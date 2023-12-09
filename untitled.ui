@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1096</width>
+    <height>446</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>0</y>
+      <width>661</width>
+      <height>341</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tabAnime">
+     <attribute name="title">
+      <string>Аниме</string>
+     </attribute>
+     <widget class="QPushButton" name="btn_pic_anime">
+      <property name="geometry">
+       <rect>
+        <x>210</x>
+        <y>100</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Картинка</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_video_anime">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>100</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Видео</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_upload_anime">
+      <property name="geometry">
+       <rect>
+        <x>510</x>
+        <y>100</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Загрузить</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="check_sftp_anime">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>176</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>SFTP</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="check_mult_anime">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>216</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Мультфильмы</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="check_nonlink_anime">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>260</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Без ссылок</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lbl_anime_pic">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>50</y>
+        <width>331</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="text">
+       <string>Картинка не выбрана</string>
+      </property>
+      <property name="scaledContents">
+       <bool>false</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="wordWrap">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lbl_anime_video">
+      <property name="geometry">
+       <rect>
+        <x>170</x>
+        <y>10</y>
+        <width>331</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>14</pointsize>
+       </font>
+      </property>
+      <property name="text">
+       <string>Видео не выбрано</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="line_nondefoult_number_anime">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>100</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="placeholderText">
+       <string>Номер серии</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tabDorama">
+     <attribute name="title">
+      <string>Дорамы</string>
+     </attribute>
+     <widget class="QPushButton" name="pushButton_5">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>160</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>PushButton</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_6">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>160</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>PushButton</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_7">
+      <property name="geometry">
+       <rect>
+        <x>420</x>
+        <y>160</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>PushButton</string>
+      </property>
+     </widget>
+     <widget class="QProgressBar" name="progressBar">
+      <property name="geometry">
+       <rect>
+        <x>310</x>
+        <y>270</y>
+        <width>291</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>240</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_4">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>70</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>CheckBox</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_5">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>100</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>CheckBox</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_6">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>130</y>
+        <width>70</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>CheckBox</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QTextEdit" name="text_last_dub">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>370</y>
+      <width>651</width>
+      <height>71</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="text_send_dub">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>20</y>
+      <width>181</width>
+      <height>221</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QScrollArea" name="scrollArea">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>20</y>
+      <width>191</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>189</width>
+       <height>419</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="btn_search_dubs">
+    <property name="geometry">
+     <rect>
+      <x>914</x>
+      <y>402</y>
+      <width>171</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Найти</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="line_id_chat">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>250</y>
+      <width>181</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Айди нужной беседы в которой дабберы сдают дороги.</string>
+    </property>
+    <property name="placeholderText">
+     <string>ID chat</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="line_search_dub_name_serial">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>280</y>
+      <width>181</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Название серии, как подписывали дабберы (если папка называется по другому или же просто найти без выбора картинки)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="placeholderText">
+     <string>Название серии</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="line_search_dub_number_serial">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>310</y>
+      <width>181</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>№ серии</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="line_count_dubbers">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>340</y>
+      <width>181</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>Кол-во даб.</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="line_prefix_name_serial">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>370</y>
+      <width>181</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>Префикс sp, фильм и тд.</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>-1</x>
+      <y>90</y>
+      <width>21</width>
+      <height>231</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;-</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
