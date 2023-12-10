@@ -107,15 +107,7 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 189, 419))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.scrollAreaWidgetContents.setLayout(QtWidgets.QVBoxLayout())
-        sorted_result = dict(sorted(dub_data.items()))
-        self.checkbox_vars = []
-        for key, value in sorted_result.items():
-            checkbox = QtWidgets.QCheckBox(key)
-            if isinstance(value, dict):
-                ping_value = value.get('ping')
-            self.checkbox_vars.append((checkbox, ping_value, key))
-            self.scrollAreaWidgetContents.layout().addWidget(checkbox)
+
                 
         
         
@@ -174,16 +166,4 @@ class Ui_MainWindow(object):
         self.line_prefix_name_serial.setPlaceholderText(_translate("MainWindow", "Префикс sp, фильм и тд."))
 
 
-if __name__ == "__main__":
-    import sys
-    from qt_material import apply_stylesheet
-    #import qdarktheme
-    app = QtWidgets.QApplication(sys.argv)
-    
-    MainWindow = QtWidgets.QMainWindow()
-    # qdarktheme.setup_theme()
-    apply_stylesheet(app, theme='dark_cyan.xml')
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+
