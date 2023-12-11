@@ -9,7 +9,6 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from connect_firebase import dub_data
 
 
 class Ui_MainWindow(object):
