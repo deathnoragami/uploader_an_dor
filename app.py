@@ -14,8 +14,9 @@ for key, value in sorted_result.items():
     self.scrollAreaWidgetContents.layout().addWidget(checkbox)''' # Рабочее
 
 
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
+import typing
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QDialog
     
 from ui import Ui_MainWindow
 from autorizationUI import AutorizationUI
@@ -26,13 +27,13 @@ from qt_material import apply_stylesheet
 
 from connect_firebase import Connect
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.center_screen()
-        
         self.ui.btn_pic_anime.clicked.connect(self.btn)
         
         ########### Добавление чекбоксов дабберов #############################
@@ -62,16 +63,9 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
-    db = Connect()
-    i = 1
-    if i == 1: # TODO : проверка на залогинен или нет
-        AutorizationUI = QtWidgets.QMainWindow()
-        autodization_ui = Ui_MainWindow()
-        autodization_ui.setupUi(AutorizationUI)
-        AutorizationUI.show()
-    else:
-        window = MainWindow()
-        apply_stylesheet(app, theme='dark_cyan.xml')
-        window.show()
-        sys.exit(app.exec_())
+    apply_stylesheet(app, theme='dark_cyan.xml')
+    main_window = MainWindow()
+    main_window.show()
+    sys.exit(app.exec_())
