@@ -1,31 +1,15 @@
-'''
-from qt_material import apply_stylesheet
-apply_stylesheet(app, theme='dark_cyan.xml')
-
-
-self.scrollAreaWidgetContents.setLayout(QtWidgets.QVBoxLayout())
-sorted_result = dict(sorted(dub_data.items()))
-self.checkbox_vars = []
-for key, value in sorted_result.items():
-    checkbox = QtWidgets.QCheckBox(key)
-    if isinstance(value, dict):
-        ping_value = value.get('ping')
-    self.checkbox_vars.append((checkbox, ping_value, key))
-    self.scrollAreaWidgetContents.layout().addWidget(checkbox)''' # Рабочее
-
-
-import typing
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QDialog
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow
     
 from ui import Ui_MainWindow
-from autorizationUI import AutorizationUI
+from autorizade_app import AuthorizationWindow
 
 import sys
+import os
 
 from qt_material import apply_stylesheet
 
-from connect_firebase import Connect
+import connect_firebase
 
 
 class MainWindow(QMainWindow):
@@ -34,9 +18,10 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.center_screen()
-        self.ui.btn_pic_anime.clicked.connect(self.btn)
-        
-        ########### Добавление чекбоксов дабберов #############################
+
+
+        ########## Добавление чекбоксов дабберов #############################
+        db = connect_firebase.Connect()
         dub_data = db.get_dub_data()
         self.ui.scrollAreaWidgetContents.setLayout(QtWidgets.QVBoxLayout())
         sorted_result = dict(sorted(dub_data.items()))
@@ -47,13 +32,20 @@ class MainWindow(QMainWindow):
                 ping_value = value.get('ping')
             self.checkbox_vars.append((checkbox, ping_value, key))
             self.ui.scrollAreaWidgetContents.layout().addWidget(checkbox)
-            
-        #######################################################################
-
-
-    def btn(self):
-        print('Кнопка нажата')
+        db.close()
         
+        #####################################################################
+        
+        if os.path.exists('assets/session_timmers'):
+            self.ui.menu_application.setDisabled(True)
+        
+        ############# МЕНЮ ВЕРНХЕЕ ####################################
+        self.ui.menu_application.triggered.connect(AuthorizationWindow)
+        
+        print(self.checkbox_vars)
+        #####################################################################
+
+    
     
     def center_screen(self):
         qr = self.frameGeometry()
@@ -63,7 +55,6 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
     apply_stylesheet(app, theme='dark_cyan.xml')
     main_window = MainWindow()

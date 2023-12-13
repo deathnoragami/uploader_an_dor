@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'autoUI.ui'
+# Form implementation generated from reading ui file '.\autoUI.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -11,36 +11,43 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class AutorizationUI(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(465, 203)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-        self.line_login = QtWidgets.QLineEdit(self.centralwidget)
-        self.line_login.setGeometry(QtCore.QRect(20, 100, 211, 31))
-        self.line_login.setObjectName("line_login")
-        self.line_pass = QtWidgets.QLineEdit(self.centralwidget)
-        self.line_pass.setGeometry(QtCore.QRect(240, 100, 211, 31))
-        self.line_pass.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.line_pass.setObjectName("line_pass")
-        self.btn_autorizade = QtWidgets.QPushButton(self.centralwidget)
-        self.btn_autorizade.setGeometry(QtCore.QRect(180, 150, 111, 31))
-        self.btn_autorizade.setObjectName("btn_autorizade")
-        self.label = QtWidgets.QLabel(self.centralwidget)
+class Ui_authorization_app(object):
+    def setupUi(self, authorization_app):
+        authorization_app.setObjectName("authorization_app")
+        authorization_app.resize(468, 214)
+        self.label = QtWidgets.QLabel(authorization_app)
         self.label.setGeometry(QtCore.QRect(0, 0, 471, 81))
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap("auto.png"))
+        self.label.setPixmap(QtGui.QPixmap(".\\auto.png"))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
-        MainWindow.setCentralWidget(self.centralwidget)
+        self.line_login = QtWidgets.QLineEdit(authorization_app)
+        self.line_login.setGeometry(QtCore.QRect(20, 120, 211, 31))
+        self.line_login.setObjectName("line_login")
+        self.line_pass = QtWidgets.QLineEdit(authorization_app)
+        self.line_pass.setGeometry(QtCore.QRect(240, 120, 211, 31))
+        self.line_pass.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.line_pass.setObjectName("line_pass")
+        self.btn_autorizade = QtWidgets.QPushButton(authorization_app)
+        self.btn_autorizade.setGeometry(QtCore.QRect(340, 160, 111, 31))
+        self.btn_autorizade.setObjectName("btn_autorizade")
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(authorization_app)
+        QtCore.QMetaObject.connectSlotsByName(authorization_app)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, authorization_app):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.line_login.setPlaceholderText(_translate("MainWindow", "Логин"))
-        self.line_pass.setPlaceholderText(_translate("MainWindow", "Пароль"))
-        self.btn_autorizade.setText(_translate("MainWindow", "Войти"))
+        authorization_app.setWindowTitle(_translate("authorization_app", "Авторизация в приложении"))
+        self.line_login.setPlaceholderText(_translate("authorization_app", "Логин"))
+        self.line_pass.setPlaceholderText(_translate("authorization_app", "Пароль"))
+        self.btn_autorizade.setText(_translate("authorization_app", "Войти"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    authorization_app = QtWidgets.QWidget()
+    ui = Ui_authorization_app()
+    ui.setupUi(authorization_app)
+    authorization_app.show()
+    sys.exit(app.exec_())
