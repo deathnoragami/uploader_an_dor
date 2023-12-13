@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\autoUI.ui'
+# Form implementation generated from reading ui file '.\autorization_application\autoUI.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -18,7 +18,7 @@ class Ui_authorization_app(object):
         self.label = QtWidgets.QLabel(authorization_app)
         self.label.setGeometry(QtCore.QRect(0, 0, 471, 81))
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap(".\\auto.png"))
+        self.label.setPixmap(QtGui.QPixmap(".\\autorization_application\\../auto.png"))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.line_login = QtWidgets.QLineEdit(authorization_app)
@@ -29,7 +29,7 @@ class Ui_authorization_app(object):
         self.line_pass.setEchoMode(QtWidgets.QLineEdit.Password)
         self.line_pass.setObjectName("line_pass")
         self.btn_autorizade = QtWidgets.QPushButton(authorization_app)
-        self.btn_autorizade.setGeometry(QtCore.QRect(340, 160, 111, 31))
+        self.btn_autorizade.setGeometry(QtCore.QRect(310, 160, 141, 31))
         self.btn_autorizade.setObjectName("btn_autorizade")
 
         self.retranslateUi(authorization_app)
@@ -43,11 +43,3 @@ class Ui_authorization_app(object):
         self.btn_autorizade.setText(_translate("authorization_app", "Войти"))
 
 
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    authorization_app = QtWidgets.QWidget()
-    ui = Ui_authorization_app()
-    ui.setupUi(authorization_app)
-    authorization_app.show()
-    sys.exit(app.exec_())

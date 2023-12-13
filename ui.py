@@ -45,7 +45,8 @@ class Ui_MainWindow(object):
         self.line_nondefoult_number_anime.setObjectName("line_nondefoult_number_anime")
         self.progress_anime = QtWidgets.QProgressBar(self.tabAnime)
         self.progress_anime.setGeometry(QtCore.QRect(20, 280, 331, 23))
-        self.progress_anime.setProperty("value", 24)
+        self.progress_anime.setProperty("value", 0)
+        self.progress_anime.setOrientation(QtCore.Qt.Horizontal)
         self.progress_anime.setObjectName("progress_anime")
         self.verticalLayoutWidget = QtWidgets.QWidget(self.tabAnime)
         self.verticalLayoutWidget.setGeometry(QtCore.QRect(20, 120, 160, 151))
@@ -156,7 +157,7 @@ class Ui_MainWindow(object):
         self.menu_tg = QtWidgets.QAction(MainWindow)
         self.menu_tg.setObjectName("menu_tg")
         self.menu_server = QtWidgets.QAction(MainWindow)
-        self.menu_server.setCheckable(True)
+        self.menu_server.setCheckable(False)
         self.menu_server.setObjectName("menu_server")
         self.menu.addAction(self.menu_application)
         self.menu.addAction(self.menu_vk)
@@ -203,13 +204,3 @@ class Ui_MainWindow(object):
         self.menu_vk.setText(_translate("MainWindow", "ВКонтакте"))
         self.menu_tg.setText(_translate("MainWindow", "Телеграм"))
         self.menu_server.setText(_translate("MainWindow", "Сервер"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())

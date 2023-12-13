@@ -1,17 +1,19 @@
 from PyQt5.QtWidgets import QDialog
-from autorizationUI import Ui_authorization_app
+from .autorizationUI import Ui_authorization_app
 from connect_firebase import Connect
 import os
 
-class AuthorizationWindow():
+class AuthorizationApp():
     def __init__(self):
-        super(AuthorizationWindow, self).__init__()
+        super(AuthorizationApp, self).__init__()
         self.db = Connect()
         widget = QDialog()
         self.auto_ui = Ui_authorization_app()
         self.auto_ui.setupUi(widget)
         
         if os.path.exists('assets/session_timmers'):
+            self.auto_ui.line_login.setDisabled(True)
+            self.auto_ui.line_pass.setDisabled(True)
             self.auto_ui.btn_autorizade.setText('Авторизован')
             self.auto_ui.btn_autorizade.setDisabled(True)
         else:
@@ -20,8 +22,8 @@ class AuthorizationWindow():
         widget.rejected.connect(self.db.close)
         widget.exec_()        
 
-    def authenticate(self):
 
+    def authenticate(self):
         found_user = None
         for user in self.db.get_user_data():
             if user:
@@ -33,11 +35,12 @@ class AuthorizationWindow():
                         file.write(str(found_user['uid']))
                     self.auto_ui.btn_autorizade.setText('Авторизован')
                     self.auto_ui.btn_autorizade.setDisabled(True)
-                    self.db.close()
                     break
-        if not found_user:
+        if found_user is None:
             print('nety')
             ... # TODO : пользователь не найден
+            
+
         
         
 

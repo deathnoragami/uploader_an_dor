@@ -2,7 +2,9 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
     
 from ui import Ui_MainWindow
-from autorizade_app import AuthorizationWindow
+from autorization.autorization_application.autorizade_app import AuthorizationApp
+from autorization.autorization_vk.autorizade_vk import AuthorizationVK
+from autorization.autorization_tg.autorizade_tg import AuthorizationTG
 
 import sys
 import os
@@ -36,15 +38,19 @@ class MainWindow(QMainWindow):
         
         #####################################################################
         
-        if os.path.exists('assets/session_timmers'):
-            self.ui.menu_application.setDisabled(True)
         
         ############# МЕНЮ ВЕРНХЕЕ ####################################
-        self.ui.menu_application.triggered.connect(AuthorizationWindow)
-        
-        print(self.checkbox_vars)
+        self.ui.menu_application.triggered.connect(AuthorizationApp)
+        self.ui.menu_vk.triggered.connect(AuthorizationVK)
+        self.ui.menu_tg.triggered.connect(AuthorizationTG)
         #####################################################################
 
+        self.ui.btn_pic_anime.clicked.connect(self.test)
+    
+    def test(self):
+        db = connect_firebase.Connect()
+        print('коннект')
+        db.close()
     
     
     def center_screen(self):
