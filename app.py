@@ -8,6 +8,7 @@ from autorization.autorization_tg.autorizade_tg import AuthorizationTG
 
 import sys
 import os
+from dotenv import load_dotenv
 
 from qt_material import apply_stylesheet
 
@@ -26,13 +27,12 @@ class MainWindow(QMainWindow):
         db = connect_firebase.Connect()
         dub_data = db.get_dub_data()
         self.ui.scrollAreaWidgetContents.setLayout(QtWidgets.QVBoxLayout())
-        sorted_result = dict(sorted(dub_data.items()))
+        sorted_result = sorted(dub_data, key=lambda x: x['id'])
         self.checkbox_vars = []
-        for key, value in sorted_result.items():
-            checkbox = QtWidgets.QCheckBox(key)
-            if isinstance(value, dict):
-                ping_value = value.get('ping')
-            self.checkbox_vars.append((checkbox, ping_value, key))
+        for item in sorted_result:
+            checkbox = QtWidgets.QCheckBox(item['id'])
+            ping_value = item.get('ping', '')
+            self.checkbox_vars.append((checkbox, ping_value, item['id']))
             self.ui.scrollAreaWidgetContents.layout().addWidget(checkbox)
         db.close()
         
@@ -48,9 +48,12 @@ class MainWindow(QMainWindow):
         self.ui.btn_pic_anime.clicked.connect(self.test)
     
     def test(self):
-        db = connect_firebase.Connect()
-        print('коннект')
-        db.close()
+        selected_data = []
+        for checkbox, ping_value, item_id in self.checkbox_vars:
+            if checkbox.isChecked():
+                selected_data.append({item_id, ping_value})
+        
+        print(selected_data)
     
     
     def center_screen(self):
@@ -62,6 +65,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    load_dotenv()
     apply_stylesheet(app, theme='dark_cyan.xml')
     main_window = MainWindow()
     main_window.show()

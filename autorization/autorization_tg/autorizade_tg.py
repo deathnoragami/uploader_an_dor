@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QMessageBox
 from .autorizationUI import Ui_authorization_tg
 import os
-from pyrogram import Client
+from pyrogram import Client, errors
 
 
 class AuthorizationTG():
@@ -23,32 +23,47 @@ class AuthorizationTG():
         
     
     def send_code(self):
-        self.number_phone = self.auto_ui.line_number_phone.text()
-        api_id = 22207760 # TODO : переместить в env
-        api_hash = '399b1653a041f35af2d2774e9b74656a'
-        self.client = Client('assets/my_session_tg', api_id, api_hash)
-        self.client.connect()
-        try:
-            self.send_code_info = self.client.send_code(self.number_phone)
-            self.auto_ui.btn_give_code.setDisabled(True)
-            self.auto_ui.line_number_phone.setDisabled(True)
-            self.auto_ui.line_code.setDisabled(False)
-            self.auto_ui.btn_autorization.setDisabled(False)
-            self.auto_ui.line_password.setDisabled(False)
-            return self.send_code_info, self.client, self.number_phone
-        except Exception as e:
-            print(e)
-            self.client.__exit__()
+        if self.auto_ui.line_number_phone.text():
+            self.number_phone = self.auto_ui.line_number_phone.text()
+            api_id = int(os.getenv("API_ID")) # TODO : переместить в env
+            api_hash = os.getenv("API_HASH")
+            self.client = Client('assets/my_session_tg', api_id, api_hash)
+            self.client.connect()
+            try:
+                self.send_code_info = self.client.send_code(self.number_phone)
+                self.auto_ui.btn_give_code.setDisabled(True)
+                self.auto_ui.line_number_phone.setDisabled(True)
+                self.auto_ui.line_code.setDisabled(False)
+                self.auto_ui.btn_autorization.setDisabled(False)
+                self.auto_ui.line_password.setDisabled(False)
+                return self.send_code_info, self.client, self.number_phone
+            except Exception as e:
+                self.client.stop()
+        else:
+            QMessageBox.warning(None, "Ошибка", "Не введен номер телефона")
 
 
     def autorization(self):
-        try:
-            self.client.sign_in(phone_number=self.number_phone, 
-                                phone_code_hash=self.send_code_info.phone_code_hash, 
-                                phone_code=self.auto_ui.line_code.text())
-        except:
-            self.client.check_password(self.auto_ui.line_password.text())
-            self.client.__exit__()
+        fine_autho = False
+        if self.number_phone and self.auto_ui.line_code.text():
+            try:
+                self.client.sign_in(phone_number=self.number_phone, 
+                                    phone_code_hash=self.send_code_info.phone_code_hash, 
+                                    phone_code=self.auto_ui.line_code.text())
+                fine_autho = True
+            except errors.PhoneCodeInvalid:
+                QMessageBox.warning(None, "Ошибка", "Неверный код")
+            except errors.PhoneCodeExpired:
+                QMessageBox.warning(None, "Ошибка", "Код истек")
+            except errors.exceptions.unauthorized_401.SessionPasswordNeeded:
+                self.client.check_password(self.auto_ui.line_password.text())
+                fine_autho = True
+            if fine_autho:
+                self.auto_ui.line_password.setDisabled(True)
+                self.auto_ui.btn_autorization.setText('Авторизован')
+                self.auto_ui.btn_give_code.setDisabled(True)
+                self.auto_ui.line_number_phone.setDisabled(True)
+                self.auto_ui.line_code.setDisabled(True)
+        else:
+            QMessageBox.warning(None, "Ошибка", "Не введен код")
             
-        
-        self.client.__exit__()
