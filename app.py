@@ -7,6 +7,10 @@ from autorization.autorization_vk.autorizade_vk import AuthorizationVK
 from autorization.autorization_tg.autorizade_tg import AuthorizationTG
 from autorization.autorization_server.autorizade_sftp import AutorizationServer
 
+from autorization.autorization_animaunt.autorization_web_animaunt import Animaunt_web
+from autorization.autorization_malfurik.autorization_web_malfurik import Malfurik_web
+
+
 import sys
 import os
 from dotenv import load_dotenv
@@ -22,12 +26,29 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.center_screen()
-
+        db = connect_firebase.Connect()
         
+        ########## ПРОВЕРКА АВТОРИЗАЦИИ ##################################
+        
+        user_autorization = False
+        if os.path.isfile('assets/session_timmers'):
+            with open('assets/session_timmers', 'r') as file:
+                uid = file.read()
+                user_data = db.find_user_uid(uid)
+                if user_data:
+                    self.ui.block_screen.hide()
+                    user_autorization = True
+                    
+        if user_autorization == False:
+            self.ui.menu_vk.setDisabled(True)
+            self.ui.menu_tg.setDisabled(True)
+            self.ui.menu_server.setDisabled(True)
+            
+        ##################################################################
 
 
         ########## Добавление чекбоксов дабберов #############################
-        db = connect_firebase.Connect()
+        
         dub_data = db.get_dub_data()
         self.ui.scrollAreaWidgetContents.setLayout(QtWidgets.QVBoxLayout())
         sorted_result = sorted(dub_data, key=lambda x: x['id'])
@@ -37,20 +58,24 @@ class MainWindow(QMainWindow):
             ping_value = item.get('ping', '')
             self.checkbox_vars.append((checkbox, ping_value, item['id']))
             self.ui.scrollAreaWidgetContents.layout().addWidget(checkbox)
-        db.close()
-        
+                
         #####################################################################
         
         
         ############# МЕНЮ ВЕРНХЕЕ ####################################
+        
         self.ui.menu_application.triggered.connect(AuthorizationApp)
         self.ui.menu_vk.triggered.connect(AuthorizationVK)
         self.ui.menu_tg.triggered.connect(AuthorizationTG)
         self.ui.menu_server.triggered.connect(AutorizationServer)
+        
         #####################################################################
 
-        self.ui.btn_pic_anime.clicked.connect(self.test)
-    
+
+        self.ui.btn_pic_anime.clicked.connect(Malfurik_web)
+
+        
+        db.close()
     def test(self):
         selected_data = []
         for checkbox, ping_value, item_id in self.checkbox_vars:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\untitled.ui'
+# Form implementation generated from reading ui file 'untitled.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -143,6 +143,11 @@ class Ui_MainWindow(object):
         self.pushButton.setEnabled(False)
         self.pushButton.setGeometry(QtCore.QRect(-1, 90, 21, 231))
         self.pushButton.setObjectName("pushButton")
+        self.block_screen = QtWidgets.QLabel(self.centralwidget)
+        self.block_screen.setGeometry(QtCore.QRect(0, 0, 801, 451))
+        self.block_screen.setAutoFillBackground(False)
+        self.block_screen.setStyleSheet("")
+        self.block_screen.setObjectName("block_screen")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 804, 21))
@@ -199,8 +204,9 @@ class Ui_MainWindow(object):
         self.line_count_dubbers.setPlaceholderText(_translate("MainWindow", "Кол-во даб."))
         self.line_prefix_name_serial.setPlaceholderText(_translate("MainWindow", "Префикс sp, фильм и тд."))
         self.pushButton.setText(_translate("MainWindow", "<-"))
+        self.block_screen.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:72pt; font-weight:600; color:#ff0004;\">НЕ</span></p><p align=\"center\"><span style=\" font-size:72pt; font-weight:600; color:#ff0004;\">АВТОРИЗОВАН</span></p></body></html>"))
         self.menu.setTitle(_translate("MainWindow", "Авторизация"))
         self.menu_application.setText(_translate("MainWindow", "Приложение"))
         self.menu_vk.setText(_translate("MainWindow", "ВКонтакте"))
-        self.menu_tg.setText(_translate("MainWindow", "Телеграм"))
+        self.menu_tg.setText(_translate("MainWindow", "Телеграмм"))
         self.menu_server.setText(_translate("MainWindow", "Сервер"))

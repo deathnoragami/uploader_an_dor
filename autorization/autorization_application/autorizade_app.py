@@ -1,6 +1,8 @@
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QMessageBox
 from .autorizationUI import Ui_authorization_app
 from connect_firebase import Connect
+from ui import Ui_MainWindow
+
 import os
 
 class AuthorizationApp():
@@ -32,7 +34,9 @@ class AuthorizationApp():
     def authenticate(self):
         found_user = None
         try:
-            for user in self.db.get_user_data():
+            users = self.db.get_user_data()
+            for user in users:
+                print(user)
                 if user:
                     if user["name"] == self.auto_ui.line_login.text() and user["pass"] == self.auto_ui.line_pass.text():
                         found_user = user
@@ -42,10 +46,10 @@ class AuthorizationApp():
                             file.write(str(found_user['uid']))
                         self.auto_ui.btn_autorizade.setText('Авторизован')
                         self.auto_ui.btn_autorizade.setDisabled(True)
+                        QMessageBox.information(None, "Авторизация успех!", "Вы успешно авторизовались, перезапустите программу.")
                         break
             if found_user is None:
-                print('nety')
-            ... # TODO : пользователь не найден
+                QMessageBox.information(None, "Авторизация!", "Пользователь был не найден или логин и пароль не верный.")
         except Exception as e:
             print(e)
             self.db.close()
