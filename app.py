@@ -1,10 +1,11 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
-    
 from ui import Ui_MainWindow
+
 from autorization.autorization_application.autorizade_app import AuthorizationApp
 from autorization.autorization_vk.autorizade_vk import AuthorizationVK
 from autorization.autorization_tg.autorizade_tg import AuthorizationTG
+from autorization.autorization_server.autorizade_sftp import AutorizationServer
 
 import sys
 import os
@@ -21,6 +22,8 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.center_screen()
+
+        
 
 
         ########## Добавление чекбоксов дабберов #############################
@@ -43,6 +46,7 @@ class MainWindow(QMainWindow):
         self.ui.menu_application.triggered.connect(AuthorizationApp)
         self.ui.menu_vk.triggered.connect(AuthorizationVK)
         self.ui.menu_tg.triggered.connect(AuthorizationTG)
+        self.ui.menu_server.triggered.connect(AutorizationServer)
         #####################################################################
 
         self.ui.btn_pic_anime.clicked.connect(self.test)

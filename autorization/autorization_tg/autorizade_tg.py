@@ -14,6 +14,7 @@ class AuthorizationTG():
         if os.path.exists('assets/my_session_tg.session'):
             self.auto_ui.btn_give_code.setDisabled(True)
             self.auto_ui.btn_give_code.setText('Авторизован')
+            self.auto_ui.btn_autorization.setHidden(True)
             self.auto_ui.line_number_phone.setDisabled(True)
         else:
             self.auto_ui.btn_give_code.clicked.connect(self.send_code)
@@ -25,7 +26,7 @@ class AuthorizationTG():
     def send_code(self):
         if self.auto_ui.line_number_phone.text():
             self.number_phone = self.auto_ui.line_number_phone.text()
-            api_id = int(os.getenv("API_ID")) # TODO : переместить в env
+            api_id = int(os.getenv("API_ID"))
             api_hash = os.getenv("API_HASH")
             self.client = Client('assets/my_session_tg', api_id, api_hash)
             self.client.connect()

@@ -12,10 +12,16 @@ class AuthorizationApp():
         self.auto_ui.setupUi(widget)
         
         if os.path.exists('assets/session_timmers'):
-            self.auto_ui.line_login.setDisabled(True)
-            self.auto_ui.line_pass.setDisabled(True)
-            self.auto_ui.btn_autorizade.setText('Авторизован')
-            self.auto_ui.btn_autorizade.setDisabled(True)
+            with open('assets/session_timmers', 'r') as file:
+                uid = file.read()
+                found_user = self.db.find_user_uid(uid)
+                if found_user:
+                    self.auto_ui.line_login.setDisabled(True)
+                    self.auto_ui.line_pass.setDisabled(True)
+                    self.auto_ui.btn_autorizade.setText('Авторизован')
+                    self.auto_ui.btn_autorizade.setDisabled(True)
+                else:
+                    self.auto_ui.btn_autorizade.clicked.connect(self.authenticate)
         else:
             self.auto_ui.btn_autorizade.clicked.connect(self.authenticate)
         
@@ -25,20 +31,24 @@ class AuthorizationApp():
 
     def authenticate(self):
         found_user = None
-        for user in self.db.get_user_data():
-            if user:
-                if user["name"] == self.auto_ui.line_login.text() and user["pass"] == self.auto_ui.line_pass.text():
-                    found_user = user
-                    if not os.path.exists("assets"):
-                        os.makedirs("assets")
-                    with open('assets/session_timmers', 'w+') as file:
-                        file.write(str(found_user['uid']))
-                    self.auto_ui.btn_autorizade.setText('Авторизован')
-                    self.auto_ui.btn_autorizade.setDisabled(True)
-                    break
-        if found_user is None:
-            print('nety')
+        try:
+            for user in self.db.get_user_data():
+                if user:
+                    if user["name"] == self.auto_ui.line_login.text() and user["pass"] == self.auto_ui.line_pass.text():
+                        found_user = user
+                        if not os.path.exists("assets"):
+                            os.makedirs("assets")
+                        with open('assets/session_timmers', 'w+') as file:
+                            file.write(str(found_user['uid']))
+                        self.auto_ui.btn_autorizade.setText('Авторизован')
+                        self.auto_ui.btn_autorizade.setDisabled(True)
+                        break
+            if found_user is None:
+                print('nety')
             ... # TODO : пользователь не найден
+        except Exception as e:
+            print(e)
+            self.db.close()
             
 
         
