@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>804</width>
-    <height>474</height>
+    <width>1072</width>
+    <height>471</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <x>40</x>
       <y>0</y>
       <width>361</width>
-      <height>341</height>
+      <height>451</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -36,8 +36,8 @@
      <widget class="QLabel" name="lbl_anime_pic">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>50</y>
+        <x>20</x>
+        <y>60</y>
         <width>331</width>
         <height>31</height>
        </rect>
@@ -84,25 +84,12 @@
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLineEdit" name="line_nondefoult_number_anime">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>90</y>
-        <width>121</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="placeholderText">
-       <string>Номер серии</string>
-      </property>
-     </widget>
      <widget class="QProgressBar" name="progress_anime">
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>280</y>
-        <width>331</width>
+        <y>390</y>
+        <width>321</width>
         <height>23</height>
        </rect>
       </property>
@@ -117,9 +104,9 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>120</y>
+        <y>170</y>
         <width>160</width>
-        <height>151</height>
+        <height>201</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
@@ -150,9 +137,9 @@
       <property name="geometry">
        <rect>
         <x>180</x>
-        <y>120</y>
+        <y>170</y>
         <width>160</width>
-        <height>151</height>
+        <height>201</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -178,6 +165,22 @@
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QLineEdit" name="line_nondefoult_number_anime">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>129</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="whatsThis">
+       <string>Если номер серии другой, например 15.5 или подобное, впишите сюда это.</string>
+      </property>
+      <property name="placeholderText">
+       <string>Номер серии</string>
+      </property>
      </widget>
     </widget>
     <widget class="QWidget" name="tabDorama">
@@ -290,20 +293,20 @@
      </widget>
     </widget>
    </widget>
-   <widget class="QTextEdit" name="text_last_dub">
+   <widget class="QTextEdit" name="logging_upload">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>350</y>
-      <width>361</width>
-      <height>81</height>
+      <x>410</x>
+      <y>20</y>
+      <width>261</width>
+      <height>411</height>
      </rect>
     </property>
    </widget>
    <widget class="QTextEdit" name="text_send_dub">
     <property name="geometry">
      <rect>
-      <x>610</x>
+      <x>680</x>
       <y>20</y>
       <width>181</width>
       <height>221</height>
@@ -313,10 +316,10 @@
    <widget class="QScrollArea" name="scrollArea">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>870</x>
       <y>20</y>
       <width>191</width>
-      <height>411</height>
+      <height>431</height>
      </rect>
     </property>
     <property name="widgetResizable">
@@ -328,7 +331,7 @@
        <x>0</x>
        <y>0</y>
        <width>189</width>
-       <height>409</height>
+       <height>429</height>
       </rect>
      </property>
     </widget>
@@ -336,8 +339,8 @@
    <widget class="QPushButton" name="btn_search_dubs">
     <property name="geometry">
      <rect>
-      <x>614</x>
-      <y>402</y>
+      <x>680</x>
+      <y>400</y>
       <width>171</width>
       <height>31</height>
      </rect>
@@ -349,8 +352,8 @@
    <widget class="QLineEdit" name="line_id_chat">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>250</y>
+      <x>676</x>
+      <y>248</y>
       <width>181</width>
       <height>20</height>
      </rect>
@@ -365,8 +368,8 @@
    <widget class="QLineEdit" name="line_search_dub_name_serial">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>280</y>
+      <x>676</x>
+      <y>278</y>
       <width>181</width>
       <height>20</height>
      </rect>
@@ -381,8 +384,8 @@
    <widget class="QLineEdit" name="line_search_dub_number_serial">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>310</y>
+      <x>676</x>
+      <y>308</y>
       <width>181</width>
       <height>20</height>
      </rect>
@@ -394,8 +397,8 @@
    <widget class="QLineEdit" name="line_count_dubbers">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>340</y>
+      <x>676</x>
+      <y>338</y>
       <width>181</width>
       <height>20</height>
      </rect>
@@ -407,8 +410,8 @@
    <widget class="QLineEdit" name="line_prefix_name_serial">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>370</y>
+      <x>676</x>
+      <y>368</y>
       <width>181</width>
       <height>20</height>
      </rect>
@@ -434,6 +437,9 @@
     </property>
    </widget>
    <widget class="QLabel" name="block_screen">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -452,13 +458,25 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:72pt; font-weight:600; color:#ff0004;&quot;&gt;НЕ&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:72pt; font-weight:600; color:#ff0004;&quot;&gt;АВТОРИЗОВАН&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
+   <zorder>block_screen</zorder>
+   <zorder>tabWidget</zorder>
+   <zorder>logging_upload</zorder>
+   <zorder>text_send_dub</zorder>
+   <zorder>scrollArea</zorder>
+   <zorder>btn_search_dubs</zorder>
+   <zorder>line_id_chat</zorder>
+   <zorder>line_search_dub_name_serial</zorder>
+   <zorder>line_search_dub_number_serial</zorder>
+   <zorder>line_count_dubbers</zorder>
+   <zorder>line_prefix_name_serial</zorder>
+   <zorder>pushButton</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>804</width>
+     <width>1072</width>
      <height>21</height>
     </rect>
    </property>
@@ -471,7 +489,15 @@
     <addaction name="menu_tg"/>
     <addaction name="menu_server"/>
    </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Сайты</string>
+    </property>
+    <addaction name="menu_animaunt"/>
+    <addaction name="menu_malfurik"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
   <action name="menu_application">
    <property name="text">
@@ -494,6 +520,16 @@
    </property>
    <property name="text">
     <string>Сервер</string>
+   </property>
+  </action>
+  <action name="menu_animaunt">
+   <property name="text">
+    <string>Animaunt</string>
+   </property>
+  </action>
+  <action name="menu_malfurik">
+   <property name="text">
+    <string>Malfurik</string>
    </property>
   </action>
  </widget>
