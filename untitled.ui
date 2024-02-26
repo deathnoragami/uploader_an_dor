@@ -9,18 +9,33 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1072</width>
-    <height>471</height>
+    <width>1066</width>
+    <height>499</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1066</width>
+    <height>499</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1066</width>
+    <height>499</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Animaunt</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QTabWidget" name="tabWidget">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>10</x>
       <y>0</y>
       <width>361</width>
       <height>451</height>
@@ -36,9 +51,9 @@
      <widget class="QLabel" name="lbl_anime_pic">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>60</y>
-        <width>331</width>
+        <x>0</x>
+        <y>20</y>
+        <width>351</width>
         <height>31</height>
        </rect>
       </property>
@@ -51,7 +66,7 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="text">
-       <string>Картинка не выбрана</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Картинка не выбрана&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="scaledContents">
        <bool>false</bool>
@@ -63,32 +78,11 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="lbl_anime_video">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>331</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>14</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Видео не выбрано</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
      <widget class="QProgressBar" name="progress_anime">
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>390</y>
+        <y>370</y>
         <width>321</width>
         <height>23</height>
        </rect>
@@ -105,7 +99,7 @@
        <rect>
         <x>20</x>
         <y>170</y>
-        <width>160</width>
+        <width>131</width>
         <height>201</height>
        </rect>
       </property>
@@ -118,9 +112,28 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="check_mult_anime">
+        <widget class="QCheckBox" name="check_post_site">
+         <property name="toolTip">
+          <string>Добавляет серию на сайт и обновляет его.</string>
+         </property>
          <property name="text">
-          <string>Мультфильмы</string>
+          <string>Обновить сайт</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check_malf_anime">
+         <property name="toolTip">
+          <string>Если видео надо заливать на малфурик, то будет заливать на малфурик, обновляться страница на малфурике с таймингами и обновляться страница на анимаунте.</string>
+         </property>
+         <property name="statusTip">
+          <string/>
+         </property>
+         <property name="whatsThis">
+          <string/>
+         </property>
+         <property name="text">
+          <string>Малфурик</string>
          </property>
         </widget>
        </item>
@@ -136,9 +149,9 @@
      <widget class="QWidget" name="verticalLayoutWidget_2">
       <property name="geometry">
        <rect>
-        <x>180</x>
+        <x>169</x>
         <y>170</y>
-        <width>160</width>
+        <width>171</width>
         <height>201</height>
        </rect>
       </property>
@@ -153,12 +166,15 @@
        <item>
         <widget class="QPushButton" name="btn_video_anime">
          <property name="text">
-          <string>Видео</string>
+          <string>Выбрать видео</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btn_upload_anime">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Загрузить</string>
          </property>
@@ -170,20 +186,93 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>129</y>
-        <width>111</width>
+        <y>70</y>
+        <width>101</width>
         <height>31</height>
        </rect>
       </property>
-      <property name="whatsThis">
+      <property name="toolTip">
        <string>Если номер серии другой, например 15.5 или подобное, впишите сюда это.</string>
+      </property>
+      <property name="whatsThis">
+       <string/>
       </property>
       <property name="placeholderText">
        <string>Номер серии</string>
       </property>
      </widget>
+     <widget class="QLineEdit" name="link_site">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>70</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Ссылка на анимаунт редактуру</string>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>Ссылка анимаунт</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="link_malfurik_anime">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>120</y>
+        <width>211</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Ссылка на малфурик редактуру</string>
+      </property>
+      <property name="placeholderText">
+       <string>Ссылка малфурик</string>
+      </property>
+      <property name="clearButtonEnabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="Line" name="line">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>170</y>
+        <width>20</width>
+        <height>191</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="progress_value">
+      <property name="geometry">
+       <rect>
+        <x>22</x>
+        <y>372</y>
+        <width>322</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загружено: 0 МБ из 0 МБ. Скорость: 0 МБ/с&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tabDorama">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <attribute name="title">
       <string>Дорамы</string>
      </attribute>
@@ -296,30 +385,57 @@
    <widget class="QTextEdit" name="logging_upload">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>380</x>
       <y>20</y>
       <width>261</width>
       <height>411</height>
      </rect>
     </property>
+    <property name="minimumSize">
+     <size>
+      <width>261</width>
+      <height>411</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>261</width>
+      <height>411</height>
+     </size>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::RightToLeft</enum>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+    <property name="placeholderText">
+     <string>Лог</string>
+    </property>
    </widget>
    <widget class="QTextEdit" name="text_send_dub">
     <property name="geometry">
      <rect>
-      <x>680</x>
+      <x>670</x>
       <y>20</y>
       <width>181</width>
       <height>221</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+    <property name="placeholderText">
+     <string>Сдача дорог дабберов</string>
     </property>
    </widget>
    <widget class="QScrollArea" name="scrollArea">
     <property name="geometry">
      <rect>
       <x>870</x>
-      <y>20</y>
+      <y>10</y>
       <width>191</width>
-      <height>431</height>
+      <height>451</height>
      </rect>
     </property>
     <property name="widgetResizable">
@@ -331,7 +447,7 @@
        <x>0</x>
        <y>0</y>
        <width>189</width>
-       <height>429</height>
+       <height>449</height>
       </rect>
      </property>
     </widget>
@@ -341,7 +457,7 @@
      <rect>
       <x>680</x>
       <y>400</y>
-      <width>171</width>
+      <width>161</width>
       <height>31</height>
      </rect>
     </property>
@@ -354,7 +470,7 @@
      <rect>
       <x>676</x>
       <y>248</y>
-      <width>181</width>
+      <width>171</width>
       <height>20</height>
      </rect>
     </property>
@@ -370,7 +486,7 @@
      <rect>
       <x>676</x>
       <y>278</y>
-      <width>181</width>
+      <width>171</width>
       <height>20</height>
      </rect>
     </property>
@@ -386,7 +502,7 @@
      <rect>
       <x>676</x>
       <y>308</y>
-      <width>181</width>
+      <width>171</width>
       <height>20</height>
      </rect>
     </property>
@@ -399,7 +515,7 @@
      <rect>
       <x>676</x>
       <y>338</y>
-      <width>181</width>
+      <width>171</width>
       <height>20</height>
      </rect>
     </property>
@@ -412,7 +528,7 @@
      <rect>
       <x>676</x>
       <y>368</y>
-      <width>181</width>
+      <width>171</width>
       <height>20</height>
      </rect>
     </property>
@@ -426,14 +542,14 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>-1</x>
-      <y>90</y>
-      <width>21</width>
-      <height>231</height>
+      <x>340</x>
+      <y>440</y>
+      <width>361</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>&lt;-</string>
+     <string>🠋</string>
     </property>
    </widget>
    <widget class="QLabel" name="block_screen">
@@ -444,8 +560,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>801</width>
-      <height>451</height>
+      <width>1061</width>
+      <height>471</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -476,7 +592,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1072</width>
+     <width>1066</width>
      <height>21</height>
     </rect>
    </property>

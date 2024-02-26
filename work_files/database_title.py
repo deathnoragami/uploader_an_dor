@@ -34,10 +34,11 @@ class DatabaseManager:
                   folder_sftp, 
                   check_sftp, 
                   check_malf, 
-                  check_nolink, 
+                  check_nolink,
+                  check_post_site,
                   link_site, 
                   chosen, 
-                  link_second_site=None):
+                  link_second_site=None): #TODO: айди поста
         if chosen == 'anime':
             entry = {
                 "path_pic": path_pic,
@@ -46,6 +47,7 @@ class DatabaseManager:
                 "check_sftp": check_sftp,
                 "check_malf": check_malf,
                 "check_nolink": check_nolink,
+                "check_post_site": check_post_site,
                 "link_site": link_site,
                 "link_second_site": link_second_site,}
             self.database["anime"].append(entry)
