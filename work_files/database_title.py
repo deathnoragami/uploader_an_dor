@@ -37,6 +37,7 @@ class DatabaseManager:
                   check_nolink,
                   check_post_site,
                   link_site, 
+                  vk_post_id, 
                   chosen, 
                   link_second_site=None): #TODO: айди поста
         if chosen == 'anime':
@@ -49,7 +50,8 @@ class DatabaseManager:
                 "check_nolink": check_nolink,
                 "check_post_site": check_post_site,
                 "link_site": link_site,
-                "link_second_site": link_second_site,}
+                "link_second_site": link_second_site,
+                "vk_post_id": vk_post_id}
             self.database["anime"].append(entry)
             self.save_database()
         elif chosen == 'dorama':

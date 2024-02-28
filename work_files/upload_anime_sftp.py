@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from connect_firebase import Connect
+from work_files.messagebox_q import CustomMessageBox
 import os
 import pysftp
 import time
@@ -59,10 +60,8 @@ class SFTPManager(QObject):
                         sftp.close()
                         return False
                     else:
-                        reply = QMessageBox.question(None, "Оповещение", f"Найден каталог {dirname}. Верная папка?", QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-                        reply.button(QMessageBox.Yes).setText("Да")
-                        reply.button(QMessageBox.No).setText("Нет")
-                        if reply == QMessageBox.Yes:
+                        q = CustomMessageBox("Оповещение", f"Найден каталог {dirname}. Верная папка?")
+                        if q.show():
                             sftp.chdir(dirname)
                             sftp.put(file_path)
                             time_upload = datetime.fromtimestamp(sftp.stat(os.path.basename(file_path)).st_mtime).strftime('%d.%m.%Y %H:%M')

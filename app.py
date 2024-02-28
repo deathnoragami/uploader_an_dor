@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject, pyqtSignal
 from ui import Ui_MainWindow
 
 from autorization.autorization_application.autorizade_app import AuthorizationApp
@@ -14,6 +14,7 @@ from work_files.select_pic_anime import PictureSelectorAnime
 from work_files.select_video_anime import VideoSelectorAnime
 from work_files.upload_anime import UploadManager
 from work_files.database_title import DatabaseManager
+from work_files.dubbers import Dubbers
 
 from config import Config
 
@@ -27,6 +28,9 @@ from qt_material import apply_stylesheet
 import connect_firebase
 
 
+load_dotenv()
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -34,7 +38,6 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.center_screen()
         db = connect_firebase.Connect()
-
 
         ############## ОБНУЛЕНИЕ ПЕРЕМЕННЫХ #############################
         
@@ -66,11 +69,13 @@ class MainWindow(QMainWindow):
 
         ##################################################################
 
+        self.ui.btn_search_dubs.clicked.connect(self.btn_search_dub)
+    
         ########## Добавление чекбоксов дабберов #############################
 
-        dub_data = db.get_dub_data()
+        self.dub_data = db.get_dub_data()
         self.ui.scrollAreaWidgetContents.setLayout(QtWidgets.QVBoxLayout())
-        sorted_result = sorted(dub_data, key=lambda x: x['id'])
+        sorted_result = sorted(self.dub_data, key=lambda x: x['id'])
         self.checkbox_vars = []
         for item in sorted_result:
             checkbox = QtWidgets.QCheckBox(item['id'])
@@ -81,7 +86,7 @@ class MainWindow(QMainWindow):
         #####################################################################
 
         ############# МЕНЮ ВЕРНХЕЕ ####################################
-
+        
         self.ui.menu_application.triggered.connect(AuthorizationApp)
         self.ui.menu_vk.triggered.connect(AuthorizationVK)
         self.ui.menu_tg.triggered.connect(AuthorizationTG)
@@ -103,7 +108,7 @@ class MainWindow(QMainWindow):
         self.ui.btn_video_anime.clicked.connect(self.select_video_anime)
 
         self.ui.btn_upload_anime.clicked.connect(self.start_work)
-        self.upload_manager = UploadManager()
+        self.upload_manager = UploadManager(self)
         self.upload_manager.signals.progress_changed.connect(self.update_progress)
         self.upload_manager.signals.upload_signals.connect(self.upload_finished)
         self.upload_manager.signals.post_signal.connect(self.upload_vk_finish)
@@ -121,7 +126,7 @@ class MainWindow(QMainWindow):
         db.close()
 
     ################ АНИМЕ КНОПКИ ############################################ 
-
+ 
     def start_work(self):
         try:
             if self.file_path_anime_pic is not None:
@@ -215,6 +220,8 @@ class MainWindow(QMainWindow):
             self.ui.check_post_site.setChecked(self.data[0]["check_post_site"])
             self.ui.link_site.setText(self.data[0]["link_site"])
         self.ui.btn_upload_anime.setDisabled(False)
+        Dubbers().find_send_vk(path=file_path, main_window_ui=self)
+        
 
     def select_video_anime(self):
         self.video_selector_anime.select_video()
@@ -242,6 +249,9 @@ class MainWindow(QMainWindow):
 
     def save_id_chat(self, id):
         Config().set_id_chat(id)
+        
+    def btn_search_dub(self):
+        Dubbers().find_send_vk(btn=True, main_window_ui=self)
 
     ########################################################################## 
 
@@ -262,7 +272,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    load_dotenv()
     apply_stylesheet(app, theme='dark_cyan.xml')
     main_window = MainWindow()
     main_window.show()
