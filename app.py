@@ -42,7 +42,6 @@ class MainWindow(QMainWindow):
         self.center_screen()
         db = connect_firebase.Connect()
 
-
         ############## ОБНУЛЕНИЕ ПЕРЕМЕННЫХ #############################
         
         self.file_path_anime_pic = None
@@ -51,7 +50,6 @@ class MainWindow(QMainWindow):
         self.link_malf_anime = None
         
         #################################################################
-
 
         ########## ПРОВЕРКА АВТОРИЗАЦИИ ##################################
 
@@ -184,37 +182,33 @@ class MainWindow(QMainWindow):
     
     def animation_open_timming(self, chose):
         self.chose = chose
-                
-        if  chose == "open":
+                    
+        if chose == "open":
             self.setMaximumHeight(821)
-            self.animation = QPropertyAnimation(self, b"size")
-            self.animation.setDuration(500)
-            self.animation.setEasingCurve(QEasingCurve.OutBounce)
-            self.animation.setStartValue(QSize(self.size()))
-            self.animation.setEndValue(QSize(self.width(), 820))
-            self.animation.start()
-            self.btn_animation = QPropertyAnimation(self.ui.btn_open_timming, b"geometry")
-            self.btn_animation.setDuration(500)
-            self.btn_animation.setEasingCurve(QEasingCurve.OutBounce) 
-            self.btn_animation.setStartValue(QRect(self.ui.btn_open_timming.x(), self.ui.btn_open_timming.y(), self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
-            self.btn_animation.setEndValue(QRect(self.ui.btn_open_timming.x(), 760, self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
-            self.btn_animation.start()
-            self.ui.btn_open_timming.setText("🠉")
+            end_height = 820
+            btn_end_y = 760
+            btn_text = "🠉"
         else:
             self.setMinimumHeight(499)
-            self.animation = QPropertyAnimation(self, b"size")
-            self.animation.setDuration(500)
-            self.animation.setEasingCurve(QEasingCurve.OutBounce)
-            self.animation.setStartValue(QSize(self.size()))
-            self.animation.setEndValue(QSize(self.width(), 499))
-            self.animation.start()
-            self.btn_animation = QPropertyAnimation(self.ui.btn_open_timming, b"geometry")
-            self.btn_animation.setDuration(500)
-            self.btn_animation.setEasingCurve(QEasingCurve.OutBounce) 
-            self.btn_animation.setStartValue(QRect(self.ui.btn_open_timming.x(), self.ui.btn_open_timming.y(), self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
-            self.btn_animation.setEndValue(QRect(self.ui.btn_open_timming.x(), 440, self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
-            self.btn_animation.start()
-            self.ui.btn_open_timming.setText("🠋")
+            end_height = 499
+            btn_end_y = 440
+            btn_text = "🠋"
+
+        self.animation = QPropertyAnimation(self, b"size")
+        self.animation.setDuration(500)
+        self.animation.setEasingCurve(QEasingCurve.OutBounce)
+        self.animation.setStartValue(QSize(self.size()))
+        self.animation.setEndValue(QSize(self.width(), end_height))
+        self.animation.start()
+
+        self.btn_animation = QPropertyAnimation(self.ui.btn_open_timming, b"geometry")
+        self.btn_animation.setDuration(500)
+        self.btn_animation.setEasingCurve(QEasingCurve.OutBounce) 
+        self.btn_animation.setStartValue(QRect(self.ui.btn_open_timming.x(), self.ui.btn_open_timming.y(), self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
+        self.btn_animation.setEndValue(QRect(self.ui.btn_open_timming.x(), btn_end_y, self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
+        self.btn_animation.start()
+
+        self.ui.btn_open_timming.setText(btn_text)
         QTimer.singleShot(500, self.fixed)
         
     def fixed(self):
@@ -223,10 +217,7 @@ class MainWindow(QMainWindow):
         else:
             self.setMaximumHeight(499)
 
-            
     ###########################################################################
-
-    
 
     ################ ФУНКЦИИ ДЛЯ АНИМЕ ############################################ 
 
@@ -288,9 +279,6 @@ class MainWindow(QMainWindow):
             self.ui.logging_upload.append("Отмена загрузки.")
             self.ui.logging_upload.append("____________________________________\n\n")
 
-        
-
-
     def select_picture_anime(self):
         self.picture_selector_anime.select_picture()
 
@@ -325,7 +313,6 @@ class MainWindow(QMainWindow):
         self.ui.btn_upload_anime.setDisabled(False)
         Dubbers().find_send_vk(path=file_path, main_window_ui=self)
         
-
     def select_video_anime(self):
         self.video_selector_anime.select_video()
 
