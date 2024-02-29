@@ -536,9 +536,9 @@
      <string>Префикс sp, фильм и тд.</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="btn_open_timming">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -574,6 +574,68 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:72pt; font-weight:600; color:#ff0004;&quot;&gt;НЕ&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:72pt; font-weight:600; color:#ff0004;&quot;&gt;АВТОРИЗОВАН&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
+   <widget class="QTextEdit" name="textedit_timming_ad">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>480</y>
+      <width>271</width>
+      <height>271</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textedit_name_ad">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>480</y>
+      <width>271</width>
+      <height>271</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="list_timming">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>480</y>
+      <width>271</width>
+      <height>271</height>
+     </rect>
+    </property>
+    <property name="acceptDrops">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_add_timming">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>480</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Добавить</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_del_timming">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>530</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Удалить выбранный тайминг.</string>
+    </property>
+    <property name="text">
+     <string>Удалить</string>
+    </property>
+   </widget>
    <zorder>block_screen</zorder>
    <zorder>tabWidget</zorder>
    <zorder>logging_upload</zorder>
@@ -585,7 +647,12 @@
    <zorder>line_search_dub_number_serial</zorder>
    <zorder>line_count_dubbers</zorder>
    <zorder>line_prefix_name_serial</zorder>
-   <zorder>pushButton</zorder>
+   <zorder>textedit_timming_ad</zorder>
+   <zorder>textedit_name_ad</zorder>
+   <zorder>list_timming</zorder>
+   <zorder>btn_add_timming</zorder>
+   <zorder>btn_del_timming</zorder>
+   <zorder>btn_open_timming</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

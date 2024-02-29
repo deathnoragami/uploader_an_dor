@@ -1,6 +1,6 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
-from PyQt5.QtCore import Qt, QObject, pyqtSignal
+from PyQt5 import QtWidgets, Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem
+from PyQt5.QtCore import Qt, QObject, pyqtSignal, QPropertyAnimation, QRect, QEasingCurve, QSize, QTimer
 from ui import Ui_MainWindow
 
 from autorization.autorization_application.autorizade_app import AuthorizationApp
@@ -16,11 +16,14 @@ from work_files.upload_anime import UploadManager
 from work_files.database_title import DatabaseManager
 from work_files.dubbers import Dubbers
 
+import timming_pro.timming_main as timming
+
 from config import Config
 
 import sys
 import os
 import glob
+import json
 from dotenv import load_dotenv
 
 from qt_material import apply_stylesheet
@@ -38,6 +41,7 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.center_screen()
         db = connect_firebase.Connect()
+
 
         ############## ОБНУЛЕНИЕ ПЕРЕМЕННЫХ #############################
         
@@ -84,6 +88,25 @@ class MainWindow(QMainWindow):
             self.ui.scrollAreaWidgetContents.layout().addWidget(checkbox)
 
         #####################################################################
+        
+        ################## ТАЙМИНГ ##################################
+                
+        with open("timming_pro/timming.json", "r", encoding="UTF-8") as file:
+            data_list = []
+            for line in reversed(file.readlines()):
+                data = json.loads(line)
+                data_list.append(data)
+        for item_data in data_list:
+            item_text = f"{item_data['projectname']} - {item_data['sequencename']}"
+            item = QListWidgetItem(item_text)
+            item.setData(Qt.UserRole, item_data)
+            self.ui.list_timming.addItem(item)
+        self.ui.list_timming.itemClicked.connect(self.get_timming)
+        self.ui.btn_del_timming.clicked.connect(self.delete_select_timming)
+        self.ui.btn_add_timming.clicked.connect(self.add_timming)
+        self.ui.btn_open_timming.clicked.connect(self.chose_animetion_open_timming)
+        
+        ####################################################################
 
         ############# МЕНЮ ВЕРНХЕЕ ####################################
         
@@ -125,8 +148,88 @@ class MainWindow(QMainWindow):
 
         db.close()
 
-    ################ АНИМЕ КНОПКИ ############################################ 
- 
+    ##################### ФУНКЦИИ ДЛЯ ТАЙМИНГОВ ###############################
+
+    def add_timming(self):
+        data = timming.add_timming()
+        item_text = f"{data['projectname']} - {data['sequencename']}"
+        item = QListWidgetItem(item_text)
+        item.setData(Qt.UserRole, data)
+        self.ui.list_timming.insertItem(0, item)
+
+    def get_timming(self, item):
+        item_data = item.data(Qt.UserRole)
+        times, name_ad = timming.format_timming(item_data)
+        self.ui.textedit_timming_ad.setText(times)
+        self.ui.textedit_name_ad.setText(name_ad)
+        
+    def delete_select_timming(self):
+        selected_item = self.ui.list_timming.currentItem()
+        if selected_item:
+            item_data = selected_item.data(Qt.UserRole)
+            self.ui.list_timming.takeItem(self.ui.list_timming.row(selected_item))
+            with open("timming_pro/timming.json", "r", encoding="UTF-8") as file:
+                data_list = [json.loads(line) for line in file]
+            data_list = [item for item in data_list if item != item_data]
+            with open("timming_pro/timming.json", "w", encoding="UTF-8") as file:
+                for item in data_list:
+                    json.dump(item, file, ensure_ascii=False)
+                    file.write('\n')
+    
+    def chose_animetion_open_timming(self):
+        if self.height() == 499:
+            self.animation_open_timming("open")
+        else:
+            self.animation_open_timming("close")
+    
+    def animation_open_timming(self, chose):
+        self.chose = chose
+                
+        if  chose == "open":
+            self.setMaximumHeight(821)
+            self.animation = QPropertyAnimation(self, b"size")
+            self.animation.setDuration(500)
+            self.animation.setEasingCurve(QEasingCurve.OutBounce)
+            self.animation.setStartValue(QSize(self.size()))
+            self.animation.setEndValue(QSize(self.width(), 820))
+            self.animation.start()
+            self.btn_animation = QPropertyAnimation(self.ui.btn_open_timming, b"geometry")
+            self.btn_animation.setDuration(500)
+            self.btn_animation.setEasingCurve(QEasingCurve.OutBounce) 
+            self.btn_animation.setStartValue(QRect(self.ui.btn_open_timming.x(), self.ui.btn_open_timming.y(), self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
+            self.btn_animation.setEndValue(QRect(self.ui.btn_open_timming.x(), 760, self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
+            self.btn_animation.start()
+            self.ui.btn_open_timming.setText("🠉")
+        else:
+            self.setMinimumHeight(499)
+            self.animation = QPropertyAnimation(self, b"size")
+            self.animation.setDuration(500)
+            self.animation.setEasingCurve(QEasingCurve.OutBounce)
+            self.animation.setStartValue(QSize(self.size()))
+            self.animation.setEndValue(QSize(self.width(), 499))
+            self.animation.start()
+            self.btn_animation = QPropertyAnimation(self.ui.btn_open_timming, b"geometry")
+            self.btn_animation.setDuration(500)
+            self.btn_animation.setEasingCurve(QEasingCurve.OutBounce) 
+            self.btn_animation.setStartValue(QRect(self.ui.btn_open_timming.x(), self.ui.btn_open_timming.y(), self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
+            self.btn_animation.setEndValue(QRect(self.ui.btn_open_timming.x(), 440, self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
+            self.btn_animation.start()
+            self.ui.btn_open_timming.setText("🠋")
+        QTimer.singleShot(500, self.fixed)
+        
+    def fixed(self):
+        if self.chose == "open":
+            self.setMinimumHeight(821)
+        else:
+            self.setMaximumHeight(499)
+
+            
+    ###########################################################################
+
+    
+
+    ################ ФУНКЦИИ ДЛЯ АНИМЕ ############################################ 
+
     def start_work(self):
         try:
             if self.file_path_anime_pic is not None:
