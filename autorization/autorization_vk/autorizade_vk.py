@@ -12,13 +12,17 @@ class AuthorizationVK():
         self.auto_ui.setupUi(widget)
         
         token = Config().get_vk_token()
-        res = requests.get('https://api.vk.com/method/users.get?access_token={token}&v=5.199')
+        res = requests.get(f'https://api.vk.com/method/users.get?access_token={token}&v=5.199')
         if res.status_code == 200:
-            self.auto_ui.line_token_vk.setDisabled(True)
-            self.auto_ui.btn_autho_vk.setText('Авторизован')
-            self.auto_ui.btn_autho_vk.setDisabled(True)
-        else:
-            self.auto_ui.btn_autho_vk.clicked.connect(self.autorization)
+            response_json = res.json()
+            if "error" in response_json:
+                error_message = response_json["error"]["error_msg"]
+                print(error_message)
+            else:
+                self.auto_ui.line_token_vk.setDisabled(True)
+                self.auto_ui.btn_autho_vk.setText('Авторизован')
+                self.auto_ui.btn_autho_vk.setDisabled(True)
+        self.auto_ui.btn_autho_vk.clicked.connect(self.autorization)
         
         widget.exec_()
         
@@ -30,13 +34,15 @@ class AuthorizationVK():
                 vk_token = vk_token.split('&')[0].split('=')[1]
             except:
                 pass
-            response = requests.get(f'https://api.vk.com/method/users.get?access_token={vk_token}&v=5.199')
-            if response.status_code == 200:
-                Config().set_vk_token(vk_token)
-                self.auto_ui.line_token_vk.setDisabled(True)
-                self.auto_ui.btn_autho_vk.setText('Авторизован')
-            else:
-                print('неверный токен') # TODO : вывести
+            res = requests.get(f'https://api.vk.com/method/users.get?access_token={vk_token}&v=5.199')
+            if res.status_code == 200:
+                response_json = res.json()
+                if "error" in response_json:
+                    print('неверный токен')
+                else:
+                    Config().set_vk_token(vk_token)
+                    self.auto_ui.line_token_vk.setDisabled(True)
+                    self.auto_ui.btn_autho_vk.setText('Авторизован')
         else:
             print('не введен токен') # TODO : вывести
             

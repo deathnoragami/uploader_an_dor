@@ -38,9 +38,8 @@ class SFTPManager(QObject):
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 200 * 1024 * 1024)
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 200 * 1024 * 1024)
                 sftp.chdir(f'/home/video/mp4/{dirname}')
-                # sftp.put(file_path, callback=self.progress)
-                # time_upload = datetime.fromtimestamp(sftp.stat(os.path.basename(file_path)).st_mtime).strftime('%d.%m.%Y %H:%M')
-                time_upload = "19"
+                sftp.put(file_path, callback=self.progress)
+                time_upload = datetime.fromtimestamp(sftp.stat(os.path.basename(file_path)).st_mtime).strftime('%d.%m.%Y %H:%M')
                 sftp.close()
                 self.signals.finished.emit(dirname, time_upload)
                 return True

@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+import resource_path
 
 class Ui_authorization_app(object):
     def setupUi(self, authorization_app):
@@ -18,7 +18,7 @@ class Ui_authorization_app(object):
         self.label = QtWidgets.QLabel(authorization_app)
         self.label.setGeometry(QtCore.QRect(0, 0, 471, 81))
         self.label.setText("")
-        self.label.setPixmap(QtGui.QPixmap(".\\autorization_application\\../auto.png"))
+        self.label.setPixmap(QtGui.QPixmap(resource_path.path("auto.png")))
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.line_login = QtWidgets.QLineEdit(authorization_app)

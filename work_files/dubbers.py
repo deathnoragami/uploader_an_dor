@@ -19,15 +19,16 @@ class Dubbers:
             if checkbox.isChecked():
                 self.selected_data.append(ping_value)
         result_string = ', '.join(self.selected_data)
-        for checkbox, ping_value, item_id in checkbox_vars:
-            if checkbox.isChecked():
-                checkbox.setChecked(False)
+        self.clear_checkbox(main_window_ui)
         return result_string
     
     def find_send_vk(self, path=None, btn=None, main_window_ui=None):
+        self.clear_checkbox(main_window_ui)
         found_message = []
         chat_id = Config().get_id_chat()
         token = Config().get_vk_token()
+        if not token:
+            return
         vk_session = vk_api.VkApi(token=f'{token}')
         vk = vk_session.get_api()
         def found_msg(message):
@@ -39,9 +40,9 @@ class Dubbers:
                 links = re.findall(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
                                    text)
                 for link in links:
-                    for key, value in main_window_ui.dub_data.items():
-                        if value.get('link') == sender_id:
-                            title = key
+                    for item in main_window_ui.dub_data:
+                        if item.get('link') == sender_id:
+                            title = item.get('id')
                             found_message.append(
                                 f"{title} {message_datatime.strftime('%d.%m.%Y %H:%M')}")
                             break
@@ -54,7 +55,8 @@ class Dubbers:
                             ping_value = key
                         if sender_id == ping_value:
                             title = key
-                            found_message.append(f"{title} {message_datatime.strftime('%d.%m.%Y %H:%M')}")
+                            if f"{title} {message_datatime.strftime('%d.%m.%Y %H:%M')}" not in found_message:
+                                found_message.append(f"{title} {message_datatime.strftime('%d.%m.%Y %H:%M')}")
                             for checkbox, ping, name in main_window_ui.checkbox_vars:
                                 if name == key:
                                     checkbox.setChecked(True)
@@ -78,3 +80,9 @@ class Dubbers:
                         found_msg(message)
         main_window_ui.ui.text_send_dub.setText("\n".join(list(reversed(found_message))))
         main_window_ui.ui.line_count_dubbers.setText(str(len(found_message)))
+
+    def clear_checkbox(self, main_ui):
+        checkbox_vars = main_ui.checkbox_vars
+        for checkbox, ping_value, item_id in checkbox_vars:
+            if checkbox.isChecked():
+                checkbox.setChecked(False)

@@ -1,6 +1,7 @@
-from PyQt5 import QtWidgets, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem
-from PyQt5.QtCore import Qt, QObject, pyqtSignal, QPropertyAnimation, QRect, QEasingCurve, QSize, QTimer
+from PyQt5 import QtWidgets
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem, QDateEdit
+from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QEasingCurve, QSize, QTimer, QDate
 from ui import Ui_MainWindow
 
 from autorization.autorization_application.autorizade_app import AuthorizationApp
@@ -15,15 +16,20 @@ from work_files.select_video_anime import VideoSelectorAnime
 from work_files.upload_anime import UploadManager
 from work_files.database_title import DatabaseManager
 from work_files.dubbers import Dubbers
+from work_files.download_fix_timming import FixTimming
 
 import timming_pro.timming_main as timming
 
+from version import VERSION_STRING
 from config import Config
 
 import sys
 import os
 import glob
 import json
+import pytz
+import datetime
+import resource_path
 from dotenv import load_dotenv
 
 from qt_material import apply_stylesheet
@@ -39,6 +45,8 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.setWindowTitle(f"AUPAn {VERSION_STRING}")
+        self.setWindowIcon(QIcon(resource_path.path("icon.ico")))
         self.center_screen()
         db = connect_firebase.Connect()
 
@@ -50,6 +58,15 @@ class MainWindow(QMainWindow):
         self.link_malf_anime = None
         
         #################################################################
+
+        ################ ДАТА ###########################################
+        self.ui.dateEdit.setButtonSymbols(QDateEdit.NoButtons)
+        msk_timezone = pytz.timezone('Europe/Moscow')
+        current_date_msk = datetime.datetime.now(msk_timezone)
+        self.year = current_date_msk.year
+        self.month = current_date_msk.month
+        self.day = current_date_msk.day
+        self.ui.dateEdit.setDate(QDate(self.year,  self.month, self.day))
 
         ########## ПРОВЕРКА АВТОРИЗАЦИИ ##################################
 
@@ -70,8 +87,6 @@ class MainWindow(QMainWindow):
             self.ui.menu_2.setDisabled(True)
 
         ##################################################################
-
-        self.ui.btn_search_dubs.clicked.connect(self.btn_search_dub)
     
         ########## Добавление чекбоксов дабберов #############################
 
@@ -87,22 +102,25 @@ class MainWindow(QMainWindow):
 
         #####################################################################
         
-        ################## ТАЙМИНГ ##################################
-                
-        with open("timming_pro/timming.json", "r", encoding="UTF-8") as file:
-            data_list = []
-            for line in reversed(file.readlines()):
-                data = json.loads(line)
-                data_list.append(data)
-        for item_data in data_list:
-            item_text = f"{item_data['projectname']} - {item_data['sequencename']}"
-            item = QListWidgetItem(item_text)
-            item.setData(Qt.UserRole, item_data)
-            self.ui.list_timming.addItem(item)
+        ################## ТАЙМИНГ ##################################  
+             
+        if os.path.exists("assets/timming.json"):
+            with open("assets/timming.json", "r", encoding="UTF-8") as file:
+                data_list = []
+                for line in reversed(file.readlines()):
+                    data = json.loads(line)
+                    data_list.append(data)
+            for item_data in data_list:
+                item_text = f"Имя {data['projectname']} Секв. {data['sequencename']}"
+                item = QListWidgetItem(item_text)
+                item.setData(Qt.UserRole, item_data)
+                self.ui.list_timming.addItem(item)
         self.ui.list_timming.itemClicked.connect(self.get_timming)
         self.ui.btn_del_timming.clicked.connect(self.delete_select_timming)
         self.ui.btn_add_timming.clicked.connect(self.add_timming)
-        self.ui.btn_open_timming.clicked.connect(self.chose_animetion_open_timming)
+        self.ui.btn_open_timming.clicked.connect(self.chose_animation_open_timming)
+        self.ui.textedit_timming_ad.mousePressEvent = lambda event: self.copy(event, self.ui.textedit_timming_ad)
+        self.ui.textedit_name_ad.mousePressEvent = lambda event: self.copy(event, self.ui.textedit_name_ad)
         
         ####################################################################
 
@@ -115,6 +133,7 @@ class MainWindow(QMainWindow):
 
         self.ui.menu_animaunt.triggered.connect(Animaunt_web)
         self.ui.menu_malfurik.triggered.connect(Malfurik_web)
+        self.ui.menu_fix_timming.triggered.connect(FixTimming)
 
         #####################################################################
 
@@ -141,16 +160,24 @@ class MainWindow(QMainWindow):
 
         self.ui.line_id_chat.setText(Config().get_id_chat())
         self.ui.line_id_chat.textChanged.connect(self.save_id_chat)
+        self.ui.btn_search_dubs.clicked.connect(self.btn_search_dub)
+        self.ui.text_send_dub.mousePressEvent = lambda event: self.copy(event, self.ui.text_send_dub)
 
         #######################################################################
 
         db.close()
 
     ##################### ФУНКЦИИ ДЛЯ ТАЙМИНГОВ ###############################
-
+    
+    def copy(self, event, ui_text):
+        if event.button() == Qt.LeftButton:
+            text = ui_text.toPlainText()
+            if text:
+                QApplication.clipboard().setText(f'"{text}"')
+ 
     def add_timming(self):
         data = timming.add_timming()
-        item_text = f"{data['projectname']} - {data['sequencename']}"
+        item_text = f"Имя {data['projectname']} Секв. {data['sequencename']}"
         item = QListWidgetItem(item_text)
         item.setData(Qt.UserRole, data)
         self.ui.list_timming.insertItem(0, item)
@@ -166,15 +193,15 @@ class MainWindow(QMainWindow):
         if selected_item:
             item_data = selected_item.data(Qt.UserRole)
             self.ui.list_timming.takeItem(self.ui.list_timming.row(selected_item))
-            with open("timming_pro/timming.json", "r", encoding="UTF-8") as file:
+            with open("assets/timming.json", "r", encoding="UTF-8") as file:
                 data_list = [json.loads(line) for line in file]
             data_list = [item for item in data_list if item != item_data]
-            with open("timming_pro/timming.json", "w", encoding="UTF-8") as file:
+            with open("assets/timming.json", "w", encoding="UTF-8") as file:
                 for item in data_list:
                     json.dump(item, file, ensure_ascii=False)
                     file.write('\n')
     
-    def chose_animetion_open_timming(self):
+    def chose_animation_open_timming(self):
         if self.height() == 499:
             self.animation_open_timming("open")
         else:
@@ -196,14 +223,14 @@ class MainWindow(QMainWindow):
 
         self.animation = QPropertyAnimation(self, b"size")
         self.animation.setDuration(500)
-        self.animation.setEasingCurve(QEasingCurve.OutBounce)
+        self.animation.setEasingCurve(QEasingCurve.InOutCubic)
         self.animation.setStartValue(QSize(self.size()))
         self.animation.setEndValue(QSize(self.width(), end_height))
         self.animation.start()
 
         self.btn_animation = QPropertyAnimation(self.ui.btn_open_timming, b"geometry")
         self.btn_animation.setDuration(500)
-        self.btn_animation.setEasingCurve(QEasingCurve.OutBounce) 
+        self.btn_animation.setEasingCurve(QEasingCurve.InOutCubic) 
         self.btn_animation.setStartValue(QRect(self.ui.btn_open_timming.x(), self.ui.btn_open_timming.y(), self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
         self.btn_animation.setEndValue(QRect(self.ui.btn_open_timming.x(), btn_end_y, self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
         self.btn_animation.start()
@@ -270,8 +297,11 @@ class MainWindow(QMainWindow):
         self.ui.check_nonlink_anime.setChecked(False)
         self.ui.check_post_site.setChecked(False)
         self.ui.check_sftp_anime.setChecked(False)
+        self.ui.link_site.setText("")
+        self.ui.link_malfurik_anime.setText("")
         self.ui.lbl_anime_pic.setText("Картинка не выбрана")
         self.ui.btn_video_anime.setText("Выбрать видео")
+        self.ui.dateEdit.setDate(QDate(self.year,  self.month, self.day))
         if end:
             self.ui.logging_upload.append("Запощено в вк!")
             self.ui.logging_upload.append("____________________________________\n\n")
@@ -311,7 +341,8 @@ class MainWindow(QMainWindow):
             self.ui.check_post_site.setChecked(self.data[0]["check_post_site"])
             self.ui.link_site.setText(self.data[0]["link_site"])
         self.ui.btn_upload_anime.setDisabled(False)
-        Dubbers().find_send_vk(path=file_path, main_window_ui=self)
+        if Config().get_id_chat():
+            Dubbers().find_send_vk(path=file_path, main_window_ui=self)
         
     def select_video_anime(self):
         self.video_selector_anime.select_video()
@@ -358,7 +389,6 @@ class MainWindow(QMainWindow):
         cp = QApplication.desktop().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

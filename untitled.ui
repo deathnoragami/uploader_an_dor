@@ -38,7 +38,7 @@
       <x>10</x>
       <y>0</y>
       <width>361</width>
-      <height>451</height>
+      <height>471</height>
      </rect>
     </property>
     <property name="currentIndex">
@@ -81,9 +81,9 @@
      <widget class="QProgressBar" name="progress_anime">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>10</x>
         <y>370</y>
-        <width>321</width>
+        <width>341</width>
         <height>23</height>
        </rect>
       </property>
@@ -106,6 +106,9 @@
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QCheckBox" name="check_sftp_anime">
+         <property name="toolTip">
+          <string>Загрузка на сервер. Обязательно надо выбрать видео файл.</string>
+         </property>
          <property name="text">
           <string>SFTP</string>
          </property>
@@ -123,6 +126,9 @@
        </item>
        <item>
         <widget class="QCheckBox" name="check_malf_anime">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="toolTip">
           <string>Если видео надо заливать на малфурик, то будет заливать на малфурик, обновляться страница на малфурике с таймингами и обновляться страница на анимаунте.</string>
          </property>
@@ -149,7 +155,7 @@
      <widget class="QWidget" name="verticalLayoutWidget_2">
       <property name="geometry">
        <rect>
-        <x>169</x>
+        <x>170</x>
         <y>170</y>
         <width>171</width>
         <height>201</height>
@@ -242,30 +248,39 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="Line" name="line">
-      <property name="geometry">
-       <rect>
-        <x>140</x>
-        <y>170</y>
-        <width>20</width>
-        <height>191</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
      <widget class="QLabel" name="progress_value">
       <property name="geometry">
        <rect>
-        <x>22</x>
-        <y>372</y>
-        <width>322</width>
+        <x>10</x>
+        <y>370</y>
+        <width>341</width>
         <height>20</height>
        </rect>
       </property>
       <property name="text">
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загружено: 0 МБ из 0 МБ. Скорость: 0 МБ/с&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+     <widget class="QDateEdit" name="dateEdit">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>128</y>
+        <width>101</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::DefaultContextMenu</enum>
+      </property>
+      <property name="toolTip">
+       <string>Та дата, которая будет выставляться в дате выхода релиза.</string>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="displayFormat">
+       <string>yyyy-MM-dd</string>
       </property>
      </widget>
     </widget>
@@ -519,6 +534,9 @@
       <height>20</height>
      </rect>
     </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
     <property name="placeholderText">
      <string>Кол-во даб.</string>
     </property>
@@ -542,9 +560,9 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>410</x>
       <y>440</y>
-      <width>361</width>
+      <width>241</width>
       <height>31</height>
      </rect>
     </property>
@@ -583,6 +601,9 @@
       <height>271</height>
      </rect>
     </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QTextEdit" name="textedit_name_ad">
     <property name="geometry">
@@ -592,6 +613,9 @@
       <width>271</width>
       <height>271</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QListWidget" name="list_timming">
@@ -636,7 +660,6 @@
      <string>Удалить</string>
     </property>
    </widget>
-   <zorder>block_screen</zorder>
    <zorder>tabWidget</zorder>
    <zorder>logging_upload</zorder>
    <zorder>text_send_dub</zorder>
@@ -653,6 +676,7 @@
    <zorder>btn_add_timming</zorder>
    <zorder>btn_del_timming</zorder>
    <zorder>btn_open_timming</zorder>
+   <zorder>block_screen</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -679,8 +703,16 @@
     <addaction name="menu_animaunt"/>
     <addaction name="menu_malfurik"/>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>Помощь</string>
+    </property>
+    <addaction name="action"/>
+    <addaction name="menu_fix_timming"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
   </widget>
   <action name="menu_application">
    <property name="text">
@@ -713,6 +745,16 @@
   <action name="menu_malfurik">
    <property name="text">
     <string>Malfurik</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>Обновления</string>
+   </property>
+  </action>
+  <action name="menu_fix_timming">
+   <property name="text">
+    <string>Фикс тайминг</string>
    </property>
   </action>
  </widget>

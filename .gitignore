@@ -27,6 +27,10 @@ share/python-wheels/
 MANIFEST
 timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json
 assets/
+Add_Keys.reg
+HOOKS/
+output/
+*.ui
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

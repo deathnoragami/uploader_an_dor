@@ -1,11 +1,10 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
-
-import os
+import resource_path
 
 class Connect():
     def __init__(self):
-        cred = credentials.Certificate("timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json")
+        cred = credentials.Certificate(resource_path.path("timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json"))
         # self.app = firebase_admin.initialize_app(cred, {'databaseURL': f'{os.getenv("DB_URL")}'})
         self.app = firebase_admin.initialize_app(cred)
         self.db = firestore.client()
@@ -50,6 +49,7 @@ class Connect():
                 'maunt_pass': password,
             })
     
+
   
     def close(self):
         firebase_admin.delete_app(self.app)

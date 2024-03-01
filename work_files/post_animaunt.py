@@ -3,15 +3,22 @@ import re
 from datetime import datetime, timedelta
 
 class PostAnimaunt():
-    def __init__(self, link_animaunt, link_malfurik, number_seria, name_video):
-        pattern = re.compile(r'\d+')
+    def __init__(self, link_animaunt, link_malfurik, number_seria, name_video, data_time):
+        self.link_animaunt = link_animaunt
+        self.link_malfurik = link_malfurik
+        self.number_seria = number_seria
+        self.name_video = name_video
+        self.pattern = re.compile(r'\d+')
+        self.data_time = data_time
+            
+    def post(self):
         try:
             with sync_playwright() as playwright:
                 browser = playwright.chromium.launch(headless=False)
                 context = browser.new_context(storage_state="assets/animaunt_storage.json")
                 page = context.new_page()
-                page.goto(link_animaunt)
-                number_seria = pattern.findall(number_seria.split('.')[0])[0]
+                page.goto(self.link_animaunt)
+                number_seria = self.pattern.findall(self.number_seria.split('.')[0])[0]
                 page.locator("#xf_number_seria").fill(f'{int(number_seria)}')
                 page.locator("#xf_date_timer_seria").fill(f"{int(number_seria)+1}")
                 current_data = page.locator("#xf_date_timer").get_attribute("value")
@@ -31,13 +38,13 @@ class PostAnimaunt():
                     data2 = table_div.query_selector_all("input")[-1] # дата 2
                     data1 = table_div.query_selector_all("input")[-2] # дата 1
                     name = table_div.query_selector_all("input")[-3] # Название
-                    local_time = datetime.now().strftime("%Y-%m-%d")
-                    data2.fill(local_time)
-                    data1.fill(local_time)
+                    data2.fill(self.data_time)
+                    data1.fill(self.data_time)
                     name.fill(f"Эпизод {int(number_seria)}")
+                    page.wait_for_timeout(15000)
                 
                 # ПЛЕЕР
-                page.get_by_role("link", name=" Плеер Все серии").click()
+                page.get_by_role("link", name=" Плеер").click()
                 page.locator("#tabplayer1").get_by_text("+").click() 
                 form_add_player = page.query_selector(".tab-pane.active#tabplayer1")
                 player_blocks = form_add_player.query_selector_all(".col-sm-12.playerNewBlock1")
@@ -47,10 +54,10 @@ class PostAnimaunt():
                     input_values.extend([input.input_value() for input in inputs])
                 inputs = player_blocks[-1].query_selector_all("input")
                 
-                if name_video:
+                if self.name_video:
                     last_slash = input_values[-3].rfind("/")
                     path_video = input_values[-3][:last_slash]
-                    inputs[-1].fill(f"{path_video}/{name_video}")
+                    inputs[-1].fill(f"{path_video}/{self.name_video}")
                 else:
                     last_link_video = input_values[-3]
                     match = re.search(r'(\d+)(x?)(?=\.\w+$)', last_link_video)
@@ -62,7 +69,9 @@ class PostAnimaunt():
                         new_path_video = re.sub(r'(\d+)(x?)(?=\.\w+$)', new_file_number, last_link_video)
                         inputs[-1].fill(new_path_video)
                 inputs[-2].fill(f"{int(number_seria)} серия")
-                page.wait_for_timeout(15000)
+                panel_footer = page.locator(".panel-footer")
+                panel_footer.locator("button[type='submit']").click()
+                browser.close()
                 return True
         except Exception as e:
             print(e)

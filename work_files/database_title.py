@@ -66,6 +66,22 @@ class DatabaseManager:
                 "link_second_site": link_second_site,}
             self.database["dorama"].append(entry)
             self.save_database()
+            
+    def update_data(self, path_pic, chosen, 
+                  path_video = None, 
+                  folder_sftp = None, 
+                  check_sftp = None, 
+                  check_malf = None, 
+                  check_nolink = None,
+                  check_post_site = None,
+                  link_site = None, 
+                  vk_post_id = None, 
+                  link_second_site=None):
+        if chosen == 'anime':
+            for entry in  self.database['anime']:
+                if entry["path_pic"] == path_pic:
+                    if path_video and path_video !=  entry["path_video"]:
+                        entry["path_video"] = path_video
         
         
     def search_by_path_pic_anime(self, path_pic):

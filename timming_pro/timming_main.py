@@ -34,7 +34,7 @@ def add_timming():
                 "path_project": project_path      
         }    
 
-        with open('timming_pro/timming.json', 'a', encoding='UTF-8') as file:
+        with open('assets/timming.json', 'a', encoding='UTF-8') as file:
             json.dump(data, file, ensure_ascii=False)
             file.write('\n')
         return data
@@ -46,14 +46,62 @@ def format_timming(data):
                     f'5 сек в миде: {format_time(data["starttimeaudio"][0])}\n' \
                     f'30 Плашка: {format_time(data["starttimevideo"][2])}\n' \
                     f'Вотермарка с 0 до {format_time(data["endtime"], round_up=False)} минуты'
-        # timming_list = [format_time(data["starttimevideo"][0]),
-        #                 format_time(data["starttimeaudio"][0]),
-        #                 format_time(data["starttimevideo"][2]),
-        #                 format_time(data["endtime"], round_up=False)]
         name_ad = f"{data['starttimevideo'][1].split('.mp4')[0] if '.mp4' in data['starttimevideo'][1] else data['starttimevideo'][1].split('.mov')[0]}\n" \
                     f'Начитка\n' \
                     f'Плашка'
-        return timming, name_ad
+    elif len(data["starttimevideo"]) == 8 and len(data["starttimeaudio"]) == 1:
+        timming = f'Преролл {format_time(data["starttimevideo"][0])}\n' \
+                    f'Аудио {format_time(data["starttimeaudio"][0])}\n' \
+                    f'Плашка {format_time(data["starttimevideo"][2])}\n' \
+                    f'Преролл {format_time(data["starttimevideo"][4])}\n' \
+                    f'Плашка {format_time(data["starttimevideo"][6])}\n' \
+                    f'Вотермарка с 00:00 по {format_time(data["endtime"], round_up=False)} минуты'
+        name_ad = f"{data['starttimevideo'][1].split('.mp4')[0] if '.mp4' in data['starttimevideo'][1] else data['starttimevideo'][1].split('.mov')[0]}\n" \
+                    f'Начитка\n' \
+                    f"{data['starttimevideo'][3].split('.mp4')[0] if '.mp4' in data['starttimevideo'][3] else data['starttimevideo'][3].split('.mov')[0]}\n" \
+                    f"{data['starttimevideo'][5].split('.mp4')[0] if '.mp4' in data['starttimevideo'][5] else data['starttimevideo'][5].split('.mov')[0]}\n" \
+                    f"{data['starttimevideo'][7].split('.mp4')[0] if '.mp4' in data['starttimevideo'][7] else data['starttimevideo'][7].split('.mov')[0]}"
+    elif len(data["starttimevideo"]) == 8 and len(data["starttimeaudio"]) == 2:
+        timming = f'Преролл {format_time(data["starttimevideo"][0])}\n' \
+                    f'Аудио {format_time(data["starttimeaudio"][0])}\n' \
+                    f'Плашка {format_time(data["starttimevideo"][2])}\n' \
+                    f'Аудио {format_time(data["starttimeaudio"][1])}\n' \
+                    f'Преролл {format_time(data["starttimevideo"][4])}\n' \
+                    f'Плашка {format_time(data["starttimevideo"][6])}\n' \
+                    f'Вотермарка с 00:00 по {format_time(data["endtime"], round_up=False)} минуты' 
+        name_ad = f"{data['starttimevideo'][1].split('.mp4')[0] if '.mp4' in data['starttimevideo'][1] else data['starttimevideo'][1].split('.mov')[0]}\n" \
+                    f'Начитка\n' \
+                    f"{data['starttimevideo'][3].split('.mp4')[0] if '.mp4' in data['starttimevideo'][3] else data['starttimevideo'][3].split('.mov')[0]}\n" \
+                    f'Начитка\n' \
+                    f"{data['starttimevideo'][5].split('.mp4')[0] if '.mp4' in data['starttimevideo'][5] else data['starttimevideo'][5].split('.mov')[0]}\n" \
+                    f"{data['starttimevideo'][7].split('.mp4')[0] if '.mp4' in data['starttimevideo'][7] else data['starttimevideo'][7].split('.mov')[0]}"  
+    elif len(data["starttimevideo"]) == 12 and len(data["starttimeaudio"]) == 3:
+        timming = f'Преролл: {format_time(data["starttimevideo"][0])}\n' \
+                    f'5 сек в миде: {format_time(data["starttimeaudio"][0])}\n' \
+                    f'30 Плашка: {format_time(data["starttimevideo"][2])}\n' \
+                    f'Преролл: {format_time(data["starttimevideo"][4])}\n' \
+                    f'5 сек в миде: {format_time(data["starttimeaudio"][1])}\n' \
+                    f'30 Плашка: {format_time(data["starttimevideo"][6])}\n' \
+                    f'Преролл: {format_time(data["starttimevideo"][8])}\n' \
+                    f'5 сек в миде: {format_time(data["starttimeaudio"][2])}\n' \
+                    f'30 Плашка: {format_time(data["starttimevideo"][10])}\n' \
+                    f'Вотермарка с 00:00 до {format_time(data["endtime"], round_up=False)} минуты'
+        name_ad = f"{data['starttimevideo'][1].split('.mp4')[0] if '.mp4' in data['starttimevideo'][1] else data['starttimevideo'][1].split('.mov')[0]}\n" \
+                    f'Начитка\n' \
+                    f'Плашка\n' \
+                    f"{data['starttimevideo'][5].split('.mp4')[0] if '.mp4' in data['starttimevideo'][5] else data['starttimevideo'][5].split('.mov')[0]}\n" \
+                    f'Начитка\n' \
+                    f'Плашка\n' \
+                    f"{data['starttimevideo'][9].split('.mp4')[0] if '.mp4' in data['starttimevideo'][9] else data['starttimevideo'][9].split('.mov')[0]}\n" \
+                    f'Начитка\n' \
+                    f'Плашка'     
+    else:
+        timming = f'Я получил {len(data["starttimevideo"])} данных видео\n' \
+                  f'{len(data["starttimeaudio"])} данных аудио\n' \
+                  f'Для аниме должно быть 4:1, для дорамы 8:1 \nили 8:2, фильм 12:3 \nпроверьте проект'   
+        name_ad = ""
+    
+    return timming, name_ad
         
 def format_time(sec, round_up=True):
     if sec < 3600:

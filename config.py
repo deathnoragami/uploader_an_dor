@@ -6,6 +6,8 @@ import os
 class Config():
     def __init__(self):
         self.cfg = configparser.ConfigParser()
+        if not os.path.exists('assets'):
+            os.makedirs('assets')
         if os.path.exists('assets/config.ini') == False:
             self.cfg['GLOBAL'] = {}
             self.cfg['GLOBAL']['id_chat'] = ''

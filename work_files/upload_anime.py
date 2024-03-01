@@ -41,6 +41,7 @@ class UploadManager(QObject):
         
         data = DatabaseManager().search_by_path_pic_anime(os.path.dirname(file_path_image))
         if not data or not data[0]["vk_post_id"]:
+            self.ui.logging_upload.append("Ишу нужны пост ВК...")
             post_id = VkPostAnime(name=os.path.basename(os.path.dirname(file_path_image))).search_post()
             if not post_id:
                 self.signals.post_signal.emit(False)
@@ -54,10 +55,13 @@ class UploadManager(QObject):
                     self.signals.post_signal.emit(False)
                     return
             else:
+                self.ui.logging_upload.append("Ищу папку на сервере...")
                 dirname_sftp = SFTPManager().search_folder_sftp(os.path.basename(os.path.dirname(file_path_image)))
                 if dirname_sftp == False:
                     self.signals.post_signal.emit(False)
                     return
+        else:
+            dirname_sftp = None
         select_dub = Dubbers().select_checkboxes(self.main_ui)
         self.worker = UploadWorker(self.sftp_manager, self.main_ui, select_dub, file_path_image,
                               file_path_video, check_sftp,
@@ -128,15 +132,14 @@ class UploadWorker(QThread):
             path_video = None
             name_video = None        
         
-        if self.post_id == None:
-            QMessageBox.warning(None, "Ошибка", "Не найден нужный пост, смените название папки для более точного названия, либо пост был сделан более 2-3 месяцев назад.")
-        if self.file_path_video is not None and self.check_sftp:
+        if self.file_path_video is not None and self.check_sftp and self.dirname_sftp is not None:
             upload_sftp = self.sftp_manager.upload_file(self.dirname_sftp, self.file_path_video)
         if upload_sftp:
             if self.check_post_malf:
                 post = PostAnimaunt(self.link_site_animaunt, self.link_site_malf, name_file)
             if self.check_post_site:
-                post = PostAnimaunt(self.link_site_animaunt, self.link_site_malf, name_file, name_video)
+                data_time = self.main_ui.ui.dateEdit.date().toString("yyyy-MM-dd")
+                post = PostAnimaunt(self.link_site_animaunt, self.link_site_malf, name_file, name_video, data_time).post()
                 if post == True:
                     pass
                 else:
@@ -150,4 +153,3 @@ class UploadWorker(QThread):
                 dbm.add_entry(path_image, path_video, self.dirname_sftp, self.check_sftp, self.check_post_malf, self.check_nolink, self.check_post_site, self.link_site_animaunt, self.post_id, "anime", self.link_site_malf)
         self.signals.post_signal.emit(bool(upload_sftp))
 
-        
