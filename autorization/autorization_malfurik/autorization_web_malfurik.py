@@ -13,7 +13,7 @@ class Malfurik_web():
                 link = os.getenv('MALFURIK_LINK')
                 page.goto(link)
                 try:
-                    page.wait_for_selector("#dashboard-widgets-wrap", timeout=2000)
+                    page.wait_for_selector("#dashboard-widgets-wrap", timeout=20000)
                     context.storage_state(path='assets/malfurik_storage.json')
                     context.close()
                     browser.close()

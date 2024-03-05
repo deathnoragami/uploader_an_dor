@@ -41,7 +41,7 @@ class UploadManager(QObject):
         
         data = DatabaseManager().search_by_path_pic_anime(os.path.dirname(file_path_image))
         if not data or not data[0]["vk_post_id"]:
-            self.ui.logging_upload.append("Ишу нужны пост ВК...")
+            self.main_ui.ui.logging_upload.append("Ишу нужныq пост ВК...")
             post_id = VkPostAnime(name=os.path.basename(os.path.dirname(file_path_image))).search_post()
             if not post_id:
                 self.signals.post_signal.emit(False)
@@ -55,7 +55,7 @@ class UploadManager(QObject):
                     self.signals.post_signal.emit(False)
                     return
             else:
-                self.ui.logging_upload.append("Ищу папку на сервере...")
+                self.main_ui.ui.logging_upload.append("Ищу папку на сервере...")
                 dirname_sftp = SFTPManager().search_folder_sftp(os.path.basename(os.path.dirname(file_path_image)))
                 if dirname_sftp == False:
                     self.signals.post_signal.emit(False)

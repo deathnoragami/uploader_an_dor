@@ -52,9 +52,9 @@
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>20</y>
+        <y>0</y>
         <width>351</width>
-        <height>31</height>
+        <height>61</height>
        </rect>
       </property>
       <property name="font">
@@ -82,7 +82,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>370</y>
+        <y>378</y>
         <width>341</width>
         <height>23</height>
        </rect>
@@ -110,7 +110,7 @@
           <string>Загрузка на сервер. Обязательно надо выбрать видео файл.</string>
          </property>
          <property name="text">
-          <string>SFTP</string>
+          <string>Сервер</string>
          </property>
         </widget>
        </item>
@@ -252,7 +252,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>370</y>
+        <y>378</y>
         <width>341</width>
         <height>20</height>
        </rect>
@@ -291,51 +291,12 @@
      <attribute name="title">
       <string>Дорамы</string>
      </attribute>
-     <widget class="QPushButton" name="pushButton_5">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>170</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>PushButton</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_6">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>130</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>PushButton</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_7">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>100</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>PushButton</string>
-      </property>
-     </widget>
      <widget class="QProgressBar" name="progressBar">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>70</y>
-        <width>291</width>
+        <x>10</x>
+        <y>397</y>
+        <width>331</width>
         <height>23</height>
        </rect>
       </property>
@@ -343,56 +304,129 @@
        <number>24</number>
       </property>
      </widget>
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="lbl_pic_video_dor">
       <property name="geometry">
        <rect>
-        <x>130</x>
-        <y>30</y>
-        <width>47</width>
-        <height>21</height>
+        <x>0</x>
+        <y>0</y>
+        <width>351</width>
+        <height>61</height>
        </rect>
       </property>
       <property name="text">
-       <string>TextLabel</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:14pt;&quot;&gt;Видео не выбрано&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox_4">
+     <widget class="QLineEdit" name="line_link_malf_dor">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>220</y>
-        <width>70</width>
-        <height>17</height>
+        <x>20</x>
+        <y>110</y>
+        <width>321</width>
+        <height>31</height>
        </rect>
       </property>
-      <property name="text">
-       <string>CheckBox</string>
+      <property name="placeholderText">
+       <string>Ссылка на малфурик</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox_5">
+     <widget class="QLineEdit" name="line_link_animaunt_dor">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>250</y>
-        <width>70</width>
-        <height>17</height>
+        <x>20</x>
+        <y>70</y>
+        <width>321</width>
+        <height>31</height>
        </rect>
       </property>
-      <property name="text">
-       <string>CheckBox</string>
+      <property name="placeholderText">
+       <string>Ссылка на анимаунт</string>
       </property>
      </widget>
-     <widget class="QCheckBox" name="checkBox_6">
+     <widget class="QWidget" name="verticalLayoutWidget_3">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>280</y>
-        <width>70</width>
-        <height>17</height>
+        <x>20</x>
+        <y>170</y>
+        <width>151</width>
+        <height>221</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QCheckBox" name="check_sftp_dor">
+         <property name="text">
+          <string>Сервер</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check_tg_dor">
+         <property name="text">
+          <string>Телеграм</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check_vk_dor">
+         <property name="text">
+          <string>ВКонтакте</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check_update_site_dor">
+         <property name="text">
+          <string>Обновить сайт</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="verticalLayoutWidget_4">
+      <property name="geometry">
+       <rect>
+        <x>169</x>
+        <y>170</y>
+        <width>171</width>
+        <height>221</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QPushButton" name="btn_chose_video_dor">
+         <property name="text">
+          <string>Видео</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_chose_pic_dor">
+         <property name="text">
+          <string>Картинка</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_upload_dor">
+         <property name="text">
+          <string>Загрузить</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>14</x>
+        <y>397</y>
+        <width>331</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>CheckBox</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загружено: 0 МБ из 0 МБ. Скорость: 0 МБ/с&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </widget>
@@ -560,7 +594,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>390</x>
       <y>440</y>
       <width>241</width>
       <height>31</height>
@@ -597,21 +631,31 @@
      <rect>
       <x>30</x>
       <y>480</y>
-      <width>271</width>
-      <height>271</height>
+      <width>251</width>
+      <height>151</height>
      </rect>
+    </property>
+    <property name="documentTitle">
+     <string/>
     </property>
     <property name="readOnly">
      <bool>true</bool>
+    </property>
+    <property name="html">
+     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
    <widget class="QTextEdit" name="textedit_name_ad">
     <property name="geometry">
      <rect>
-      <x>330</x>
+      <x>300</x>
       <y>480</y>
-      <width>271</width>
-      <height>271</height>
+      <width>251</width>
+      <height>151</height>
      </rect>
     </property>
     <property name="readOnly">
@@ -621,10 +665,10 @@
    <widget class="QListWidget" name="list_timming">
     <property name="geometry">
      <rect>
-      <x>630</x>
+      <x>570</x>
       <y>480</y>
-      <width>271</width>
-      <height>271</height>
+      <width>281</width>
+      <height>151</height>
      </rect>
     </property>
     <property name="acceptDrops">
@@ -634,9 +678,9 @@
    <widget class="QPushButton" name="btn_add_timming">
     <property name="geometry">
      <rect>
-      <x>910</x>
+      <x>870</x>
       <y>480</y>
-      <width>141</width>
+      <width>181</width>
       <height>31</height>
      </rect>
     </property>
@@ -647,9 +691,9 @@
    <widget class="QPushButton" name="btn_del_timming">
     <property name="geometry">
      <rect>
-      <x>910</x>
-      <y>530</y>
-      <width>141</width>
+      <x>870</x>
+      <y>520</y>
+      <width>181</width>
       <height>31</height>
      </rect>
     </property>
@@ -660,6 +704,30 @@
      <string>Удалить</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="line_add_timming_malf">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>566</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_add_timming_malf">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>602</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Обновить сайт</string>
+    </property>
+   </widget>
+   <zorder>block_screen</zorder>
    <zorder>tabWidget</zorder>
    <zorder>logging_upload</zorder>
    <zorder>text_send_dub</zorder>
@@ -676,7 +744,8 @@
    <zorder>btn_add_timming</zorder>
    <zorder>btn_del_timming</zorder>
    <zorder>btn_open_timming</zorder>
-   <zorder>block_screen</zorder>
+   <zorder>line_add_timming_malf</zorder>
+   <zorder>btn_add_timming_malf</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

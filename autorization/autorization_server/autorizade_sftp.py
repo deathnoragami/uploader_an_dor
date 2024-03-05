@@ -19,7 +19,7 @@ class AutorizationServer():
         file_path = os.path.normpath(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "../assets/session_timmers"))
         if os.path.isfile(file_path):
             with open(file_path, 'r') as file:
-                uid = file.read()
+                uid = file.read() # TODO:
                 print(uid)
             db = Connect()
             user_data = db.find_user_uid(uid)

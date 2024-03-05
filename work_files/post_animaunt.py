@@ -41,7 +41,6 @@ class PostAnimaunt():
                     data2.fill(self.data_time)
                     data1.fill(self.data_time)
                     name.fill(f"Эпизод {int(number_seria)}")
-                    page.wait_for_timeout(15000)
                 
                 # ПЛЕЕР
                 page.get_by_role("link", name=" Плеер").click()

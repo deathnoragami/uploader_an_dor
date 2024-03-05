@@ -13,7 +13,10 @@ from autorization.autorization_malfurik.autorization_web_malfurik import Malfuri
 
 from work_files.select_pic_anime import PictureSelectorAnime
 from work_files.select_video_anime import VideoSelectorAnime
+from work_files.select_video_dorama import VideoSelectorDorama
+from work_files.select_pic_dorama import PictureSelectorDorama
 from work_files.upload_anime import UploadManager
+from work_files.upload_dorama import UploadManagerDorama
 from work_files.database_title import DatabaseManager
 from work_files.dubbers import Dubbers
 from work_files.download_fix_timming import FixTimming
@@ -37,7 +40,7 @@ from qt_material import apply_stylesheet
 import connect_firebase
 
 
-load_dotenv()
+load_dotenv(dotenv_path=resource_path.path(".env"))
 
 
 class MainWindow(QMainWindow):
@@ -54,6 +57,8 @@ class MainWindow(QMainWindow):
         
         self.file_path_anime_pic = None
         self.file_path_anime_video = None
+        self.file_path_dorama_pic = None
+        self.file_path_dorama_video = None
         self.link_site_animaunt = None
         self.link_malf_anime = None
         
@@ -111,7 +116,7 @@ class MainWindow(QMainWindow):
                     data = json.loads(line)
                     data_list.append(data)
             for item_data in data_list:
-                item_text = f"Имя {data['projectname']} Секв. {data['sequencename']}"
+                item_text = f"{data['projectname']} Секв. {data['sequencename']}"
                 item = QListWidgetItem(item_text)
                 item.setData(Qt.UserRole, item_data)
                 self.ui.list_timming.addItem(item)
@@ -154,7 +159,25 @@ class MainWindow(QMainWindow):
         self.upload_manager.signals.post_signal.connect(self.upload_vk_finish)
 
         self.ui.check_malf_anime.stateChanged.connect(self.toggle_site_anime)
+        
         #######################################################################
+
+        ########################## ДОРАМЫ КНОПКИ ##############################
+        
+        self.video_selector_dorama = VideoSelectorDorama()
+        self.video_selector_dorama.video_selected.connect(self.update_video_dorama)
+        self.ui.btn_chose_video_dor.clicked.connect(self.select_video_dorama)
+        
+        self.pictute_selecor_dorama = PictureSelectorDorama()
+        self.pictute_selecor_dorama.picture_selected.connect(self.update_picture_dorama)
+        self.ui.btn_chose_pic_dor.clicked.connect(self.select_picture_dorama)
+        
+        self.upload_manager_dorama = UploadManagerDorama(self)
+        self.upload_manager_dorama.signals.progress_changed.connect(self.update_progress_dor)
+        self.upload_manager_dorama.signals.upload_signals.connect(self.upload_finished_dor)
+        self.ui.btn_upload_dor.clicked.connect(self.start_work_dorama)
+        
+        #######################################################################      
 
         ######################### СДАЧА ДОРОГ #################################
 
@@ -177,7 +200,7 @@ class MainWindow(QMainWindow):
  
     def add_timming(self):
         data = timming.add_timming()
-        item_text = f"Имя {data['projectname']} Секв. {data['sequencename']}"
+        item_text = f"{data['projectname']} Секв. {data['sequencename']}"
         item = QListWidgetItem(item_text)
         item.setData(Qt.UserRole, data)
         self.ui.list_timming.insertItem(0, item)
@@ -211,9 +234,9 @@ class MainWindow(QMainWindow):
         self.chose = chose
                     
         if chose == "open":
-            self.setMaximumHeight(821)
-            end_height = 820
-            btn_end_y = 760
+            self.setMaximumHeight(681)
+            end_height = 690
+            btn_end_y = 633
             btn_text = "🠉"
         else:
             self.setMinimumHeight(499)
@@ -240,7 +263,7 @@ class MainWindow(QMainWindow):
         
     def fixed(self):
         if self.chose == "open":
-            self.setMinimumHeight(821)
+            self.setMinimumHeight(690)
         else:
             self.setMaximumHeight(499)
 
@@ -304,10 +327,10 @@ class MainWindow(QMainWindow):
         self.ui.dateEdit.setDate(QDate(self.year,  self.month, self.day))
         if end:
             self.ui.logging_upload.append("Запощено в вк!")
-            self.ui.logging_upload.append("____________________________________\n\n")
+            self.ui.logging_upload.append("__________________________________\n")
         else:
             self.ui.logging_upload.append("Отмена загрузки.")
-            self.ui.logging_upload.append("____________________________________\n\n")
+            self.ui.logging_upload.append("__________________________________\n")
 
     def select_picture_anime(self):
         self.picture_selector_anime.select_picture()
@@ -353,8 +376,6 @@ class MainWindow(QMainWindow):
             self.ui.btn_video_anime.setText("Выбрать видео")
         else:
             file_name = os.path.basename(file_path)
-            file_name_without_extension, extension = os.path.splitext(os.path.basename(file_path))
-            folder_name = os.path.basename(os.path.dirname(file_path))
             self.ui.btn_video_anime.setText(f"Серия {file_name}")
             self.file_path_anime_video = file_path
 
@@ -364,6 +385,51 @@ class MainWindow(QMainWindow):
         else:
             self.ui.link_malfurik_anime.setEnabled(False)
 
+    ##########################################################################
+
+    ############################# ФУНКЦИИ ДЛЯ ДОРАМ ##########################
+
+    def select_video_dorama(self):
+        self.video_selector_dorama.select_video()
+
+    def select_picture_dorama(self):
+        self.pictute_selecor_dorama.select_picture()
+        
+    def update_video_dorama(self, file_path):
+        file_name_without_extension, extension = os.path.splitext(os.path.basename(file_path))
+        folder_name = os.path.basename(os.path.dirname(file_path))
+        self.ui.lbl_pic_video_dor.setText(f"{folder_name} серия {file_name_without_extension}")
+        self.file_path_dorama_video = file_path
+        dbm = DatabaseManager()
+        self.data_dorama = dbm.search_by_path_video_dorama(os.path.dirname(self.file_path_dorama_video))
+        if not self.data_dorama:
+            self.check_data_dorama = False
+        else:
+            self.check_data_dorama = True
+            if self.data_dorama[0]["path_pic"] == None or self.data_dorama[0]["path_pic"] == "":
+                self.file_path_dorama_pic = None
+            else:
+                search_number = str(file_name_without_extension.zfill(2))
+                search_pattern = os.path.join(self.data[0]["path_pic"], f"{search_number}*.jpg")
+                try:
+                    pic_file = glob.glob(search_pattern)[0]
+                    self.update_picture_dorama(pic_file)
+                except:
+                    pic_file = None
+    
+    def update_picture_dorama(self, file_path):
+        if file_path == "":
+            self.file_path_dorama_pic = None
+            self.ui.btn_chose_pic_dor.setText("Выбрать картинку")
+        else:
+            self.file_path_dorama_pic = file_path
+            file_name = os.path.basename(file_path)
+            self.ui.btn_chose_pic_dor.setText(file_name)
+           
+        
+    def start_work_dorama(self):
+        pass
+        
     ##########################################################################
 
     ###########################  СДАЧА ДОРОГ #################################

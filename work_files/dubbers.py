@@ -76,7 +76,7 @@ class Dubbers:
                     if f'{prefix}{number}' in text:
                         found_msg(message)
                 else:
-                    if f'e{number} ' in text or f'е{number} ' in text or f'e {number} ' in text or f'е {number} ' in text:
+                    if f'e{number} ' in text or f'е{number} ' in text or f'e {number} ' in text or f'е {number} ' in text or f'e {number}' in text or f'e{number}' in text or f'е {number}' in text or f'е{number}' in text:
                         found_msg(message)
         main_window_ui.ui.text_send_dub.setText("\n".join(list(reversed(found_message))))
         main_window_ui.ui.line_count_dubbers.setText(str(len(found_message)))
