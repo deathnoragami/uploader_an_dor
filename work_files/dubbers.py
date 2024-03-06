@@ -65,7 +65,7 @@ class Dubbers:
             name = main_window_ui.ui.line_search_dub_name_serial.text()
             prefix = main_window_ui.ui.line_prefix_name_serial.text()
         else:
-            number = os.path.splitext(os.path.basename(path))[0].lstrip('0')
+            number = os.path.splitext(os.path.basename(path))[0].replace('x', '').lstrip('0')
             name = os.path.basename(os.path.dirname(path))
             prefix = ''
         result_chat = vk.messages.search(q=f'{name}', peer_id=2000000000+int(chat_id), count=100)

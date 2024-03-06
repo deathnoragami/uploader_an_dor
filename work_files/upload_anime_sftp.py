@@ -61,12 +61,12 @@ class SFTPManager(QObject):
             
             with pysftp.Connection(os.getenv("ANIMAUNT_IP_SERVER"), username=maunt_login, password=maunt_pass, port=22, cnopts=cnopts) as sftp:
                 sftp.chdir('/home/video/mp4')
-                name_folder = ''.join(char for char in name_folder if char not in string.punctuation)
+                name_folder = ''.join(char if char not in string.punctuation else ' ' for char in name_folder).lower().replace("  ", " ")
                 found_folder = False
                 list_dir = sorted(sftp.listdir_attr(), key=lambda k: k.st_mtime, reverse=True)
                 for attr in list_dir:
-                    folder_sftp = ''.join(char for char in attr.filename if char not in string.punctuation)
-                    if name_folder.lower() in folder_sftp.lower():
+                    folder_sftp = ''.join(char if char not in string.punctuation else ' ' for char in attr.filename).lower().replace("  ", " ")
+                    if name_folder in folder_sftp:
                         dirname = attr.filename
                         found_folder = True
                         break

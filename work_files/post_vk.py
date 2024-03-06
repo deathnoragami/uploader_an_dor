@@ -33,12 +33,10 @@ class VkPostAnime(QObject):
                 return None
             for post in posts['items']:
                 post_text = post['text'].split('\n')[0]
-                clean_post_text = ''.join(char for char in post_text if char not in string.punctuation).lower()
-                clean_name_anime = ''.join(char for char in self.name_anime if char not in string.punctuation).lower()
+                clean_post_text = ''.join(char if char not in string.punctuation else ' ' for char in post_text).lower().replace("  ", " ")
+                clean_name_anime = ''.join(char if char not in string.punctuation else ' ' for char in self.name_anime).lower().replace("  ", " ")
                 if clean_name_anime in clean_post_text:
-                    
                     reply = QMessageBox.question(None, "Что-то нашел", f"Этот ли прошлый пост?\n{post_text}", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
-                    # q = CustomMessageBox("Что-то нашел", f"Этот ли прошлый пост?\n{post_text}")
                     if reply == QMessageBox.Yes:
                         post_id = post['id']
                         return post_id

@@ -39,6 +39,8 @@ class DatabaseManager:
                   link_site, 
                   vk_post_id, 
                   chosen, 
+                  tg_post_id = None,
+                  vk_playlist_id = None,
                   link_second_site=None): #TODO: айди поста
         if chosen == 'anime':
             entry = {
@@ -56,19 +58,23 @@ class DatabaseManager:
             self.save_database()
         elif chosen == 'dorama':
             entry = {
-                "path_pic": path_pic,
                 "path_video": path_video,
+                "path_pic": path_pic,
                 "folder_sftp": folder_sftp,
                 "check_sftp": check_sftp,
                 "check_vk": check_malf,
                 "check_telegram": check_nolink,
+                "check_site":  check_post_site,
+                "vk_post_id": vk_post_id,
+                "vk_playlist_id": vk_playlist_id,
+                "tg_post_id" : tg_post_id,
                 "link_site": link_site,
                 "link_second_site": link_second_site,}
             self.database["dorama"].append(entry)
             self.save_database()
             
-    def update_data(self, path_pic, chosen, 
-                  path_video = None, 
+    def update_data_dorama(self, path_video,
+                  path_pic = None, 
                   folder_sftp = None, 
                   check_sftp = None, 
                   check_malf = None, 
@@ -77,11 +83,10 @@ class DatabaseManager:
                   link_site = None, 
                   vk_post_id = None, 
                   link_second_site=None):
-        if chosen == 'anime':
-            for entry in  self.database['anime']:
-                if entry["path_pic"] == path_pic:
-                    if path_video and path_video !=  entry["path_video"]:
-                        entry["path_video"] = path_video
+        for entry in  self.database['dorama']:
+            if entry["path_video"] == path_video:
+                if path_pic and path_pic !=  entry["path_pic"]:
+                    entry["path_pic"] = path_pic
         
         
     def search_by_path_pic_anime(self, path_pic):

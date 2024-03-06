@@ -17,6 +17,7 @@ from work_files.select_video_dorama import VideoSelectorDorama
 from work_files.select_pic_dorama import PictureSelectorDorama
 from work_files.upload_anime import UploadManager
 from work_files.upload_dorama import UploadManagerDorama
+from work_files.upload_dorama_sftp import UploadDoramaSFTP
 from work_files.database_title import DatabaseManager
 from work_files.dubbers import Dubbers
 from work_files.download_fix_timming import FixTimming
@@ -33,6 +34,7 @@ import json
 import pytz
 import datetime
 import resource_path
+from urllib.parse import unquote
 from dotenv import load_dotenv
 
 from qt_material import apply_stylesheet
@@ -106,7 +108,7 @@ class MainWindow(QMainWindow):
             self.ui.scrollAreaWidgetContents.layout().addWidget(checkbox)
 
         #####################################################################
-        
+        db.close()
         ################## ТАЙМИНГ ##################################  
              
         if os.path.exists("assets/timming.json"):
@@ -174,7 +176,8 @@ class MainWindow(QMainWindow):
         
         self.upload_manager_dorama = UploadManagerDorama(self)
         self.upload_manager_dorama.signals.progress_changed.connect(self.update_progress_dor)
-        self.upload_manager_dorama.signals.upload_signals.connect(self.upload_finished_dor)
+        self.upload_manager_dorama.signals.finished_upload_sftp.connect(self.finish_upload_sftp_dor)
+        self.upload_manager_dorama.signals.finished_upload_tg.connect(self.finish_upload_tg_dor)
         self.ui.btn_upload_dor.clicked.connect(self.start_work_dorama)
         
         #######################################################################      
@@ -188,7 +191,7 @@ class MainWindow(QMainWindow):
 
         #######################################################################
 
-        db.close()
+        
 
     ##################### ФУНКЦИИ ДЛЯ ТАЙМИНГОВ ###############################
     
@@ -274,16 +277,16 @@ class MainWindow(QMainWindow):
     def start_work(self):
         try:
             if self.file_path_anime_pic is not None:
-                   
                 if self.ui.check_post_site.isChecked():
+                    self.ui.link_site.setText(unquote(self.ui.link_site.text()))
                     if not self.ui.link_site.text().startswith(os.getenv('CHECK_ANIMAUNT_LINK')) or self.ui.link_site.text() == '':
-                        QMessageBox.warning(None, "Ошибка", "Ссылка указана не верно")
+                        QMessageBox.warning(None, "Ошибка", "Ссылка на анимаунт указана не верно")
                         return
                     else:
                         self.link_site_animaunt = self.ui.link_site.text()
                 if self.ui.check_malf_anime.isChecked():
                     if not self.ui.link_malfurik_anime.text().startswith(os.getenv('CHECK_MALFURIK_LINK')) or self.ui.link_malfurik_anime.text() == '':
-                        QMessageBox.warning(None, "Ошибка", "Ссылка указана не верно")
+                        QMessageBox.warning(None, "Ошибка", "Ссылка на малфурик указана не верно")
                         return
                     else:
                         self.link_malf_anime = self.ui.link_malfurik_anime.text()
@@ -336,36 +339,38 @@ class MainWindow(QMainWindow):
         self.picture_selector_anime.select_picture()
 
     def update_label_pic_anime(self, file_path):
-        file_name_without_extension, extension = os.path.splitext(os.path.basename(file_path))
-        folder_name = os.path.basename(os.path.dirname(file_path))
-        self.ui.lbl_anime_pic.setText(f"{folder_name} серия {file_name_without_extension}")
-        self.file_path_anime_pic = file_path
-        dbm = DatabaseManager()
-        self.data = dbm.search_by_path_pic_anime(os.path.dirname(self.file_path_anime_pic))
-        if not self.data:
-            self.check_data = False
-        else:
-            self.check_data = True
-            if self.data[0]["path_video"] == None or self.data[0]["path_video"] == "":
-                self.file_path_anime_video = None
+        if file_path:
+            file_name_without_extension, extension = os.path.splitext(os.path.basename(file_path))
+            folder_name = os.path.basename(os.path.dirname(file_path))
+            self.ui.lbl_anime_pic.setText(f"{folder_name} серия {file_name_without_extension}")
+            self.file_path_anime_pic = file_path
+            dbm = DatabaseManager()
+            self.data = dbm.search_by_path_pic_anime(os.path.dirname(self.file_path_anime_pic))
+            if not self.data:
+                self.check_data = False
             else:
-                search_number = str(file_name_without_extension.zfill(2))
-                search_pattern = os.path.join(self.data[0]["path_video"], f"{search_number}*.mp4")
-                try:
-                    video_file = glob.glob(search_pattern)[0]
-                    self.update_label_video_anime(video_file)
-                except:
-                    video_file = None
-                
+                self.check_data = True
+                if self.data[0]["path_video"] == None or self.data[0]["path_video"] == "":
+                    self.file_path_anime_video = None
+                else:
+                    search_number = str(file_name_without_extension.zfill(2))
+                    search_pattern = os.path.join(self.data[0]["path_video"], f"{search_number}*.mp4")
+                    try:
+                        video_file = glob.glob(search_pattern)[0]
+                        self.update_label_video_anime(video_file)
+                    except:
+                        video_file = None
+                    
 
-            self.ui.check_sftp_anime.setChecked(self.data[0]["check_sftp"])
-            self.ui.check_nonlink_anime.setChecked(self.data[0]["check_nolink"])
-            self.ui.check_malf_anime.setChecked(self.data[0]["check_malf"])
-            self.ui.check_post_site.setChecked(self.data[0]["check_post_site"])
-            self.ui.link_site.setText(self.data[0]["link_site"])
-        self.ui.btn_upload_anime.setDisabled(False)
-        if Config().get_id_chat():
-            Dubbers().find_send_vk(path=file_path, main_window_ui=self)
+                self.ui.check_sftp_anime.setChecked(self.data[0]["check_sftp"])
+                self.ui.check_nonlink_anime.setChecked(self.data[0]["check_nolink"])
+                self.ui.check_malf_anime.setChecked(self.data[0]["check_malf"])
+                self.ui.check_post_site.setChecked(self.data[0]["check_post_site"])
+                self.ui.link_site.setText(self.data[0]["link_site"])
+                self.ui.link_malfurik_anime.setText(self.data[0]["link_second_site"])
+            self.ui.btn_upload_anime.setDisabled(False)
+            if Config().get_id_chat():
+                Dubbers().find_send_vk(path=file_path, main_window_ui=self)
         
     def select_video_anime(self):
         self.video_selector_anime.select_video()
@@ -396,26 +401,36 @@ class MainWindow(QMainWindow):
         self.pictute_selecor_dorama.select_picture()
         
     def update_video_dorama(self, file_path):
-        file_name_without_extension, extension = os.path.splitext(os.path.basename(file_path))
-        folder_name = os.path.basename(os.path.dirname(file_path))
-        self.ui.lbl_pic_video_dor.setText(f"{folder_name} серия {file_name_without_extension}")
-        self.file_path_dorama_video = file_path
-        dbm = DatabaseManager()
-        self.data_dorama = dbm.search_by_path_video_dorama(os.path.dirname(self.file_path_dorama_video))
-        if not self.data_dorama:
-            self.check_data_dorama = False
-        else:
-            self.check_data_dorama = True
-            if self.data_dorama[0]["path_pic"] == None or self.data_dorama[0]["path_pic"] == "":
-                self.file_path_dorama_pic = None
+        if file_path:
+            file_name_without_extension, extension = os.path.splitext(os.path.basename(file_path))
+            folder_name = os.path.basename(os.path.dirname(file_path))
+            self.ui.lbl_pic_video_dor.setText(f"{folder_name} серия {file_name_without_extension}")
+            self.file_path_dorama_video = file_path
+            dbm = DatabaseManager()
+            self.data_dorama = dbm.search_by_path_video_dorama(os.path.dirname(self.file_path_dorama_video))
+            if not self.data_dorama:
+                self.check_data_dorama = False
             else:
-                search_number = str(file_name_without_extension.zfill(2))
-                search_pattern = os.path.join(self.data[0]["path_pic"], f"{search_number}*.jpg")
-                try:
-                    pic_file = glob.glob(search_pattern)[0]
-                    self.update_picture_dorama(pic_file)
-                except:
-                    pic_file = None
+                self.check_data_dorama = True
+                if self.data_dorama[0]["path_pic"] == None or self.data_dorama[0]["path_pic"] == "":
+                    self.file_path_dorama_pic = None
+                else:
+                    search_number = str(file_name_without_extension.zfill(2))
+                    search_pattern = os.path.join(self.data[0]["path_pic"], f"{search_number}*.jpg")
+                    try:
+                        pic_file = glob.glob(search_pattern)[0]
+                        self.update_picture_dorama(pic_file)
+                    except:
+                        pic_file = None
+                self.ui.check_sftp_dor.setChecked(self.data_dorama[0]["check_sftp"])
+                self.ui.check_tg_dor.setChecked(self.data_dorama[0]["check_telegram"])
+                self.ui.check_vk_dor.setChecked(self.data_dorama[0]["check_vk"])
+                self.ui.check_update_site_dor.setChecked(self.data_dorama[0]["check_site"])
+                self.ui.line_link_animaunt_dor.setText(self.data_dorama[0]["link_second_site"])
+                self.ui.line_link_malf_dor.setText(self.data_dorama[0]["link_site"])
+            self.ui.btn_upload_dor.setDisabled(False)
+            if Config().get_id_chat():
+                Dubbers().find_send_vk(path=file_path, main_window_ui=self)
     
     def update_picture_dorama(self, file_path):
         if file_path == "":
@@ -425,11 +440,49 @@ class MainWindow(QMainWindow):
             self.file_path_dorama_pic = file_path
             file_name = os.path.basename(file_path)
             self.ui.btn_chose_pic_dor.setText(file_name)
-           
         
     def start_work_dorama(self):
-        pass
+        self.ui.check_sftp_dor.isChecked()
+        self.ui.check_tg_dor.isChecked()
+        self.ui.check_vk_dor.isChecked()
+        self.ui.check_update_site_dor.isChecked()
+        self.ui.line_link_animaunt_dor.text()
+        self.ui.line_link_malf_dor.text()
+        self.file_path_dorama_pic
+        self.file_path_dorama_video
+        # try:
+        if self.ui.check_update_site_dor.isChecked():
+            self.ui.line_link_animaunt_dor.setText(unquote(self.ui.line_link_animaunt_dor.text())) # Перекодируем текст если вдруг
+            if not self.ui.line_link_malf_dor.text().startswith(os.getenv('CHECK_MALFURIK_LINK')) or self.ui.line_link_malf_dor.text() == '' or \
+                    not self.ui.line_link_animaunt_dor.text().startswith(os.getenv('CHECK_ANIMAUNT_LINK')) or self.ui.line_link_animaunt_dor.text() == '':
+                QMessageBox.warning(None, "Ошибка", "Неверная ссылка на малфурик или анимаунт")
+                return     
+        self.upload_manager_dorama.start_upload(self.file_path_dorama_pic, self.file_path_dorama_video,
+                                                self.ui.check_sftp_dor.isChecked(), self.ui.check_vk_dor.isChecked(),
+                                                self.ui.check_tg_dor.isChecked(), self.ui.check_update_site_dor.isChecked(),
+                                                self.ui.line_link_animaunt_dor.text(), self.ui.line_link_malf_dor.text(),
+                                                self.check_data_dorama)
+        # except Exception as e:
+        #     print(e)
+            
+    def update_progress_dor(self, value, mb_upload, mb_total, speed):
+        self.ui.progressBar.setValue(value)
+        self.ui.label_2.setText(f'Загружено: {mb_upload:.1f} МБ из {mb_total:.1f} МБ. Скорость: {speed:.1f} МБ/с')
         
+    def finish_upload_sftp_dor(self, folder, time):
+        self.ui.logging_upload.append(folder + " загружен в " + time)
+        
+    def finish_upload_tg_dor(self, finish):
+        if finish:
+            self.ui.logging_upload.append("Загружено в телеграмм")
+        else:
+            self.ui.logging_upload.append("Ошибка загрузки в телеграмм")
+            
+
+            
+        
+        
+
     ##########################################################################
 
     ###########################  СДАЧА ДОРОГ #################################
@@ -441,14 +494,6 @@ class MainWindow(QMainWindow):
         Dubbers().find_send_vk(btn=True, main_window_ui=self)
 
     ########################################################################## 
-
-    def test(self):
-        selected_data = []
-        for checkbox, ping_value, item_id in self.checkbox_vars:
-            if checkbox.isChecked():
-                selected_data.append({item_id, ping_value})
-
-        print(selected_data)
 
     def center_screen(self):
         qr = self.frameGeometry()
