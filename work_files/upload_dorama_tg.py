@@ -29,7 +29,7 @@ class UploadDoramaTg(QObject):
         for message in messages:
             if message.caption:
                 first_line = message.caption.split("\n")[0]
-                q = QMessageBox.question(None, "Что-то нашел", f"Этот пост?\n{first_line}", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+                q = QMessageBox.question(None, "[TG] Что-то нашел", f"[TG] Этот пост?\n{first_line}", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
                 if q == QMessageBox.Yes:
                     client.stop()
                     return message.id
@@ -38,7 +38,7 @@ class UploadDoramaTg(QObject):
                 else:
                     client.stop()
                     return None
-        QMessageBox.information(None, "Информация", "Не нашел постов")
+        QMessageBox.information(None, "[TG] Информация", "[TG] Не нашел постов")
         client.stop()
         return None
         

@@ -14,7 +14,7 @@ class PostAnimaunt():
     def post(self):
         try:
             with sync_playwright() as playwright:
-                browser = playwright.chromium.launch(headless=False)
+                browser = playwright.chromium.launch(headless=True)
                 context = browser.new_context(storage_state="assets/animaunt_storage.json")
                 page = context.new_page()
                 page.goto(self.link_animaunt)
@@ -73,4 +73,4 @@ class PostAnimaunt():
                 browser.close()
                 return True
         except Exception as e:
-            print(e)
+            return e

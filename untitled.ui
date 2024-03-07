@@ -106,6 +106,9 @@
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QCheckBox" name="check_sftp_anime">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="toolTip">
           <string>Загрузка на сервер. Обязательно надо выбрать видео файл.</string>
          </property>
@@ -116,6 +119,9 @@
        </item>
        <item>
         <widget class="QCheckBox" name="check_post_site">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="toolTip">
           <string>Добавляет серию на сайт и обновляет его.</string>
          </property>
@@ -164,6 +170,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QPushButton" name="btn_pic_anime">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Картинка</string>
          </property>
@@ -171,6 +180,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn_video_anime">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Выбрать видео</string>
          </property>
@@ -361,6 +373,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QCheckBox" name="check_sftp_dor">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Сервер</string>
          </property>
@@ -368,6 +383,9 @@
        </item>
        <item>
         <widget class="QCheckBox" name="check_tg_dor">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Телеграм</string>
          </property>
@@ -375,6 +393,9 @@
        </item>
        <item>
         <widget class="QCheckBox" name="check_vk_dor">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>ВКонтакте</string>
          </property>
@@ -382,8 +403,24 @@
        </item>
        <item>
         <widget class="QCheckBox" name="check_update_site_dor">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Обновить сайт</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="check_timmer_dor">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string>Обновляет таймер на неделю на анимаунте</string>
+         </property>
+         <property name="text">
+          <string>Таймер</string>
          </property>
         </widget>
        </item>
@@ -408,6 +445,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn_chose_pic_dor">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Выбрать картинку</string>
          </property>
@@ -415,6 +455,9 @@
        </item>
        <item>
         <widget class="QPushButton" name="btn_upload_dor">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Загрузить</string>
          </property>
@@ -777,6 +820,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <addaction name="menu_animaunt"/>
     <addaction name="menu_malfurik"/>
+    <addaction name="menu_vk_site"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -830,6 +874,11 @@ p, li { white-space: pre-wrap; }
   <action name="menu_fix_timming">
    <property name="text">
     <string>Фикс тайминг</string>
+   </property>
+  </action>
+  <action name="menu_vk_site">
+   <property name="text">
+    <string>ВКонтаке</string>
    </property>
   </action>
  </widget>

@@ -65,6 +65,7 @@ class AuthorizationTG():
                 self.auto_ui.btn_give_code.setDisabled(True)
                 self.auto_ui.line_number_phone.setDisabled(True)
                 self.auto_ui.line_code.setDisabled(True)
+                return True
         else:
             QMessageBox.warning(None, "Ошибка", "Не введен код")
             

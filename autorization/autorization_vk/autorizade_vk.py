@@ -43,6 +43,7 @@ class AuthorizationVK():
                     Config().set_vk_token(vk_token)
                     self.auto_ui.line_token_vk.setDisabled(True)
                     self.auto_ui.btn_autho_vk.setText('Авторизован')
+                    return True
         else:
             print('не введен токен') # TODO : вывести
             

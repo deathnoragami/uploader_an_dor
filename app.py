@@ -10,6 +10,7 @@ from autorization.autorization_tg.autorizade_tg import AuthorizationTG
 from autorization.autorization_server.autorizade_sftp import AutorizationServer
 from autorization.autorization_animaunt.autorization_web_animaunt import Animaunt_web
 from autorization.autorization_malfurik.autorization_web_malfurik import Malfurik_web
+from autorization.autorization_vk_site.autorization_web_vk import AutorizationWebVK
 
 from work_files.select_pic_anime import PictureSelectorAnime
 from work_files.select_video_anime import VideoSelectorAnime
@@ -17,7 +18,7 @@ from work_files.select_video_dorama import VideoSelectorDorama
 from work_files.select_pic_dorama import PictureSelectorDorama
 from work_files.upload_anime import UploadManager
 from work_files.upload_dorama import UploadManagerDorama
-from work_files.upload_dorama_sftp import UploadDoramaSFTP
+from work_files.post_dorama import PostDorama
 from work_files.database_title import DatabaseManager
 from work_files.dubbers import Dubbers
 from work_files.download_fix_timming import FixTimming
@@ -33,6 +34,7 @@ import glob
 import json
 import pytz
 import datetime
+import re
 import resource_path
 from urllib.parse import unquote
 from dotenv import load_dotenv
@@ -108,6 +110,31 @@ class MainWindow(QMainWindow):
             self.ui.scrollAreaWidgetContents.layout().addWidget(checkbox)
 
         #####################################################################
+        
+        ###################### АКТИВАЦИЯ ВИДЖЕТОВ ###########################
+        if Config().get_vk_token != "":
+            self.ui.btn_pic_anime.setEnabled(True)
+            self.ui.check_vk_dor.setEnabled(True)
+        if os.path.exists("assets/my_session_tg.session"):
+            self.ui.check_tg_dor.setEnabled(True)
+        if user_data:
+            if ('malf_pass' not in user_data or not user_data['malf_pass']) or ('malf_login' not in user_data or not user_data['malf_login']):
+                pass
+            else:
+                self.ui.check_sftp_dor.setEnabled(True)
+            if ('maunt_login' not in user_data or not user_data['maunt_login']) or ('maunt_pass' not in user_data or not user_data['maunt_pass']):
+                pass
+            else:
+                self.ui.check_sftp_anime.setEnabled(True)
+                self.ui.btn_video_anime.setEnabled(True)
+        if os.path.exists("assets/animaunt_storage.json"):
+            self.ui.check_post_site.setEnabled(True)
+            if os.path.exists("assets/malfurik_storage.json"):
+                self.ui.check_update_site_dor.setEnabled(True)
+        if os.path.exists("assets/vk_storage.json"):
+            self.ui.btn_chose_pic_dor.setEnabled(True)
+        #####################################################################
+        
         db.close()
         ################## ТАЙМИНГ ##################################  
              
@@ -118,7 +145,7 @@ class MainWindow(QMainWindow):
                     data = json.loads(line)
                     data_list.append(data)
             for item_data in data_list:
-                item_text = f"{data['projectname']} Секв. {data['sequencename']}"
+                item_text = f"{item_data['projectname']} Секв. {item_data['sequencename']}"
                 item = QListWidgetItem(item_text)
                 item.setData(Qt.UserRole, item_data)
                 self.ui.list_timming.addItem(item)
@@ -128,18 +155,21 @@ class MainWindow(QMainWindow):
         self.ui.btn_open_timming.clicked.connect(self.chose_animation_open_timming)
         self.ui.textedit_timming_ad.mousePressEvent = lambda event: self.copy(event, self.ui.textedit_timming_ad)
         self.ui.textedit_name_ad.mousePressEvent = lambda event: self.copy(event, self.ui.textedit_name_ad)
+        self.ui.btn_add_timming_malf.clicked.connect(self.post_malf)
         
         ####################################################################
 
         ############# МЕНЮ ВЕРНХЕЕ ####################################
         
         self.ui.menu_application.triggered.connect(AuthorizationApp)
-        self.ui.menu_vk.triggered.connect(AuthorizationVK)
-        self.ui.menu_tg.triggered.connect(AuthorizationTG)
-        self.ui.menu_server.triggered.connect(AutorizationServer)
-
-        self.ui.menu_animaunt.triggered.connect(Animaunt_web)
-        self.ui.menu_malfurik.triggered.connect(Malfurik_web)
+        self.ui.menu_vk.triggered.connect(self.autorization_vk)
+        self.ui.menu_tg.triggered.connect(self.autorization_tg)
+        self.ui.menu_server.triggered.connect(self.autorization_sftp)
+        
+        self.ui.menu_animaunt.triggered.connect(self.autorization_animaunt_web)
+        self.ui.menu_malfurik.triggered.connect(self.autorization_malfurik_web)
+        self.ui.menu_vk_site.triggered.connect(self.autorization_vk_web)
+        
         self.ui.menu_fix_timming.triggered.connect(FixTimming)
 
         #####################################################################
@@ -178,10 +208,13 @@ class MainWindow(QMainWindow):
         self.upload_manager_dorama.signals.progress_changed.connect(self.update_progress_dor)
         self.upload_manager_dorama.signals.finished_upload_sftp.connect(self.finish_upload_sftp_dor)
         self.upload_manager_dorama.signals.finished_upload_tg.connect(self.finish_upload_tg_dor)
+        self.upload_manager_dorama.signals.finish.connect(self.finish_dor)
         self.ui.btn_upload_dor.clicked.connect(self.start_work_dorama)
         
+        self.ui.check_update_site_dor.stateChanged.connect(self.enable_timer_dor)
+        
         #######################################################################      
-
+        
         ######################### СДАЧА ДОРОГ #################################
 
         self.ui.line_id_chat.setText(Config().get_id_chat())
@@ -191,7 +224,59 @@ class MainWindow(QMainWindow):
 
         #######################################################################
 
+    ####################### ФУНКЦИИ ДЛЯ АВТОРИЗАЦИИ ###########################
+    
+    def autorization_vk(self):
+        check = AuthorizationVK()
+        if check:
+            self.ui.btn_pic_anime.setEnabled(True)
+            self.ui.check_vk_dor.setEnabled(True)
+    
+    def autorization_tg(self):
+        check = AuthorizationTG()
+        if check:
+            self.ui.check_tg_dor.setEnabled(True)
+            
+    def autorization_sftp(self):
+        AutorizationServer()
+        uid = Config().get_uid_program()
+        db = connect_firebase.Connect()
+        user_data = db.find_user_uid(uid)
+        print(user_data)
+        db.close()
+        if user_data:
+            if ('malf_pass' not in user_data or not user_data['malf_pass']) or ('malf_login' not in user_data or not user_data['malf_login']):
+                pass
+            else:
+                self.ui.check_sftp_dor.setEnabled(True)
+            if ('maunt_login' not in user_data or not user_data['maunt_login']) or ('maunt_pass' not in user_data or not user_data['maunt_pass']):
+                pass
+            else:
+                self.ui.check_sftp_anime.setEnabled(True)
+                self.ui.btn_video_anime.setEnabled(True)
+    
+    def autorization_animaunt_web(self):
+        Animaunt_web()
+        if os.path.exists("assets/animaunt_storage.json"):
+            self.ui.check_post_site.setEnabled(True)
+            if os.path.exists("assets/malfurik_storage.json"):
+                self.ui.check_update_site_dor.setEnabled(True)
+    
+    def autorization_malfurik_web(self):
+        Malfurik_web()
+        if os.path.exists("assets/malfurik_storage.json") and os.path.exists("assets/animaunt_storage.json"):
+            self.ui.check_update_site_dor.setEnabled(True)
+            
+    def autorization_vk_web(self):
+        AutorizationWebVK()
+        if os.path.exists("assets/vk_storage.json"):
+            self.ui.btn_chose_pic_dor.setEnabled(True)
+            
         
+    
+    ###########################################################################
+
+
 
     ##################### ФУНКЦИИ ДЛЯ ТАЙМИНГОВ ###############################
     
@@ -290,7 +375,8 @@ class MainWindow(QMainWindow):
                         return
                     else:
                         self.link_malf_anime = self.ui.link_malfurik_anime.text()
-                        
+                self.ui.btn_upload_anime.setEnabled(False)        
+                self.ui.btn_pic_anime.setEnabled(False)        
                 self.upload_manager.start_upload(self.file_path_anime_pic,
                                                 self.file_path_anime_video,
                                                 self.ui.check_sftp_anime.isChecked(),
@@ -327,7 +413,10 @@ class MainWindow(QMainWindow):
         self.ui.link_malfurik_anime.setText("")
         self.ui.lbl_anime_pic.setText("Картинка не выбрана")
         self.ui.btn_video_anime.setText("Выбрать видео")
+        self.ui.progress_value.setText("Загружено: 0 МБ из 0 МБ. Скорость: 0 МБ/с")
+        self.ui.progress_anime.setValue(0)
         self.ui.dateEdit.setDate(QDate(self.year,  self.month, self.day))
+        self.ui.btn_pic_anime.setEnabled(True)
         if end:
             self.ui.logging_upload.append("Запощено в вк!")
             self.ui.logging_upload.append("__________________________________\n")
@@ -431,6 +520,32 @@ class MainWindow(QMainWindow):
             self.ui.btn_upload_dor.setDisabled(False)
             if Config().get_id_chat():
                 Dubbers().find_send_vk(path=file_path, main_window_ui=self)
+            self.timming_list = None
+            all_item = self.ui.list_timming.findItems("", Qt.MatchContains)
+            for item in all_item:
+                item_data = item.data(Qt.UserRole)
+                path_project = item_data.get("path_project")
+                project_name = item_data.get("projectname")
+                name_folder = os.path.basename(os.path.dirname(self.file_path_dorama_video))
+                pattern = r'(\d+)(?=x\.mp4)'
+                match = re.search(pattern, os.path.basename(self.file_path_dorama_video))
+                if match:
+                    number_project = match.group(1).lstrip('0')
+                else:
+                    number_project = None
+                if name_folder in path_project:
+                    if number_project in project_name:
+                        self.ui.list_timming.setCurrentItem(item)
+                        self.get_timming(item)
+                        self.timming_list = timming.get_list(item_data)
+                        break
+            if self.timming_list is None:
+                select_item = self.ui.list_timming.currentItem()
+                if select_item is not None:
+                    item_data = select_item.data(Qt.UserRole)
+                    self.timming_list = timming.get_list(item_data)
+                    if self.timming_list is None:
+                        QMessageBox.warning(None, "Ошибка", "Не нашел тайминга")
     
     def update_picture_dorama(self, file_path):
         if file_path == "":
@@ -442,28 +557,25 @@ class MainWindow(QMainWindow):
             self.ui.btn_chose_pic_dor.setText(file_name)
         
     def start_work_dorama(self):
-        self.ui.check_sftp_dor.isChecked()
-        self.ui.check_tg_dor.isChecked()
-        self.ui.check_vk_dor.isChecked()
-        self.ui.check_update_site_dor.isChecked()
-        self.ui.line_link_animaunt_dor.text()
-        self.ui.line_link_malf_dor.text()
-        self.file_path_dorama_pic
-        self.file_path_dorama_video
-        # try:
-        if self.ui.check_update_site_dor.isChecked():
-            self.ui.line_link_animaunt_dor.setText(unquote(self.ui.line_link_animaunt_dor.text())) # Перекодируем текст если вдруг
-            if not self.ui.line_link_malf_dor.text().startswith(os.getenv('CHECK_MALFURIK_LINK')) or self.ui.line_link_malf_dor.text() == '' or \
-                    not self.ui.line_link_animaunt_dor.text().startswith(os.getenv('CHECK_ANIMAUNT_LINK')) or self.ui.line_link_animaunt_dor.text() == '':
-                QMessageBox.warning(None, "Ошибка", "Неверная ссылка на малфурик или анимаунт")
-                return     
-        self.upload_manager_dorama.start_upload(self.file_path_dorama_pic, self.file_path_dorama_video,
-                                                self.ui.check_sftp_dor.isChecked(), self.ui.check_vk_dor.isChecked(),
-                                                self.ui.check_tg_dor.isChecked(), self.ui.check_update_site_dor.isChecked(),
-                                                self.ui.line_link_animaunt_dor.text(), self.ui.line_link_malf_dor.text(),
-                                                self.check_data_dorama)
-        # except Exception as e:
-        #     print(e)
+        try:
+            if self.ui.check_update_site_dor.isChecked():
+                self.ui.line_link_animaunt_dor.setText(unquote(self.ui.line_link_animaunt_dor.text())) # Перекодируем текст если вдруг
+                if not self.ui.line_link_malf_dor.text().startswith(os.getenv('CHECK_MALFURIK_LINK')) or self.ui.line_link_malf_dor.text() == '' or \
+                        not self.ui.line_link_animaunt_dor.text().startswith(os.getenv('CHECK_ANIMAUNT_LINK')) or self.ui.line_link_animaunt_dor.text() == '':
+                    QMessageBox.warning(None, "Ошибка", "Неверная ссылка на малфурик или анимаунт")
+                    return
+                if self.timming_list is None:
+                    QMessageBox.warning(None, "Ошибка", "Не выбраны тайминги")
+                    return
+            self.ui.btn_upload_dor.setEnabled(False)
+            self.ui.btn_chose_video_dor.setEnabled(False)
+            self.upload_manager_dorama.start_upload(self.file_path_dorama_pic, self.file_path_dorama_video,
+                                                    self.ui.check_sftp_dor.isChecked(), self.ui.check_vk_dor.isChecked(),
+                                                    self.ui.check_tg_dor.isChecked(), self.ui.check_update_site_dor.isChecked(),
+                                                    self.ui.line_link_animaunt_dor.text(), self.ui.line_link_malf_dor.text(),
+                                                    self.check_data_dorama, self.timming_list)
+        except Exception as e:
+            QMessageBox.warning(None, "Ошибка", f"{e}")
             
     def update_progress_dor(self, value, mb_upload, mb_total, speed):
         self.ui.progressBar.setValue(value)
@@ -478,10 +590,45 @@ class MainWindow(QMainWindow):
         else:
             self.ui.logging_upload.append("Ошибка загрузки в телеграмм")
             
-
+    def post_malf(self):
+        select_item = self.ui.list_timming.currentItem()
+        if select_item is not None:
+            item_data = select_item.data(Qt.UserRole)
+            timming_list = timming.get_list(item_data)
+            if timming_list is not None:
+                post = PostDorama().post_malfurik(timming_list)
+                if post == True:
+                    self.ui.logging_upload.append("На сайт было запощено")
+                    self.ui.logging_upload.append("__________________________________\n")
+                else:
+                    QMessageBox.warning(None, "Ошибка", f"Произошла какая то ошибка\n{post}")
+            else:
+                QMessageBox.warning(None, "Ошибка", "Не правильно переданы тайминги")
+        else:
+            QMessageBox.warning(None, "Ошибка", "Тайминги не выбраны")
             
-        
-        
+    def enable_timer_dor(self, state):
+        if state == Qt.Checked:
+            self.ui.check_timmer_dor.setEnabled(True)
+        else:
+            self.ui.check_timmer_dor.setChecked(False)
+            self.ui.check_timmer_dor.setEnabled(False)
+            
+    def finish_dor(self):
+        self.file_path_dorama_pic = None
+        self.file_path_dorama_video = None
+        self.ui.check_update_site_dor.setChecked(False)
+        self.ui.btn_chose_pic_dor.setText("Выбрать картинку")
+        self.ui.lbl_pic_video_dor.setText("Видео не выбрано")
+        self.ui.progressBar.setValue(0)
+        self.ui.label_2.setText("Загружено: 0 МБ из 0 МБ. Скорость: 0 МБ/с")
+        self.ui.check_sftp_dor.setChecked(False)
+        self.ui.check_tg_dor.setChecked(False)
+        self.ui.check_vk_dor.setChecked(False)
+        self.ui.check_update_site_dor.setChecked(False)
+        self.ui.check_timmer_dor.setChecked(False)
+        self.ui.check_timmer_dor.setEnabled(False)
+        self.ui.btn_chose_video_dor.setEnabled(True)
 
     ##########################################################################
 

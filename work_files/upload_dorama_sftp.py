@@ -40,7 +40,7 @@ class UploadDoramaSFTP(QObject):
             for attr in list_dir:
                 folder_sftp = ''.join(char if char not in string.punctuation else ' ' for char in attr.filename).lower().replace("  ", " ")
                 if name_folder in folder_sftp:
-                    q = QMessageBox.question(None, "Что-то нашел", f"Папка на сервере называется\n {attr.filename} ?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+                    q = QMessageBox.question(None, "[SFTP] Что-то нашел", f"[SFTP] Папка на сервере называется\n {attr.filename} ?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
                     if q == QMessageBox.Yes:
                         found_folder = attr.filename
                         sftp.close()
@@ -51,7 +51,7 @@ class UploadDoramaSFTP(QObject):
                         sftp.close()
                         return None
             if not found_folder:
-                QMessageBox.warning(None, "Поиск", "Не смог найти папку. Убедитесь в названии у себя на компьютере или на сервере")
+                QMessageBox.warning(None, "[SFTP] Поиск", "[SFTP] Не смог найти папку. Убедитесь в названии у себя на компьютере или на сервере")
                 sftp.close()
                 return None
             

@@ -102,6 +102,31 @@ def format_timming(data):
         name_ad = ""
     
     return timming, name_ad
+
+def get_list(data):
+    if len(data["starttimevideo"]) == 4 and len(data["starttimeaudio"]) == 1:
+        timming_list = [format_time(data["starttimevideo"][0]),
+                format_time(data["starttimeaudio"][0]),
+                format_time(data["starttimevideo"][2]),
+                format_time(data["endtime"], round_up=False)]
+    elif len(data["starttimevideo"]) == 8 and len(data["starttimeaudio"]) == 1:
+        timming_list = [format_time(data["starttimevideo"][0]),
+                            format_time(data["starttimeaudio"][0]),
+                            format_time(data["starttimevideo"][2]),
+                            format_time(data["starttimevideo"][4]),
+                            format_time(data["starttimevideo"][6]),
+                            format_time(data["endtime"], round_up=False)]
+    elif len(data["starttimevideo"]) == 8 and len(data["starttimeaudio"]) == 2:
+        timming_list = [format_time(data["starttimevideo"][0]),
+                            format_time(data["starttimeaudio"][0]),
+                            format_time(data["starttimevideo"][2]),
+                            format_time(data["starttimeaudio"][1]),
+                            format_time(data["starttimevideo"][4]),
+                            format_time(data["starttimevideo"][6]),
+                            format_time(data["endtime"], round_up=False)]
+    else:
+        timming_list = None
+    return timming_list
         
 def format_time(sec, round_up=True):
     if sec < 3600:

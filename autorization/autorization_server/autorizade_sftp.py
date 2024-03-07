@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QMessageBox
 from .autorizationUI import Ui_autorization_server
 from connect_firebase import Connect
+from config import Config
 
 import pysftp
 import os
@@ -16,36 +17,36 @@ class AutorizationServer():
         self.auto_ui.btn_enter_malfurik.clicked.connect(self.add_malfurik)
         self.auto_ui.btn_enter_animaunt.clicked.connect(self.add_animaunt)
         
-        file_path = os.path.normpath(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "../assets/session_timmers"))
-        if os.path.isfile(file_path):
-            with open(file_path, 'r') as file:
-                uid = file.read() # TODO:
-                print(uid)
-            db = Connect()
-            user_data = db.find_user_uid(uid)
-            db.close()
-            if user_data:
-                if all(key in user_data and user_data[key] for key in ['malf_pass', 'malf_login', 'maunt_login', 'maunt_pass']):
-                    self.auto_ui.animaunt_login.setDisabled(True)
-                    self.auto_ui.pass_animaunt.setDisabled(True)
-                    self.auto_ui.login_malfurik.setDisabled(True)
-                    self.auto_ui.pass_malfurik.setDisabled(True)
-                    self.auto_ui.btn_enter_animaunt.setDisabled(True)
-                    self.auto_ui.btn_enter_animaunt.setText('Авторизован')
-                    self.auto_ui.btn_enter_malfurik.setDisabled(True)
-                    self.auto_ui.btn_enter_malfurik.setText('Авторизован')
-                else:
-                    print(user_data)
-                    if ('malf_pass' not in user_data or not user_data['malf_pass']) or ('malf_login' not in user_data or not user_data['malf_login']):
-                        self.auto_ui.animaunt_login.setDisabled(True)
-                        self.auto_ui.pass_animaunt.setDisabled(True)
-                        self.auto_ui.btn_enter_animaunt.setDisabled(True)
-                        self.auto_ui.btn_enter_animaunt.setText('Авторизован')
-                    if ('maunt_login' not in user_data or not user_data['maunt_login']) or ('maunt_pass' not in user_data or not user_data['maunt_pass']):
-                        self.auto_ui.login_malfurik.setDisabled(True)
-                        self.auto_ui.pass_malfurik.setDisabled(True)
-                        self.auto_ui.btn_enter_malfurik.setDisabled(True)
-                        self.auto_ui.btn_enter_malfurik.setText('Авторизован')
+        uid = Config().get_uid_program()
+        db = Connect()
+        user_data = db.find_user_uid(uid)
+        db.close()
+        if user_data:
+            # if all(key in user_data and user_data[key] for key in ['malf_pass', 'malf_login', 'maunt_login', 'maunt_pass']):
+            #         self.auto_ui.animaunt_login.setDisabled(True)
+            #         self.auto_ui.pass_animaunt.setDisabled(True)
+            #         self.auto_ui.login_malfurik.setDisabled(True)
+            #         self.auto_ui.pass_malfurik.setDisabled(True)
+            #         self.auto_ui.btn_enter_animaunt.setDisabled(True)
+            #         self.auto_ui.btn_enter_animaunt.setText('Авторизован')
+            #         self.auto_ui.btn_enter_malfurik.setDisabled(True)
+            #         self.auto_ui.btn_enter_malfurik.setText('Авторизован')
+            # else:
+            if ('malf_pass' not in user_data or not user_data['malf_pass']) or ('malf_login' not in user_data or not user_data['malf_login']):
+                pass
+            else:
+                self.auto_ui.login_malfurik.setDisabled(True)
+                self.auto_ui.pass_malfurik.setDisabled(True)
+                self.auto_ui.btn_enter_malfurik.setDisabled(True)
+                self.auto_ui.btn_enter_malfurik.setText('Авторизован')
+            if ('maunt_login' not in user_data or not user_data['maunt_login']) or ('maunt_pass' not in user_data or not user_data['maunt_pass']):
+                pass
+            else:
+                self.auto_ui.animaunt_login.setDisabled(True)
+                self.auto_ui.pass_animaunt.setDisabled(True)
+                self.auto_ui.btn_enter_animaunt.setDisabled(True)
+                self.auto_ui.btn_enter_animaunt.setText('Авторизован')
+
 
         widget.exec_()
         
@@ -66,11 +67,10 @@ class AutorizationServer():
                     self.auto_ui.btn_enter_malfurik.setText('Авторизован')
                     self.auto_ui.login_malfurik.setDisabled(True)
                     self.auto_ui.pass_malfurik.setDisabled(True)
-                    with open('assets/session_timmers', 'r') as file:
-                        uid = file.read()
-                        self.db = Connect()
-                        self.db.update_malf_data(uid, login_malf, pass_malf)
-                        self.db.close()
+                    uid = Config().get_uid_program()
+                    self.db = Connect()
+                    self.db.update_malf_data(uid, login_malf, pass_malf)
+                    self.db.close()
             except pysftp.AuthenticationException:
                 QMessageBox.warning(None, "Ошибка", "Неверный логин или пароль")
             except Exception as e:
@@ -93,11 +93,10 @@ class AutorizationServer():
                     self.auto_ui.btn_enter_animaunt.setText('Авторизован')
                     self.auto_ui.animaunt_login.setDisabled(True)
                     self.auto_ui.pass_animaunt.setDisabled(True)
-                    with open('assets/session_timmers', 'r') as file:
-                        uid = file.read()
-                        self.db = Connect()
-                        self.db.update_maunt_data(uid, login_maunt, pass_maunt)
-                        self.db.close()
+                    uid = Config().get_uid_program()
+                    self.db = Connect()
+                    self.db.update_maunt_data(uid, login_maunt, pass_maunt)
+                    self.db.close()
             except pysftp.AuthenticationException:
                 QMessageBox.warning(None, "Ошибка", "Неверный логин или пароль")
             except Exception as e:
