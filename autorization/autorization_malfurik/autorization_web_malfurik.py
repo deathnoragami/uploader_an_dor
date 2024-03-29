@@ -8,17 +8,26 @@ class Malfurik_web():
         try:
             with sync_playwright() as playwright:
                 browser = playwright.chromium.launch(headless=False)
-                context = browser.new_context()
-                page = context.new_page()
-                link = os.getenv('MALFURIK_LINK')
+                if os.path.exists("assets/malfurik_storage.json"):
+                    context = browser.new_context(storage_state="assets/malfurik_storage.json")
+                    page = context.new_page()
+                    link = "https://anime.malfurik.online/"
+                else:
+                    context = browser.new_context()
+                    page = context.new_page()
+                    link = os.getenv('MALFURIK_LINK')
                 page.goto(link)
-                try:
-                    page.wait_for_selector("#dashboard-widgets-wrap", timeout=20000)
-                    context.storage_state(path='assets/malfurik_storage.json')
-                    context.close()
-                    browser.close()
-                except Exception as e:
-                    QMessageBox.warning(None, "Ошибка", "Вы не успели войти, повторите попытку.")
+                wpadminbar_element = page.query_selector('#wpadminbar')
+                if wpadminbar_element:
+                    QMessageBox.information(None, "Информация", "Вы залогинены.")
+                else:
+                    try:
+                        page.wait_for_selector("#dashboard-widgets-wrap", timeout=20000)
+                        context.storage_state(path='assets/malfurik_storage.json')
+                        context.close()
+                        browser.close()
+                    except Exception as e:
+                        QMessageBox.warning(None, "Ошибка", "Вы не успели войти, повторите попытку.")
               
         except Exception as e:
-            QMessageBox.warning(None, "Ошибка", e)
+            QMessageBox.warning(None, "Ошибка", f"{e}")

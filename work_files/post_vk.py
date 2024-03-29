@@ -28,7 +28,7 @@ class VkPostAnime(QObject):
     def search_post(self):
         post_id = None
         for i in range(10):
-            posts = self.vk.wall.get(owner_id=self.group_id, count=70, offset=i*70+1)
+            posts = self.vk.wall.get(owner_id=self.group_id, count=70, offset=i*70)
             if not len(posts['items']): 
                 return None
             for post in posts['items']:

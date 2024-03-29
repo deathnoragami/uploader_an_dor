@@ -150,6 +150,6 @@ class UploadWorker(QThread):
             # заливка только в вк
             if self.check_data == False:
                 dbm = DatabaseManager()
-                dbm.add_entry(path_image, path_video, self.dirname_sftp, self.check_sftp, self.check_post_malf, self.check_nolink, self.check_post_site, self.link_site_animaunt, self.post_id, "anime", self.link_site_malf)
+                dbm.add_entry(path_image, path_video, self.dirname_sftp, self.check_sftp, self.check_post_malf, self.check_nolink, self.check_post_site, self.link_site_animaunt, self.post_id, self.link_site_malf)
         self.signals.post_signal.emit(bool(upload_sftp))
 

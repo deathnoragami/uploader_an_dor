@@ -8,7 +8,10 @@ class Animaunt_web():
         try:
             with sync_playwright() as playwright:
                 browser = playwright.chromium.launch(headless=False)
-                context = browser.new_context()
+                if os.path.exists("assets/animaunt_storage.json"):
+                    context = browser.new_context(storage_state="assets/animaunt_storage.json")
+                else:
+                    context = browser.new_context()
                 page = context.new_page()
                 link = os.getenv('ANIMAUNT_LINK')
                 page.goto(link)

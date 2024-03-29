@@ -38,40 +38,40 @@ class DatabaseManager:
                   check_post_site,
                   link_site, 
                   vk_post_id, 
-                  chosen, 
-                  tg_post_id = None,
-                  vk_playlist_id = None,
                   link_second_site=None): #TODO: айди поста
-        if chosen == 'anime':
-            entry = {
-                "path_pic": path_pic,
-                "path_video": path_video,
-                "folder_sftp": folder_sftp,
-                "check_sftp": check_sftp,
-                "check_malf": check_malf,
-                "check_nolink": check_nolink,
-                "check_post_site": check_post_site,
-                "link_site": link_site,
-                "link_second_site": link_second_site,
-                "vk_post_id": vk_post_id}
-            self.database["anime"].append(entry)
-            self.save_database()
-        elif chosen == 'dorama':
-            entry = {
-                "path_video": path_video,
-                "path_pic": path_pic,
-                "folder_sftp": folder_sftp,
-                "check_sftp": check_sftp,
-                "check_vk": check_malf,
-                "check_telegram": check_nolink,
-                "check_site":  check_post_site,
-                "vk_post_id": vk_post_id,
-                "vk_playlist_id": vk_playlist_id,
-                "tg_post_id" : tg_post_id,
-                "link_site": link_site,
-                "link_second_site": link_second_site,}
-            self.database["dorama"].append(entry)
-            self.save_database()
+        entry = {
+            "path_pic": path_pic,
+            "path_video": path_video,
+            "folder_sftp": folder_sftp,
+            "check_sftp": check_sftp,
+            "check_malf": check_malf,
+            "check_nolink": check_nolink,
+            "check_post_site": check_post_site,
+            "link_site": link_site,
+            "link_second_site": link_second_site,
+            "vk_post_id": vk_post_id}
+        self.database["anime"].append(entry)
+        self.save_database()
+
+            
+    def add_entry_dorama(self, path_video, path_pic, folder_sftp, check_sftp,
+                         check_vk, check_tg, check_post_site, vk_playlist_id,
+                         vk_post_id, tg_post_id, link_site, link_second_site):
+        entry = {
+            "path_video": path_video,
+            "path_pic": path_pic,
+            "folder_sftp": folder_sftp,
+            "check_sftp": check_sftp,
+            "check_vk": check_vk,
+            "check_telegram": check_tg,
+            "check_site":  check_post_site,
+            "vk_post_id": vk_post_id,
+            "vk_playlist_id": vk_playlist_id,
+            "tg_post_id" : tg_post_id,
+            "link_site": link_site,
+            "link_second_site": link_second_site,}
+        self.database["dorama"].append(entry)
+        self.save_database()
             
     def update_data_dorama(self, path_video,
                   path_pic = None, 

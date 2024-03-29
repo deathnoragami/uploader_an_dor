@@ -16,7 +16,7 @@ class UploadSignals(QObject):
     finished_upload_sftp = pyqtSignal(str, str)
     finished_upload_tg = pyqtSignal(bool)
     finish_all = pyqtSignal(str)
-    finish = pyqtSignal()
+    finish = pyqtSignal(bool)
     
 class UploadManagerDorama(QObject):
     def __init__(self, main_window):
@@ -43,9 +43,8 @@ class UploadManagerDorama(QObject):
                     link_site_malf,                    
                     check_data,
                     timming_list):
-        
+        db = DatabaseManager()
         if check_data:
-            db = DatabaseManager()
             # TODO: Добавить обновление
             data = db.search_by_path_video_dorama(os.path.dirname(file_path_video))
             vk_post_id = data[0]["vk_post_id"]
@@ -56,6 +55,7 @@ class UploadManagerDorama(QObject):
             if check_tg:
                 tg_post_id = UploadDoramaTg().seach_id_post(file_path_video)
                 if not tg_post_id:
+                    self.signals.finish.emit(False)
                     return
             else:
                 tg_post_id = None
@@ -63,19 +63,22 @@ class UploadManagerDorama(QObject):
                 try:
                     vk_post_id, vk_playlist_id = UploadDoramaVK().search_vk_dorama(file_path_video)
                 except TypeError as e:
+                    self.signals.finish.emit(False)
                     return
             else:
                 vk_post_id, vk_playlist_id = None, None
             if check_sftp:
                 folder_sftp = UploadDoramaSFTP().search_folder_sftp(file_path_video)
                 if not folder_sftp:
+                    self.signals.finish.emit(False)
                     return
             else:
                 folder_sftp = None
         select_dub = Dubbers().select_checkboxes(self.main_ui)
-        
         if not check_data:
-            pass
+            db.add_entry_dorama(os.path.dirname(file_path_video), os.path.dirname(file_path_image), folder_sftp, check_sftp,
+                                check_vk, check_tg, check_post_site, vk_playlist_id,
+                                vk_post_id, tg_post_id, link_site_malf, link_site_animaunt)
 
         self.worker = UploadWorkerDorama(self.sftp_manager, self.tg_manager, file_path_video, file_path_image, vk_playlist_id, vk_post_id, tg_post_id, folder_sftp,
                                          check_sftp, check_tg, check_vk, check_post_site, link_site_animaunt, link_site_malf, self.main_ui, select_dub, timming_list)
@@ -85,7 +88,7 @@ class UploadManagerDorama(QObject):
     def all_post(self, text):
         self.main_ui.ui.logging_upload.append(f"{text} загрузка завершена!")
         self.main_ui.ui.logging_upload.append("__________________________________\n")   
-        self.signals.finish.emit()
+        self.signals.finish.emit(True)
                   
 class UploadWorkerDorama(QThread):
     signals = UploadSignals()
@@ -120,14 +123,16 @@ class UploadWorkerDorama(QThread):
                 self.tg_manager.upload_tg(self.file_path_video, self.tg_post_id)
             if self.check_vk:
                 UploadDoramaVK().upload_vk_dorama(self.file_path_video, self.file_path_image, self.vk_playlist_id, self.vk_post_id, name_file, self.select_dub)
-                self.main_ui.ui.logging_upload.append("Запощено в ВК")
+                # self.main_ui.ui.logging_upload.append("Запощено в ВК")
             if self.check_post_site:
                 post_malf = PostDorama().post_malfurik(self.link_malf, name_file=os.path.basename(self.file_path_video), timming_list=self.timming_list)
                 if post_malf == True:
                     post_maunt = PostDorama().post_animaunt(self.main_ui.ui.check_timmer_dor.isChecked(), self.link_animaunt, name_file)
                     if post_maunt != True:
+                        self.signals.finish_all.emit(os.path.basename(os.path.dirname(self.file_path_video)))
                         QMessageBox.warning(None, "Ошибка", f"Ошибка при посте на анимаунт")
                 else:
+                    self.signals.finish_all.emit(os.path.basename(os.path.dirname(self.file_path_video)))
                     QMessageBox.warning(None, "Ошибка", f"Ошибка при посте на малфурик")
                     return
                 self.main_ui.ui.logging_upload.append("Запощено на сайт")

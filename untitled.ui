@@ -523,6 +523,9 @@
     <property name="readOnly">
      <bool>true</bool>
     </property>
+    <property name="textInteractionFlags">
+     <set>Qt::TextSelectableByMouse</set>
+    </property>
     <property name="placeholderText">
      <string>Сдача дорог дабберов</string>
     </property>
@@ -551,6 +554,9 @@
     </widget>
    </widget>
    <widget class="QPushButton" name="btn_search_dubs">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>680</x>
@@ -580,6 +586,9 @@
     </property>
    </widget>
    <widget class="QLineEdit" name="line_search_dub_name_serial">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>676</x>
@@ -596,6 +605,9 @@
     </property>
    </widget>
    <widget class="QLineEdit" name="line_search_dub_number_serial">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>676</x>
@@ -662,7 +674,7 @@
       <x>0</x>
       <y>0</y>
       <width>1061</width>
-      <height>471</height>
+      <height>481</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -697,6 +709,12 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
+    <property name="textInteractionFlags">
+     <set>Qt::TextSelectableByMouse</set>
+    </property>
+    <property name="placeholderText">
+     <string>Тайминги</string>
+    </property>
    </widget>
    <widget class="QTextEdit" name="textedit_name_ad">
     <property name="geometry">
@@ -708,7 +726,10 @@ p, li { white-space: pre-wrap; }
      </rect>
     </property>
     <property name="readOnly">
-     <bool>true</bool>
+     <bool>false</bool>
+    </property>
+    <property name="placeholderText">
+     <string>Наименования</string>
     </property>
    </widget>
    <widget class="QListWidget" name="list_timming">
@@ -776,17 +797,10 @@ p, li { white-space: pre-wrap; }
      <string>Обновить сайт</string>
     </property>
    </widget>
-   <zorder>block_screen</zorder>
    <zorder>tabWidget</zorder>
    <zorder>logging_upload</zorder>
    <zorder>text_send_dub</zorder>
    <zorder>scrollArea</zorder>
-   <zorder>btn_search_dubs</zorder>
-   <zorder>line_id_chat</zorder>
-   <zorder>line_search_dub_name_serial</zorder>
-   <zorder>line_search_dub_number_serial</zorder>
-   <zorder>line_count_dubbers</zorder>
-   <zorder>line_prefix_name_serial</zorder>
    <zorder>textedit_timming_ad</zorder>
    <zorder>textedit_name_ad</zorder>
    <zorder>list_timming</zorder>
@@ -795,6 +809,13 @@ p, li { white-space: pre-wrap; }
    <zorder>btn_open_timming</zorder>
    <zorder>line_add_timming_malf</zorder>
    <zorder>btn_add_timming_malf</zorder>
+   <zorder>line_search_dub_number_serial</zorder>
+   <zorder>line_count_dubbers</zorder>
+   <zorder>line_id_chat</zorder>
+   <zorder>btn_search_dubs</zorder>
+   <zorder>line_search_dub_name_serial</zorder>
+   <zorder>line_prefix_name_serial</zorder>
+   <zorder>block_screen</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

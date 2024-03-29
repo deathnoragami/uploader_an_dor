@@ -31,6 +31,12 @@ Add_Keys.reg
 HOOKS/
 output/
 *.ui
+icon/
+*.gif
+*.png
+*.xml
+*.ico
+*.ui
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

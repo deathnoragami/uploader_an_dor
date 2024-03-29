@@ -14,3 +14,5 @@ class PictureSelectorDorama(QObject):
         if file_path:
             cfg().set_defoult_path_pic_dorama(os.path.dirname(os.path.dirname(file_path)))
             self.picture_selected.emit(file_path)
+        else:
+            self.picture_selected.emit("")

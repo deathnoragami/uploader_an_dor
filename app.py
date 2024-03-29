@@ -1,6 +1,11 @@
-from PyQt5 import QtWidgets
+# pyinstaller --noconfirm --onedir --windowed --icon "D:\GitHub\Uploader/icon.ico" --name "AUPAn" --version-file "C:/Python/uploader_an_dor/version.txt" --add-data "C:/Python/uploader_an_dor/timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json;." --add-data "C:/Python/uploader_an_dor/.env;." --add-data "C:/Python/uploader_an_dor/icon.ico;." --add-data "C:/Python/uploader_an_dor/auto.png;."  "C:/Python/uploader_an_dor/app.py"
+# pyinstaller --noconfirm --onedir --windowed --icon "D:/GitHub/Uploader/icon.ico" --name "AUPAn" --version-file "D:/GitHub/Uploader/version.txt" --add-data "D:/GitHub/Uploader/timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json;." --add-data "D:/GitHub/Uploader/.env;." --add-data "D:/GitHub/Uploader/icon.ico;." --add-data "D:/GitHub/Uploader/auto.png;."  "D:/GitHub/Uploader/app.py"
+
+#! D:\GitHub\Uploader\venv\Scripts\python.exe
+
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem, QDateEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem, QDateEdit, QDesktopWidget
 from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QEasingCurve, QSize, QTimer, QDate
 from ui import Ui_MainWindow
 
@@ -22,11 +27,12 @@ from work_files.post_dorama import PostDorama
 from work_files.database_title import DatabaseManager
 from work_files.dubbers import Dubbers
 from work_files.download_fix_timming import FixTimming
+from work_files.version_checker import VersionChecker
 
 import timming_pro.timming_main as timming
 
-from version import VERSION_STRING
 from config import Config
+import win32api
 
 import sys
 import os
@@ -36,10 +42,14 @@ import pytz
 import datetime
 import re
 import resource_path
+import logging
+import subprocess
 from urllib.parse import unquote
 from dotenv import load_dotenv
 
-from qt_material import apply_stylesheet
+import qdarktheme
+# from qt_material import apply_stylesheet
+
 
 import connect_firebase
 
@@ -52,7 +62,24 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle(f"AUPAn {VERSION_STRING}")
+        self.resize(1218, 404)
+        self.ui.frameTim.setMaximumHeight(0)
+        try:
+            info = win32api.GetFileVersionInfo("AUPAn.exe", '\\')
+            major = info['FileVersionMS'] >> 16
+            minor = info['FileVersionMS'] & 0xFFFF
+            patch = info['FileVersionLS'] >> 16
+            build = info['FileVersionLS'] & 0xFFFF
+            version = f"{major}.{minor}.{patch}.{build}"
+            self.setWindowTitle(f"AUPAn {version}")
+        except win32api.error as e:
+            version = '0.0.0.0'
+            self.setWindowTitle(f"AUPAn")
+        
+        self.version_thread = VersionChecker(version=version)
+        self.version_thread.check_version.connect(self.handler_version_checker)
+        self.version_thread.start()
+
         self.setWindowIcon(QIcon(resource_path.path("icon.ico")))
         self.center_screen()
         db = connect_firebase.Connect()
@@ -85,15 +112,19 @@ class MainWindow(QMainWindow):
         if not uid == '':
             user_data = db.find_user_uid(uid)
             if user_data:
-                self.ui.block_screen.hide()
+                # self.ui.block_screen.hide()
                 user_autorization = True
+                self.ui.menu_lbl_profile.setText(f"Профиль: {user_data['name']}")
+        else:
+            user_data = False
 
         if not user_autorization:
             self.ui.menu_vk.setDisabled(True)
             self.ui.menu_tg.setDisabled(True)
             self.ui.menu_server.setDisabled(True)
-            self.ui.menu_animaunt.setDisabled(True)
-            self.ui.menu_2.setDisabled(True)
+            self.ui.menu_sait_animaunt.setDisabled(True)
+            self.ui.menu_sait_malfurik.setDisabled(True)
+            self.ui.menu_sait_vk.setDisabled(True)
 
         ##################################################################
     
@@ -112,9 +143,13 @@ class MainWindow(QMainWindow):
         #####################################################################
         
         ###################### АКТИВАЦИЯ ВИДЖЕТОВ ###########################
-        if Config().get_vk_token != "":
+        if Config().get_vk_token() != "":
             self.ui.btn_pic_anime.setEnabled(True)
             self.ui.check_vk_dor.setEnabled(True)
+            self.ui.line_search_dub_name_serial.setEnabled(True)
+            self.ui.line_search_dub_number_serial.setEnabled(True)
+            self.ui.line_prefix_name_serial.setEnabled(True)
+            self.ui.btn_search_dubs.setEnabled(True)
         if os.path.exists("assets/my_session_tg.session"):
             self.ui.check_tg_dor.setEnabled(True)
         if user_data:
@@ -153,24 +188,24 @@ class MainWindow(QMainWindow):
         self.ui.btn_del_timming.clicked.connect(self.delete_select_timming)
         self.ui.btn_add_timming.clicked.connect(self.add_timming)
         self.ui.btn_open_timming.clicked.connect(self.chose_animation_open_timming)
-        self.ui.textedit_timming_ad.mousePressEvent = lambda event: self.copy(event, self.ui.textedit_timming_ad)
-        self.ui.textedit_name_ad.mousePressEvent = lambda event: self.copy(event, self.ui.textedit_name_ad)
+        self.ui.textedit_timming_ad.mouseDoubleClickEvent = lambda event: self.copy(event, self.ui.textedit_timming_ad)
+        self.ui.textedit_name_ad.mouseDoubleClickEvent = lambda event: self.copy(event, self.ui.textedit_name_ad)
         self.ui.btn_add_timming_malf.clicked.connect(self.post_malf)
         
-        ####################################################################
+        ####################################### #############################
 
         ############# МЕНЮ ВЕРНХЕЕ ####################################
         
-        self.ui.menu_application.triggered.connect(AuthorizationApp)
-        self.ui.menu_vk.triggered.connect(self.autorization_vk)
-        self.ui.menu_tg.triggered.connect(self.autorization_tg)
-        self.ui.menu_server.triggered.connect(self.autorization_sftp)
+        self.ui.menu_app.clicked.connect(AuthorizationApp)
+        self.ui.menu_vk.clicked.connect(self.autorization_vk)
+        self.ui.menu_tg.clicked.connect(self.autorization_tg)
+        self.ui.menu_server.clicked.connect(self.autorization_sftp)
         
-        self.ui.menu_animaunt.triggered.connect(self.autorization_animaunt_web)
-        self.ui.menu_malfurik.triggered.connect(self.autorization_malfurik_web)
-        self.ui.menu_vk_site.triggered.connect(self.autorization_vk_web)
+        self.ui.menu_sait_animaunt.clicked.connect(self.autorization_animaunt_web)
+        self.ui.menu_sait_malfurik.clicked.connect(self.autorization_malfurik_web)
+        self.ui.menu_sait_vk.clicked.connect(self.autorization_vk_web)
         
-        self.ui.menu_fix_timming.triggered.connect(FixTimming)
+        self.ui.menu_fix_tim.clicked.connect(FixTimming)
 
         #####################################################################
 
@@ -220,10 +255,52 @@ class MainWindow(QMainWindow):
         self.ui.line_id_chat.setText(Config().get_id_chat())
         self.ui.line_id_chat.textChanged.connect(self.save_id_chat)
         self.ui.btn_search_dubs.clicked.connect(self.btn_search_dub)
-        self.ui.text_send_dub.mousePressEvent = lambda event: self.copy(event, self.ui.text_send_dub)
+        self.ui.text_send_dub.mouseDoubleClickEvent = lambda event: self.copy(event, self.ui.text_send_dub)
 
         #######################################################################
 
+        self.ui.pushButton_5.clicked.connect(self.slideleftMenu)
+        self.ui.btn_navi_anime.clicked.connect(lambda: self.switch_chose(1, "upload"))
+        self.ui.btn_navi_dorama.clicked.connect(lambda: self.switch_chose(0, "upload"))
+        self.ui.btn_navi_autorization.clicked.connect(lambda: self.switch_chose(1, "setting"))
+
+    def handler_version_checker(self, check):
+        if check:
+            QMessageBox.information(None, "Обновление", "Вышло новое обновление программы, программа будет обновлена.")
+            if os.path.exists("update.exe"):
+                QApplication.quit()
+                subprocess.Popen(["update.exe"])
+            else:
+                QMessageBox.information(None, "Обновление", "Не нашел файл обновления update.exe, скачайте его заново.")
+        else:
+            print('ne nado')
+
+    def switch_chose(self, index, page):
+        if page == "upload":
+            if index == 0:
+                self.ui.chose_lbl_page.setText("Дорамы")
+            else:
+                self.ui.chose_lbl_page.setText("Аниме")
+            self.ui.stackedWidget.setCurrentIndex(0)
+            self.ui.stackedWidget_2.setCurrentIndex(index)
+        elif page == "setting":
+            self.ui.chose_lbl_page.setText("Авторизация")
+            self.ui.stackedWidget.setCurrentIndex(index)
+        
+
+    def slideleftMenu(self):
+        width = self.ui.leftMenuSlider.width()
+        if width < 160:
+            newWidth = 160
+        else:
+            newWidth = 60
+
+        self.animation = QPropertyAnimation(self.ui.leftMenuSlider, b"minimumWidth")
+        self.animation.setDuration(250)
+        self.animation.setStartValue(width)
+        self.animation.setEndValue(newWidth)
+        self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
+        self.animation.start()
     ####################### ФУНКЦИИ ДЛЯ АВТОРИЗАЦИИ ###########################
     
     def autorization_vk(self):
@@ -272,11 +349,7 @@ class MainWindow(QMainWindow):
         if os.path.exists("assets/vk_storage.json"):
             self.ui.btn_chose_pic_dor.setEnabled(True)
             
-        
-    
     ###########################################################################
-
-
 
     ##################### ФУНКЦИИ ДЛЯ ТАЙМИНГОВ ###############################
     
@@ -296,6 +369,10 @@ class MainWindow(QMainWindow):
     def get_timming(self, item):
         item_data = item.data(Qt.UserRole)
         times, name_ad = timming.format_timming(item_data)
+        select_item = self.ui.list_timming.currentItem()
+        if select_item is not None:
+            item_data = select_item.data(Qt.UserRole)
+            self.timming_list = timming.get_list(item_data)
         self.ui.textedit_timming_ad.setText(times)
         self.ui.textedit_name_ad.setText(name_ad)
         
@@ -313,48 +390,46 @@ class MainWindow(QMainWindow):
                     file.write('\n')
     
     def chose_animation_open_timming(self):
-        if self.height() == 499:
+        if self.ui.btn_open_timming.text() == "🠋":
             self.animation_open_timming("open")
         else:
             self.animation_open_timming("close")
     
     def animation_open_timming(self, chose):
-        self.chose = chose
-                    
+        width = self.ui.frameTim.height()
+        height = self.height()
         if chose == "open":
-            self.setMaximumHeight(681)
-            end_height = 690
-            btn_end_y = 633
+            available_geometry = QDesktopWidget().availableGeometry()
+            speed_size = 300
+            speed_time = 450
+            end_height = height + 150
+            if end_height > available_geometry.height():
+                end_height = available_geometry.height() - 30
+            newWidth = 150
             btn_text = "🠉"
         else:
-            self.setMinimumHeight(499)
-            end_height = 499
-            btn_end_y = 440
+            speed_size = 450
+            speed_time = 300
+            end_height = height - 150
+            newWidth = 0
             btn_text = "🠋"
-
+        
         self.animation = QPropertyAnimation(self, b"size")
-        self.animation.setDuration(500)
+        self.animation.setDuration(speed_size)
         self.animation.setEasingCurve(QEasingCurve.InOutCubic)
         self.animation.setStartValue(QSize(self.size()))
         self.animation.setEndValue(QSize(self.width(), end_height))
         self.animation.start()
 
-        self.btn_animation = QPropertyAnimation(self.ui.btn_open_timming, b"geometry")
-        self.btn_animation.setDuration(500)
-        self.btn_animation.setEasingCurve(QEasingCurve.InOutCubic) 
-        self.btn_animation.setStartValue(QRect(self.ui.btn_open_timming.x(), self.ui.btn_open_timming.y(), self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
-        self.btn_animation.setEndValue(QRect(self.ui.btn_open_timming.x(), btn_end_y, self.ui.btn_open_timming.width(), self.ui.btn_open_timming.height()))
-        self.btn_animation.start()
+        self.frame_animation = QPropertyAnimation(self.ui.frameTim, b"maximumHeight")
+        self.frame_animation.setDuration(speed_time)
+        self.frame_animation.setStartValue(width)
+        self.frame_animation.setEndValue(newWidth)
+        self.frame_animation.setEasingCurve(QEasingCurve.InOutCubic)
+        self.frame_animation.start()
 
         self.ui.btn_open_timming.setText(btn_text)
-        QTimer.singleShot(500, self.fixed)
         
-    def fixed(self):
-        if self.chose == "open":
-            self.setMinimumHeight(690)
-        else:
-            self.setMaximumHeight(499)
-
     ###########################################################################
 
     ################ ФУНКЦИИ ДЛЯ АНИМЕ ############################################ 
@@ -425,7 +500,10 @@ class MainWindow(QMainWindow):
             self.ui.logging_upload.append("__________________________________\n")
 
     def select_picture_anime(self):
-        self.picture_selector_anime.select_picture()
+        try:
+            self.picture_selector_anime.select_picture()
+        except Exception as e:
+            logging.exception(e)
 
     def update_label_pic_anime(self, file_path):
         if file_path:
@@ -504,8 +582,8 @@ class MainWindow(QMainWindow):
                 if self.data_dorama[0]["path_pic"] == None or self.data_dorama[0]["path_pic"] == "":
                     self.file_path_dorama_pic = None
                 else:
-                    search_number = str(file_name_without_extension.zfill(2))
-                    search_pattern = os.path.join(self.data[0]["path_pic"], f"{search_number}*.jpg")
+                    search_number = re.search(r'\d+', str(file_name_without_extension.zfill(2))).group()
+                    search_pattern = os.path.join(self.data_dorama[0]["path_pic"], f"{search_number}*.jpg")
                     try:
                         pic_file = glob.glob(search_pattern)[0]
                         self.update_picture_dorama(pic_file)
@@ -546,6 +624,9 @@ class MainWindow(QMainWindow):
                     self.timming_list = timming.get_list(item_data)
                     if self.timming_list is None:
                         QMessageBox.warning(None, "Ошибка", "Не нашел тайминга")
+        else:
+            self.file_path_dorama_video = None
+            self.update_picture_dorama("")
     
     def update_picture_dorama(self, file_path):
         if file_path == "":
@@ -567,6 +648,7 @@ class MainWindow(QMainWindow):
                 if self.timming_list is None:
                     QMessageBox.warning(None, "Ошибка", "Не выбраны тайминги")
                     return
+            
             self.ui.btn_upload_dor.setEnabled(False)
             self.ui.btn_chose_video_dor.setEnabled(False)
             self.upload_manager_dorama.start_upload(self.file_path_dorama_pic, self.file_path_dorama_video,
@@ -614,7 +696,7 @@ class MainWindow(QMainWindow):
             self.ui.check_timmer_dor.setChecked(False)
             self.ui.check_timmer_dor.setEnabled(False)
             
-    def finish_dor(self):
+    def finish_dor(self, done):
         self.file_path_dorama_pic = None
         self.file_path_dorama_video = None
         self.ui.check_update_site_dor.setChecked(False)
@@ -629,6 +711,11 @@ class MainWindow(QMainWindow):
         self.ui.check_timmer_dor.setChecked(False)
         self.ui.check_timmer_dor.setEnabled(False)
         self.ui.btn_chose_video_dor.setEnabled(True)
+        self.ui.line_link_animaunt_dor.setText("")
+        self.ui.line_link_malf_dor.setText("")
+        if done == False:
+            self.ui.logging_upload.append(f"Загрузка прервана!")
+            self.ui.logging_upload.append("__________________________________\n")  
 
     ##########################################################################
 
@@ -638,7 +725,8 @@ class MainWindow(QMainWindow):
         Config().set_id_chat(id)
         
     def btn_search_dub(self):
-        Dubbers().find_send_vk(btn=True, main_window_ui=self)
+        if self.ui.line_search_dub_name_serial.text() and self.ui.line_search_dub_number_serial.text():
+            Dubbers().find_send_vk(btn=True, main_window_ui=self)
 
     ########################################################################## 
 
@@ -649,8 +737,13 @@ class MainWindow(QMainWindow):
         self.move(qr.topLeft())
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    apply_stylesheet(app, theme='dark_cyan.xml')
-    main_window = MainWindow()
-    main_window.show()
-    sys.exit(app.exec_())
+    try:
+        app = QApplication(sys.argv)
+        # apply_stylesheet(app, theme='dark_cyan.xml')
+        qdarktheme.setup_theme()
+        logging.basicConfig(filename="app.log", level=logging.DEBUG, filemode="w", format="%(levelname)s (%(asctime)s): %(message)s (Line: %(lineno)d) [%(filename)s]", datefmt="%d.%m.%Y %I:%M:%S")
+        main_window = MainWindow()
+        main_window.show()
+        sys.exit(app.exec_())
+    except Exception as e:
+        logging.exception(e)

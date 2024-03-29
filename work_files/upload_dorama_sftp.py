@@ -18,20 +18,19 @@ class UploadDoramaSFTP(QObject):
     def __init__(self, main_ui = None):
         super().__init__()
         self.signals = SftpSignals()
-        db = Connect()
-        uid = Config().get_uid_program()
-        user_data = db.find_user_uid(uid)
-        self.malf_login = user_data.get('malf_login')
-        self.malf_pass = user_data.get('malf_pass')
-        db.close()
-        self.ip_malf = os.getenv("MALFURIK_IP_SERVER")
         self.start_time = None
-        self.cnopts = pysftp.CnOpts()
-        self.cnopts.hostkeys = None
         self.main_ui = main_ui
         
     def search_folder_sftp(self, file_path):
-        with pysftp.Connection(host=self.ip_malf, username=self.malf_login, password=self.malf_pass, port=22, cnopts=self.cnopts) as sftp:
+        db = Connect()
+        uid = Config().get_uid_program()
+        user_data = db.find_user_uid(uid)
+        malf_login = user_data.get('malf_login')
+        malf_pass = user_data.get('malf_pass')
+        db.close()
+        cnopts = pysftp.CnOpts()
+        cnopts.hostkeys = None
+        with pysftp.Connection(host=os.getenv("MALFURIK_IP_SERVER"), username=malf_login, password=malf_pass, port=22, cnopts=cnopts) as sftp:
             sftp.chdir('/home/video/mp4')
             name_folder = os.path.basename(os.path.dirname(file_path))
             name_folder = ''.join(char if char not in string.punctuation else ' ' for char in name_folder).lower().replace("  ", " ")
@@ -57,7 +56,15 @@ class UploadDoramaSFTP(QObject):
             
     def upload_sftp(self, file_path, folder_sftp):
         try:
-            with pysftp.Connection(host=self.ip_malf, username=self.malf_login, password=self.malf_pass, port=22, cnopts=self.cnopts) as sftp:
+            db = Connect()
+            uid = Config().get_uid_program()
+            user_data = db.find_user_uid(uid)
+            malf_login = user_data.get('malf_login')
+            malf_pass = user_data.get('malf_pass')
+            db.close()
+            cnopts = pysftp.CnOpts()
+            cnopts.hostkeys = None
+            with pysftp.Connection(host=os.getenv("MALFURIK_IP_SERVER"), username=malf_login, password=malf_pass, port=22, cnopts=cnopts) as sftp:
                 sock = sftp._transport.sock
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 200 * 1024 * 1024)
                 sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 200 * 1024 * 1024)

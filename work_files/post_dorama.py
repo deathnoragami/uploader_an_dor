@@ -10,8 +10,7 @@ class PostDorama:
     def post_malfurik(self, link, timming_list = None, name_file = None):
         try:
             with sync_playwright() as p:
-                link = "https://anime.malfurik.online/wp-admin/post.php?post=6927&action=edit"
-                browser = p.chromium.launch(headless=True)
+                browser = p.chromium.launch(headless=False)
                 context = browser.new_context(storage_state="assets/malfurik_storage.json")
                 page = context.new_page()
                 page.goto(link)
@@ -52,7 +51,8 @@ class PostDorama:
                     else:
                         time_code[-1].fill(time)
                     new_seria.query_selector(".rwmb-button.button-primary.add-clone").click()
-                page.query_selector(".button.button-primary.button-large").click()
+                page.click("#publish")
+                
                 browser.close()
                 return True
         except Exception as e:
@@ -61,7 +61,7 @@ class PostDorama:
     def post_animaunt(self, timer, link, name_file):
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
+                browser = p.chromium.launch(headless=False)
                 context = browser.new_context(storage_state="assets/animaunt_storage.json")
                 page = context.new_page()
                 page.goto(link)
@@ -73,9 +73,10 @@ class PostDorama:
                     new_data = reform_current_data + timedelta(weeks=1)
                     reform_new_data = new_data.strftime("%Y-%m-%dT%H:%M")
                     page.locator("#xf_date_timer").fill(reform_new_data)
-                    page.get_by_label("установить текущую дату и время").check()
-                    page.locator(".panel-footer").locator("button[type='submit']").click()
-                    browser.close()
-                    return True
+                page.get_by_label("установить текущую дату и время").check()
+                page.locator(".panel-footer").locator("button[type='submit']").click()
+                page.wait_for_timeout(2000)
+                browser.close()
+                return True
         except Exception as e:
             return e
