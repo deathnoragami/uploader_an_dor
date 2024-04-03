@@ -2,7 +2,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMessageBox
 
 from work_files.dubbers import Dubbers
-from work_files.database_title import DatabaseManager
+from work_files.database_title import DataBase
 from work_files.upload_dorama_tg import UploadDoramaTg
 from work_files.upload_dorama_vk import UploadDoramaVK
 from work_files.upload_dorama_sftp import UploadDoramaSFTP
@@ -16,7 +16,7 @@ class UploadSignals(QObject):
     finished_upload_sftp = pyqtSignal(str, str)
     finished_upload_tg = pyqtSignal(bool)
     finish_all = pyqtSignal(str)
-    finish = pyqtSignal(bool)
+    finish = pyqtSignal(bool, str)
     
 class UploadManagerDorama(QObject):
     def __init__(self, main_window):
@@ -42,15 +42,48 @@ class UploadManagerDorama(QObject):
                     link_site_animaunt,
                     link_site_malf,                    
                     check_data,
-                    timming_list):
-        db = DatabaseManager()
+                    timming_list,
+                    check_novideo_vk, 
+                    select_dub):
+        if file_path_image is not None:
+            file_path_image_folder = os.path.dirname(file_path_image)
+            print(file_path_image_folder)
+            print(file_path_image)
         if check_data:
-            # TODO: Добавить обновление
-            data = db.search_by_path_video_dorama(os.path.dirname(file_path_video))
-            vk_post_id = data[0]["vk_post_id"]
-            vk_playlist_id = data[0]["vk_playlist_id"]
-            tg_post_id = data[0]["tg_post_id"]
-            folder_sftp = data[0]["folder_sftp"]
+            with DataBase() as db:
+                update_values = {}
+                data = db.search_by_path_video_dor(os.path.dirname(file_path_video))
+                if check_tg and data[0][6] != check_tg:
+                    tg_post_id = UploadDoramaTg().seach_id_post(file_path_video)
+                    if not tg_post_id:
+                        self.signals.finish.emit(False)
+                        return
+                    update_values.update({"check_telegram"}, check_tg)
+                    update_values.update({"tg_post_id"}, tg_post_id)
+                else:
+                    tg_post_id = data[0][10]
+                if check_vk and data[0][5] != check_vk:
+                    vk_post_id, vk_playlist_id = UploadDoramaVK().search_vk_dorama(file_path_video)
+                    if not vk_post_id and not vk_playlist_id:
+                        self.signals.finish.emit(False)
+                        return
+                    update_values["vk_post_id"] = vk_post_id
+                    update_values["vk_playlist_id"] = vk_playlist_id
+                    update_values["check_vk"] = check_vk
+                else: 
+                    vk_playlist_id = data[0][9]
+                    vk_post_id = data[0][8]
+                if check_sftp and data[0][6] != check_sftp:
+                    folder_sftp = UploadDoramaSFTP().search_folder_sftp(file_path_video)
+                    if not folder_sftp:
+                        self.signals.finish.emit(False)
+                        return
+                    update_values.update({"check_sftp"}, check_sftp)
+                    update_values.update({"folder_sftp"}, folder_sftp)
+                else:
+                    folder_sftp = data[0][3]
+                if update_values != {}:
+                    db.update_dorama(os.path.dirname(file_path_video), update_values)
         else:
             if check_tg:
                 tg_post_id = UploadDoramaTg().seach_id_post(file_path_video)
@@ -74,26 +107,23 @@ class UploadManagerDorama(QObject):
                     return
             else:
                 folder_sftp = None
-        select_dub = Dubbers().select_checkboxes(self.main_ui)
         if not check_data:
-            db.add_entry_dorama(os.path.dirname(file_path_video), os.path.dirname(file_path_image), folder_sftp, check_sftp,
-                                check_vk, check_tg, check_post_site, vk_playlist_id,
-                                vk_post_id, tg_post_id, link_site_malf, link_site_animaunt)
-
+            with DataBase() as db:
+                db.add_dorama(os.path.dirname(file_path_video), file_path_image_folder, folder_sftp, check_sftp,
+                                    check_vk, check_tg, check_post_site, check_novideo_vk, vk_playlist_id,
+                                    vk_post_id, tg_post_id, link_site_malf, link_site_animaunt)
         self.worker = UploadWorkerDorama(self.sftp_manager, self.tg_manager, file_path_video, file_path_image, vk_playlist_id, vk_post_id, tg_post_id, folder_sftp,
-                                         check_sftp, check_tg, check_vk, check_post_site, link_site_animaunt, link_site_malf, self.main_ui, select_dub, timming_list)
+                                         check_sftp, check_tg, check_vk, check_post_site, check_novideo_vk, link_site_animaunt, link_site_malf, self.main_ui, select_dub, timming_list)
         self.worker.signals.finish_all.connect(self.all_post)
         self.worker.start()
     
-    def all_post(self, text):
-        self.main_ui.ui.logging_upload.append(f"{text} загрузка завершена!")
-        self.main_ui.ui.logging_upload.append("__________________________________\n")   
-        self.signals.finish.emit(True)
+    def all_post(self, text):  
+        self.signals.finish.emit(True, text)
                   
 class UploadWorkerDorama(QThread):
     signals = UploadSignals()
     def __init__(self, sftp_manager, tg_manager, file_path_video, file_path_image, vk_playlist_id, vk_post_id, tg_post_id, folder_sftp,
-                        check_sftp, check_tg, check_vk, check_post_site, link_site_animaunt, link_site_malf, main_ui, select_dub, timming_list):
+                        check_sftp, check_tg, check_vk, check_post_site, check_novideo_vk, link_site_animaunt, link_site_malf, main_ui, select_dub, timming_list):
         super().__init__()
         self.sftp_manager = sftp_manager
         self.tg_manager = tg_manager
@@ -107,6 +137,7 @@ class UploadWorkerDorama(QThread):
         self.check_tg = check_tg
         self.check_vk = check_vk
         self.check_post_site = check_post_site
+        self.check_novideo_vk = check_novideo_vk
         self.link_animaunt = link_site_animaunt
         self.link_malf = link_site_malf
         self.main_ui = main_ui
@@ -122,7 +153,7 @@ class UploadWorkerDorama(QThread):
             if self.check_tg:
                 self.tg_manager.upload_tg(self.file_path_video, self.tg_post_id)
             if self.check_vk:
-                UploadDoramaVK().upload_vk_dorama(self.file_path_video, self.file_path_image, self.vk_playlist_id, self.vk_post_id, name_file, self.select_dub)
+                UploadDoramaVK().upload_vk_dorama(self.file_path_video, self.file_path_image, self.vk_playlist_id, self.vk_post_id, name_file, self.select_dub, self.check_novideo_vk)
                 # self.main_ui.ui.logging_upload.append("Запощено в ВК")
             if self.check_post_site:
                 post_malf = PostDorama().post_malfurik(self.link_malf, name_file=os.path.basename(self.file_path_video), timming_list=self.timming_list)

@@ -4,40 +4,45 @@ import os
 
 
 def add_timming():
-    app = pymiere.objects.app.project
-    sequence = app.activeSequence
-    if sequence:
-        project_name = app.name
-        project_path = app.path
-        sequence_name = sequence.name
-        clips_video = sequence.videoTracks[2].clips
-        clips_audio = sequence.audioTracks[1].clips
-        main_track = sequence.videoTracks[0].clips
-        numClips = main_track.numItems
-        lastClip = main_track[numClips - 1]
-        endtime = lastClip.end.seconds
-        startTimeVideo = []
-        for clip in clips_video:
-            startTimeVideo.append(clip.start.seconds)
-            startTimeVideo.append(clip.name)
-            
-        startTimeAudio = []
-        for clip in clips_audio:
-            startTimeAudio.append(clip.start.seconds)
-            
-        data = {
-                "projectname": os.path.splitext(project_name)[0],
-                "sequencename": sequence_name,
-                "starttimevideo": startTimeVideo,
-                "starttimeaudio": startTimeAudio,
-                "endtime": endtime,
-                "path_project": project_path      
-        }    
+    try:
+        app = pymiere.objects.app.project
+        sequence = app.activeSequence
+        if sequence:
+            project_name = app.name
+            project_path = app.path
+            sequence_name = sequence.name
+            clips_video = sequence.videoTracks[2].clips
+            clips_audio = sequence.audioTracks[1].clips
+            main_track = sequence.videoTracks[0].clips
+            numClips = main_track.numItems
+            lastClip = main_track[numClips - 1]
+            endtime = lastClip.end.seconds
+            startTimeVideo = []
+            for clip in clips_video:
+                startTimeVideo.append(clip.start.seconds)
+                startTimeVideo.append(clip.name)
+                
+            startTimeAudio = []
+            for clip in clips_audio:
+                startTimeAudio.append(clip.start.seconds)
+                
+            data = {
+                    "projectname": os.path.splitext(project_name)[0],
+                    "sequencename": sequence_name,
+                    "starttimevideo": startTimeVideo,
+                    "starttimeaudio": startTimeAudio,
+                    "endtime": endtime,
+                    "path_project": project_path      
+            }    
 
-        with open('assets/timming.json', 'a', encoding='UTF-8') as file:
-            json.dump(data, file, ensure_ascii=False)
-            file.write('\n')
-        return data
+            with open('assets/timming.json', 'a', encoding='UTF-8') as file:
+                json.dump(data, file, ensure_ascii=False)
+                file.write('\n')
+            return data
+    except ValueError as e:
+        if "Premiere Pro is not running" in str(e):
+            return False
+        
         
       
 def format_timming(data):

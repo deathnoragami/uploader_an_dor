@@ -4,9 +4,9 @@
 #! D:\GitHub\Uploader\venv\Scripts\python.exe
 
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem, QDateEdit, QDesktopWidget
-from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QEasingCurve, QSize, QTimer, QDate
+from PyQt5.QtGui import QIcon, QPainter, QColor
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem, QDateEdit, QDesktopWidget, QWidget, QGraphicsDropShadowEffect
+from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QSize, QDate, pyqtSignal, pyqtSlot
 from ui import Ui_MainWindow
 
 from autorization.autorization_application.autorizade_app import AuthorizationApp
@@ -24,10 +24,12 @@ from work_files.select_pic_dorama import PictureSelectorDorama
 from work_files.upload_anime import UploadManager
 from work_files.upload_dorama import UploadManagerDorama
 from work_files.post_dorama import PostDorama
-from work_files.database_title import DatabaseManager
+from work_files.database_title import DataBase
 from work_files.dubbers import Dubbers
 from work_files.download_fix_timming import FixTimming
 from work_files.version_checker import VersionChecker
+
+from test.sql import YourClass
 
 import timming_pro.timming_main as timming
 
@@ -44,6 +46,7 @@ import re
 import resource_path
 import logging
 import subprocess
+import time
 from urllib.parse import unquote
 from dotenv import load_dotenv
 
@@ -56,8 +59,8 @@ import connect_firebase
 
 load_dotenv(dotenv_path=resource_path.path(".env"))
 
-
 class MainWindow(QMainWindow):
+    other = pyqtSignal(bool)
     def __init__(self):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
@@ -96,6 +99,7 @@ class MainWindow(QMainWindow):
         #################################################################
 
         ################ ДАТА ###########################################
+        
         self.ui.dateEdit.setButtonSymbols(QDateEdit.NoButtons)
         msk_timezone = pytz.timezone('Europe/Moscow')
         current_date_msk = datetime.datetime.now(msk_timezone)
@@ -146,6 +150,7 @@ class MainWindow(QMainWindow):
         if Config().get_vk_token() != "":
             self.ui.btn_pic_anime.setEnabled(True)
             self.ui.check_vk_dor.setEnabled(True)
+            self.ui.check_novideo_dor.setEnabled(True)
             self.ui.line_search_dub_name_serial.setEnabled(True)
             self.ui.line_search_dub_number_serial.setEnabled(True)
             self.ui.line_prefix_name_serial.setEnabled(True)
@@ -220,10 +225,12 @@ class MainWindow(QMainWindow):
         self.ui.btn_video_anime.clicked.connect(self.select_video_anime)
 
         self.ui.btn_upload_anime.clicked.connect(self.start_work)
-        self.upload_manager = UploadManager(self)
+
+        self.upload_manager = UploadManager()
         self.upload_manager.signals.progress_changed.connect(self.update_progress)
         self.upload_manager.signals.upload_signals.connect(self.upload_finished)
         self.upload_manager.signals.post_signal.connect(self.upload_vk_finish)
+        self.upload_manager.signals.search_signal.connect(self.anime_search_signal)
 
         self.ui.check_malf_anime.stateChanged.connect(self.toggle_site_anime)
         
@@ -263,6 +270,32 @@ class MainWindow(QMainWindow):
         self.ui.btn_navi_anime.clicked.connect(lambda: self.switch_chose(1, "upload"))
         self.ui.btn_navi_dorama.clicked.connect(lambda: self.switch_chose(0, "upload"))
         self.ui.btn_navi_autorization.clicked.connect(lambda: self.switch_chose(1, "setting"))
+
+        indicator = self.createIndicator('red')
+        label = QtWidgets.QLabel("Ani", self.ui.sliderDownInfo)
+        self.ui.horizontalLayout_11.addWidget(indicator)
+        self.ui.horizontalLayout_11.addWidget(label)
+        indicator = self.createIndicator('green')
+        label1 = QtWidgets.QLabel("Dor", self.ui.sliderDownInfo)
+        self.ui.horizontalLayout_12.addWidget(indicator)
+        self.ui.horizontalLayout_12.addWidget(label1)
+
+    def createIndicator(self, color):
+        indicator = QWidget()
+        indicator.setFixedSize(20, 20)
+
+        # Переопределяем метод paintEvent для рисования кружка
+        def paintEvent(event):
+            painter = QPainter(indicator)
+            painter.setRenderHint(QPainter.Antialiasing)
+            painter.setBrush(QColor(color))
+            diameter = min(indicator.width(), indicator.height())
+            center_x = (indicator.width() - diameter) // 2
+            center_y = (indicator.height() - diameter) // 2
+            painter.drawEllipse(center_x, center_y, diameter, diameter)
+
+        indicator.paintEvent = paintEvent
+        return indicator
 
     def handler_version_checker(self, check):
         if check:
@@ -361,10 +394,13 @@ class MainWindow(QMainWindow):
  
     def add_timming(self):
         data = timming.add_timming()
-        item_text = f"{data['projectname']} Секв. {data['sequencename']}"
-        item = QListWidgetItem(item_text)
-        item.setData(Qt.UserRole, data)
-        self.ui.list_timming.insertItem(0, item)
+        if data == False:
+            QMessageBox.warning(None, "Ошибка", "Премьер не запущен")
+        else:
+            item_text = f"{data['projectname']} Секв. {data['sequencename']}"
+            item = QListWidgetItem(item_text)
+            item.setData(Qt.UserRole, data)
+            self.ui.list_timming.insertItem(0, item)
 
     def get_timming(self, item):
         item_data = item.data(Qt.UserRole)
@@ -435,7 +471,7 @@ class MainWindow(QMainWindow):
     ################ ФУНКЦИИ ДЛЯ АНИМЕ ############################################ 
 
     def start_work(self):
-        try:
+        # try:
             if self.file_path_anime_pic is not None:
                 if self.ui.check_post_site.isChecked():
                     self.ui.link_site.setText(unquote(self.ui.link_site.text()))
@@ -451,7 +487,23 @@ class MainWindow(QMainWindow):
                     else:
                         self.link_malf_anime = self.ui.link_malfurik_anime.text()
                 self.ui.btn_upload_anime.setEnabled(False)        
-                self.ui.btn_pic_anime.setEnabled(False)        
+                self.ui.btn_pic_anime.setEnabled(False)     
+                # self.work = UploadManager(self.file_path_anime_pic,
+                #                     self.file_path_anime_video,
+                #                     self.ui.check_sftp_anime.isChecked(),
+                #                     self.ui.check_malf_anime.isChecked(),
+                #                     self.ui.check_nonlink_anime.isChecked(),
+                #                     self.ui.check_post_site.isChecked(),
+                #                     self.link_site_animaunt,
+                #                     self.link_malf_anime)  
+                
+                # self.work.signals.search_signal.connect(self.anime_search_signal, Qt.QueuedConnection)
+
+                # self.work.signals.progress_changed.connect(self.update_progress)
+                # self.work.signals.upload_signals.connect(self.upload_finished)
+                # self.work.signals.post_signal.connect(self.upload_vk_finish)
+
+                # self.work.start() 
                 self.upload_manager.start_upload(self.file_path_anime_pic,
                                                 self.file_path_anime_video,
                                                 self.ui.check_sftp_anime.isChecked(),
@@ -459,15 +511,19 @@ class MainWindow(QMainWindow):
                                                 self.ui.check_nonlink_anime.isChecked(),
                                                 self.ui.check_post_site.isChecked(),
                                                 self.link_site_animaunt,
-                                                self.link_malf_anime,
-                                                self.check_data, )
+                                                self.link_malf_anime)
             else:
                 QMessageBox.warning(None, "Ошибка", "Картинка не выбрана!")
-        except Exception as e:
-            self.file_path_anime_pic = None
-            self.file_path_anime_video = None
-            QMessageBox.warning(None, "Ошибка", f"Ошибка: {e}")
-            
+        # except Exception as e:
+        #     self.file_path_anime_pic = None
+        #     self.file_path_anime_video = None
+        #     logging.exception(e)
+        #     QMessageBox.warning(None, "Ошибка", f"Ошибка: {e}")
+     
+    def anime_search_signal(self, text):
+        self.ui.logging_upload.append(text)
+    
+
     def update_progress(self, value, mb_upload, mb_total, speed):
         self.ui.progress_anime.setValue(value)
         self.ui.progress_value.setText(f'Загружено: {mb_upload:.1f} МБ из {mb_total:.1f} МБ. Скорость: {speed:.1f} МБ/с')
@@ -511,33 +567,28 @@ class MainWindow(QMainWindow):
             folder_name = os.path.basename(os.path.dirname(file_path))
             self.ui.lbl_anime_pic.setText(f"{folder_name} серия {file_name_without_extension}")
             self.file_path_anime_pic = file_path
-            dbm = DatabaseManager()
-            self.data = dbm.search_by_path_pic_anime(os.path.dirname(self.file_path_anime_pic))
-            if not self.data:
-                self.check_data = False
-            else:
-                self.check_data = True
-                if self.data[0]["path_video"] == None or self.data[0]["path_video"] == "":
-                    self.file_path_anime_video = None
-                else:
-                    search_number = str(file_name_without_extension.zfill(2))
-                    search_pattern = os.path.join(self.data[0]["path_video"], f"{search_number}*.mp4")
-                    try:
-                        video_file = glob.glob(search_pattern)[0]
-                        self.update_label_video_anime(video_file)
-                    except:
-                        video_file = None
-                    
-
-                self.ui.check_sftp_anime.setChecked(self.data[0]["check_sftp"])
-                self.ui.check_nonlink_anime.setChecked(self.data[0]["check_nolink"])
-                self.ui.check_malf_anime.setChecked(self.data[0]["check_malf"])
-                self.ui.check_post_site.setChecked(self.data[0]["check_post_site"])
-                self.ui.link_site.setText(self.data[0]["link_site"])
-                self.ui.link_malfurik_anime.setText(self.data[0]["link_second_site"])
-            self.ui.btn_upload_anime.setDisabled(False)
-            if Config().get_id_chat():
-                Dubbers().find_send_vk(path=file_path, main_window_ui=self)
+            with DataBase() as db:
+                data = db.search_by_path_pic_anime(os.path.dirname(self.file_path_anime_pic))
+                if data:
+                    if data[0][2] == None or data[0][2] == "":
+                        self.file_path_anime_video = None
+                    else:
+                        search_number = str(file_name_without_extension.zfill(2))
+                        search_pattern = os.path.join(self.data[0][2], f"{search_number}*.mp4")
+                        try:
+                            video_file = glob.glob(search_pattern)[0]
+                            self.update_label_video_anime(video_file)
+                        except:
+                            video_file = None
+                    self.ui.check_sftp_anime.setChecked(data[0][4])
+                    self.ui.check_nonlink_anime.setChecked(data[0][6])
+                    self.ui.check_malf_anime.setChecked(data[0][5])
+                    self.ui.check_post_site.setChecked(data[0][7])
+                    self.ui.link_site.setText(data[0][8])
+                    self.ui.link_malfurik_anime.setText(data[0][9])
+                self.ui.btn_upload_anime.setDisabled(False)
+                if Config().get_id_chat():
+                    Dubbers().find_send_vk(path=file_path, main_window_ui=self)
         
     def select_video_anime(self):
         self.video_selector_anime.select_video()
@@ -573,28 +624,28 @@ class MainWindow(QMainWindow):
             folder_name = os.path.basename(os.path.dirname(file_path))
             self.ui.lbl_pic_video_dor.setText(f"{folder_name} серия {file_name_without_extension}")
             self.file_path_dorama_video = file_path
-            dbm = DatabaseManager()
-            self.data_dorama = dbm.search_by_path_video_dorama(os.path.dirname(self.file_path_dorama_video))
+            with DataBase() as db:
+                self.data_dorama = db.search_by_path_video_dor(os.path.dirname(self.file_path_dorama_video))
             if not self.data_dorama:
                 self.check_data_dorama = False
             else:
                 self.check_data_dorama = True
-                if self.data_dorama[0]["path_pic"] == None or self.data_dorama[0]["path_pic"] == "":
+                if self.data_dorama[0][2] == None or self.data_dorama[0][2] == "":
                     self.file_path_dorama_pic = None
                 else:
                     search_number = re.search(r'\d+', str(file_name_without_extension.zfill(2))).group()
-                    search_pattern = os.path.join(self.data_dorama[0]["path_pic"], f"{search_number}*.jpg")
+                    search_pattern = os.path.join(self.data_dorama[0][2], f"{search_number}*.jpg")
                     try:
                         pic_file = glob.glob(search_pattern)[0]
                         self.update_picture_dorama(pic_file)
                     except:
                         pic_file = None
-                self.ui.check_sftp_dor.setChecked(self.data_dorama[0]["check_sftp"])
-                self.ui.check_tg_dor.setChecked(self.data_dorama[0]["check_telegram"])
-                self.ui.check_vk_dor.setChecked(self.data_dorama[0]["check_vk"])
-                self.ui.check_update_site_dor.setChecked(self.data_dorama[0]["check_site"])
-                self.ui.line_link_animaunt_dor.setText(self.data_dorama[0]["link_second_site"])
-                self.ui.line_link_malf_dor.setText(self.data_dorama[0]["link_site"])
+                self.ui.check_sftp_dor.setChecked(self.data_dorama[0][4])
+                self.ui.check_tg_dor.setChecked(self.data_dorama[0][6])
+                self.ui.check_vk_dor.setChecked(self.data_dorama[0][5])
+                self.ui.check_update_site_dor.setChecked(self.data_dorama[0][7])
+                self.ui.line_link_malf_dor.setText(self.data_dorama[0][11])
+                self.ui.line_link_animaunt_dor.setText(self.data_dorama[0][12])
             self.ui.btn_upload_dor.setDisabled(False)
             if Config().get_id_chat():
                 Dubbers().find_send_vk(path=file_path, main_window_ui=self)
@@ -648,14 +699,20 @@ class MainWindow(QMainWindow):
                 if self.timming_list is None:
                     QMessageBox.warning(None, "Ошибка", "Не выбраны тайминги")
                     return
-            
+            self.check_data_dorama = False
+            with DataBase() as db:
+                data = db.search_by_path_video_dor(os.path.dirname(self.file_path_dorama_video))
+                if data:
+                    self.check_data_dorama = True
+            select_dub = Dubbers().select_checkboxes(self.main_ui)
             self.ui.btn_upload_dor.setEnabled(False)
             self.ui.btn_chose_video_dor.setEnabled(False)
             self.upload_manager_dorama.start_upload(self.file_path_dorama_pic, self.file_path_dorama_video,
                                                     self.ui.check_sftp_dor.isChecked(), self.ui.check_vk_dor.isChecked(),
                                                     self.ui.check_tg_dor.isChecked(), self.ui.check_update_site_dor.isChecked(),
                                                     self.ui.line_link_animaunt_dor.text(), self.ui.line_link_malf_dor.text(),
-                                                    self.check_data_dorama, self.timming_list)
+                                                    self.check_data_dorama, self.timming_list, self.ui.check_novideo_dor.isChecked(),
+                                                    select_dub)
         except Exception as e:
             QMessageBox.warning(None, "Ошибка", f"{e}")
             
@@ -675,17 +732,20 @@ class MainWindow(QMainWindow):
     def post_malf(self):
         select_item = self.ui.list_timming.currentItem()
         if select_item is not None:
-            item_data = select_item.data(Qt.UserRole)
-            timming_list = timming.get_list(item_data)
-            if timming_list is not None:
-                post = PostDorama().post_malfurik(timming_list)
-                if post == True:
-                    self.ui.logging_upload.append("На сайт было запощено")
-                    self.ui.logging_upload.append("__________________________________\n")
+            if self.ui.line_add_timming_malf.text().startswith(os.getenv('CHECK_MALFURIK_LINK')) or self.ui.line_add_timming_malf.text() != '':
+                item_data = select_item.data(Qt.UserRole)
+                timming_list = timming.get_list(item_data)
+                if timming_list is not None:
+                    post = PostDorama().post_malfurik(self.ui.line_add_timming_malf.text(), self.timming_list)
+                    if post == True:
+                        self.ui.logging_upload.append("На сайт было запощено")
+                        self.ui.logging_upload.append("__________________________________\n")
+                    else:
+                        QMessageBox.warning(None, "Ошибка", f"Произошла какая то ошибка\n{post}")
                 else:
-                    QMessageBox.warning(None, "Ошибка", f"Произошла какая то ошибка\n{post}")
+                    QMessageBox.warning(None, "Ошибка", "Не правильно переданы тайминги")
             else:
-                QMessageBox.warning(None, "Ошибка", "Не правильно переданы тайминги")
+                QMessageBox.warning(None, "Ошибка", "Нет ссылки")
         else:
             QMessageBox.warning(None, "Ошибка", "Тайминги не выбраны")
             
@@ -696,7 +756,7 @@ class MainWindow(QMainWindow):
             self.ui.check_timmer_dor.setChecked(False)
             self.ui.check_timmer_dor.setEnabled(False)
             
-    def finish_dor(self, done):
+    def finish_dor(self, done, name):
         self.file_path_dorama_pic = None
         self.file_path_dorama_video = None
         self.ui.check_update_site_dor.setChecked(False)
@@ -714,7 +774,10 @@ class MainWindow(QMainWindow):
         self.ui.line_link_animaunt_dor.setText("")
         self.ui.line_link_malf_dor.setText("")
         if done == False:
-            self.ui.logging_upload.append(f"Загрузка прервана!")
+            self.ui.logging_upload.append(f"{name} загрузка прервана!")
+            self.ui.logging_upload.append("__________________________________\n")  
+        else:
+            self.ui.logging_upload.append(f"{name} загрузка завершена!")
             self.ui.logging_upload.append("__________________________________\n")  
 
     ##########################################################################
@@ -737,7 +800,7 @@ class MainWindow(QMainWindow):
         self.move(qr.topLeft())
 
 if __name__ == "__main__":
-    try:
+    # try:
         app = QApplication(sys.argv)
         # apply_stylesheet(app, theme='dark_cyan.xml')
         qdarktheme.setup_theme()
@@ -745,5 +808,5 @@ if __name__ == "__main__":
         main_window = MainWindow()
         main_window.show()
         sys.exit(app.exec_())
-    except Exception as e:
-        logging.exception(e)
+    # except Exception as e:
+    #     logging.exception(e)

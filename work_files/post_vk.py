@@ -3,11 +3,12 @@ import os
 import string
 import re
 
+
+from work_files.messagebox_q import CustomMessageBox
 from vk_api import VkUpload
 from config import Config
 from PyQt5.QtWidgets import QMessageBox
-from work_files.messagebox_q import CustomMessageBox
-from PyQt5.QtCore import QObject, pyqtSignal, QThread
+from PyQt5.QtCore import QObject, pyqtSignal, QThread, pyqtSlot, QMetaObject, Qt
 
 
 class VkPostAnime(QObject):
@@ -23,8 +24,6 @@ class VkPostAnime(QObject):
         self.path_image = path_image
         self.select_dub = select_dub
 
-    
-    
     def search_post(self):
         post_id = None
         for i in range(10):
@@ -45,9 +44,9 @@ class VkPostAnime(QObject):
                     if reply == QMessageBox.Cancel:
                         return None
         if not post_id:
-            QMessageBox.warning(None, "Ошибка", "Не найден нужный пост, смените название папки для более точного названия, либо пост был сделан более 2-3 месяцев назад.")
             return None
-        
+    
+           
     def post_vk(self):
         from connect_firebase import Connect
         db = Connect()

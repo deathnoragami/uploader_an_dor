@@ -10,7 +10,7 @@ class PostDorama:
     def post_malfurik(self, link, timming_list = None, name_file = None):
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=False)
+                browser = p.chromium.launch(headless=True)
                 context = browser.new_context(storage_state="assets/malfurik_storage.json")
                 page = context.new_page()
                 page.goto(link)
@@ -61,7 +61,7 @@ class PostDorama:
     def post_animaunt(self, timer, link, name_file):
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=False)
+                browser = p.chromium.launch(headless=True)
                 context = browser.new_context(storage_state="assets/animaunt_storage.json")
                 page = context.new_page()
                 page.goto(link)
@@ -73,6 +73,13 @@ class PostDorama:
                     new_data = reform_current_data + timedelta(weeks=1)
                     reform_new_data = new_data.strftime("%Y-%m-%dT%H:%M")
                     page.locator("#xf_date_timer").fill(reform_new_data)
+                else:
+                    data_now = datetime.fromisoformat(datetime.now())
+                    time_difference = reform_current_data - data_now
+                    if time_difference.days < 2:
+                        new_data = reform_current_data + timedelta(weeks=2)
+                        reform_new_data = new_data.strftime("%Y-%m-%dT%H:%M")
+                        page.locator("#xf_date_timer").fill(reform_new_data)
                 page.get_by_label("установить текущую дату и время").check()
                 page.locator(".panel-footer").locator("button[type='submit']").click()
                 page.wait_for_timeout(2000)

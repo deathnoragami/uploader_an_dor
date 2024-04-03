@@ -20,7 +20,10 @@ class Malfurik_web():
                 wpadminbar_element = page.query_selector('#wpadminbar')
                 if wpadminbar_element:
                     QMessageBox.information(None, "Информация", "Вы залогинены.")
+                    context.close()
+                    browser.close()
                 else:
+                    page.goto(os.getenv('MALFURIK_LINK'))
                     try:
                         page.wait_for_selector("#dashboard-widgets-wrap", timeout=20000)
                         context.storage_state(path='assets/malfurik_storage.json')
