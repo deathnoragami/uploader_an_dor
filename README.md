@@ -1,1 +1,1 @@
-[![GitHub stats](https://github-readme-stats.vercel.app/api?username=deathnoragamo)]
+[![GitHub stats](https://github-readme-stats.vercel.app/api?username=deathnoragami)]
