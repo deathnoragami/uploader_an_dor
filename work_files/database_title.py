@@ -70,7 +70,7 @@ class DataBase:
                 check_sftp, check_vk, check_telegram,
                 check_site, check_novideo_vk, vk_post_id, vk_playlist_id,
                 tg_post_id, link_site, link_second_site
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             path_video, path_pic, folder_sftp,
             check_sftp, check_vk, check_telegram,
@@ -127,7 +127,7 @@ class DataBase:
                 check_sftp, check_malf, check_nolink,
                 check_post_site, link_site, link_second_site,
                 vk_post_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             path_pic, path_video, folder_sftp,
             check_sftp, check_malf, check_nolink,

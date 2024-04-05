@@ -1,13 +1,17 @@
 # pyinstaller --noconfirm --onedir --windowed --icon "D:\GitHub\Uploader/icon.ico" --name "AUPAn" --version-file "C:/Python/uploader_an_dor/version.txt" --add-data "C:/Python/uploader_an_dor/timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json;." --add-data "C:/Python/uploader_an_dor/.env;." --add-data "C:/Python/uploader_an_dor/icon.ico;." --add-data "C:/Python/uploader_an_dor/auto.png;."  "C:/Python/uploader_an_dor/app.py"
-# pyinstaller --noconfirm --onedir --windowed --icon "D:/GitHub/Uploader/icon.ico" --name "AUPAn" --version-file "D:/GitHub/Uploader/version.txt" --add-data "D:/GitHub/Uploader/timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json;." --add-data "D:/GitHub/Uploader/.env;." --add-data "D:/GitHub/Uploader/icon.ico;." --add-data "D:/GitHub/Uploader/auto.png;."  "D:/GitHub/Uploader/app.py"
+# pyinstaller --noconfirm --onedir --windowed --icon "D:/GitHub/Uploader/icon.ico" --name "AUPAn" --version-file "D:/GitHub/Uploader/version.txt" --add-data "D:/GitHub/Uploader/timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json;." --add-data "D:/GitHub/Uploader/.env;." --add-data "D:/GitHub/Uploader/icon.ico;." --add-data "D:/GitHub/Uploader/auto.png;." --add-data "D:/GitHub/Uploader/red.png;." --add-data "D:/GitHub/Uploader/green.png;." "D:/GitHub/Uploader/app.py"
+
 
 #! D:\GitHub\Uploader\venv\Scripts\python.exe
 
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtGui import QIcon, QPainter, QColor
+from PyQt5.QtGui import QIcon, QPainter, QColor, QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem, QDateEdit, QDesktopWidget, QWidget, QGraphicsDropShadowEffect
-from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QSize, QDate, pyqtSignal, pyqtSlot
+from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QSize, QDate, pyqtSignal, pyqtSlot, QThread
 from ui import Ui_MainWindow
+from ui_splash import Ui_SplashScreen
+
+from Custom_Widgets.QCustomModals import QCustomModals
 
 from autorization.autorization_application.autorizade_app import AuthorizationApp
 from autorization.autorization_vk.autorizade_vk import AuthorizationVK
@@ -16,6 +20,7 @@ from autorization.autorization_server.autorizade_sftp import AutorizationServer
 from autorization.autorization_animaunt.autorization_web_animaunt import Animaunt_web
 from autorization.autorization_malfurik.autorization_web_malfurik import Malfurik_web
 from autorization.autorization_vk_site.autorization_web_vk import AutorizationWebVK
+from autorization.checker_autorization import CheckerThread
 
 from work_files.select_pic_anime import PictureSelectorAnime
 from work_files.select_video_anime import VideoSelectorAnime
@@ -28,8 +33,6 @@ from work_files.database_title import DataBase
 from work_files.dubbers import Dubbers
 from work_files.download_fix_timming import FixTimming
 from work_files.version_checker import VersionChecker
-
-from test.sql import YourClass
 
 import timming_pro.timming_main as timming
 
@@ -49,6 +52,7 @@ import subprocess
 import time
 from urllib.parse import unquote
 from dotenv import load_dotenv
+import traceback
 
 import qdarktheme
 # from qt_material import apply_stylesheet
@@ -59,29 +63,139 @@ import connect_firebase
 
 load_dotenv(dotenv_path=resource_path.path(".env"))
 
-class MainWindow(QMainWindow):
-    other = pyqtSignal(bool)
+class MasterThread(QThread):
+    version_app = pyqtSignal(bool)
+    auto_app = pyqtSignal(bool, bool, bool)
+
+    def __init__(self, version, parent=None):
+        super().__init__(parent)
+        self.version = version
+
+    def run(self):
+
+        version_thread = VersionChecker(self.version)
+        version_thread.check_version.connect(self.version_app)
+        version_thread.start()
+        version_thread.wait()
+
+        site_thread = CheckerThread()
+        site_thread.finished.connect(self.auto_app)
+        site_thread.start()
+        site_thread.wait()
+
+class SplashScreen(QMainWindow):
     def __init__(self):
-        super(MainWindow, self).__init__()
-        self.ui = Ui_MainWindow()
+        QMainWindow.__init__(self)
+        self.ui = Ui_SplashScreen()
         self.ui.setupUi(self)
-        self.resize(1218, 404)
-        self.ui.frameTim.setMaximumHeight(0)
+        self.counter = 0
+
+        self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+
+        self.progress_animation = QPropertyAnimation(self.ui.progressBar, b"value")
+        self.progress_animation.setDuration(1000)
+        self.progress_animation.setEasingCurve(QEasingCurve.Linear) 
+
+
+        self.shadow = QGraphicsDropShadowEffect(self)
+        self.shadow.setBlurRadius(20)
+        self.shadow.setXOffset(0)
+        self.shadow.setYOffset(0)
+        self.shadow.setColor(QColor(0, 0, 0, 60))
+        self.ui.dropShadowFrame.setGraphicsEffect(self.shadow)
+
         try:
             info = win32api.GetFileVersionInfo("AUPAn.exe", '\\')
             major = info['FileVersionMS'] >> 16
             minor = info['FileVersionMS'] & 0xFFFF
             patch = info['FileVersionLS'] >> 16
             build = info['FileVersionLS'] & 0xFFFF
-            version = f"{major}.{minor}.{patch}.{build}"
-            self.setWindowTitle(f"AUPAn {version}")
+            self.version = f"{major}.{minor}.{patch}.{build}"
+            self.setWindowTitle(f"AUPAn {self.version}")
         except win32api.error as e:
-            version = '0.0.0.0'
+            self.version = '0.0.0.0'
             self.setWindowTitle(f"AUPAn")
+        self.ui.label_description.setText("<strong>ПРОВЕРКА</strong> ВЕРСИИ")
+        self.master_thread = MasterThread(self.version)
+        self.master_thread.version_app.connect(self.handler_version_checker)
+        self.master_thread.auto_app.connect(self.handler_site_checker)
+        self.master_thread.start()
+        self.show()
+
+    def progress(self, count):
+        current_value = self.ui.progressBar.value()
+        self.progress_animation.setStartValue(current_value)
+        self.progress_animation.setEndValue(count)
+        self.progress_animation.start()
+        if count == 60:
+            self.progress_animation.finished.connect(self.end_open)
+
+    def end_open(self):
+        self.ui.label_description.setText("<strong>ШОКОЛАДКИ</strong> ДЕЛАЕМ")
+        current_value = self.ui.progressBar.value()
+        while current_value < 100:
+            current_value += 1
+            self.ui.progressBar.setValue(current_value)
+            QtCore.QCoreApplication.processEvents()  # Обновляем пользовательский интерфейс
+            time.sleep(0.1)  # Делаем небольшую паузу, чтобы не перегружать процессор
+        main_window = MainWindow(self.version, self.malf_check, self.ani_check, self.vk_check)
+        main_window.show()
+        self.close()
+
+    def handler_site_checker(self, malf_check, ani_check, vk_check):
+        self.progress(60)
+        self.malf_check = malf_check
+        self.ani_check = ani_check
+        self.vk_check = vk_check
+
+    def handler_version_checker(self, check):
+        time.sleep(1)
+        if check:
+            if os.path.exists("update.exe"):
+                q = QMessageBox.information(None, "Обновление", "Вышло новое обновление программы, программа будет обновлена.", QMessageBox.Yes)
+                if q == QMessageBox.Yes:
+                    QApplication.quit()
+                    subprocess.Popen(["update.exe"])
+            else:
+                QMessageBox.information(None, "Обновление", "Не нашел файл обновления update.exe, скачайте его заново.")
+                QtCore.QCoreApplication.processEvents()
+                self.progress(20)
+                self.ui.label_description.setText("<strong>ПРОВЕРКА</strong> АВТОРИЗАЦИЙ")
+        else:
+            QtCore.QCoreApplication.processEvents()
+            self.progress(20)
+            self.ui.label_description.setText("<strong>ПРОВЕРКА</strong> АВТОРИЗАЦИЙ")
+
+
+class MainWindow(QMainWindow):
+    other = pyqtSignal(bool)
+    def __init__(self, version, malf_check, ani_check, vk_check):
+        super(MainWindow, self).__init__()
+        qdarktheme.setup_theme()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.resize(1218, 404)
+        self.ui.frameTim.setMaximumHeight(0)
+        # try:
+        #     info = win32api.GetFileVersionInfo("AUPAn.exe", '\\')
+        #     major = info['FileVersionMS'] >> 16
+        #     minor = info['FileVersionMS'] & 0xFFFF
+        #     patch = info['FileVersionLS'] >> 16
+        #     build = info['FileVersionLS'] & 0xFFFF
+        #     version = f"{major}.{minor}.{patch}.{build}"
+        self.setWindowTitle(f"AUPAn {version}")
+        # except win32api.error as e:
+        #     version = '0.0.0.0'
+        #     self.setWindowTitle(f"AUPAn")
         
-        self.version_thread = VersionChecker(version=version)
-        self.version_thread.check_version.connect(self.handler_version_checker)
-        self.version_thread.start()
+        # version_thread = VersionChecker(version=version)
+        # version_thread.check_version.connect(self.handler_version_checker)
+        # version_thread.start()
+
+        # site_thread = CheckerThread()
+        # site_thread.finished.connect(self.handler_site_checker)
+        # site_thread.start()
 
         self.setWindowIcon(QIcon(resource_path.path("icon.ico")))
         self.center_screen()
@@ -116,7 +230,6 @@ class MainWindow(QMainWindow):
         if not uid == '':
             user_data = db.find_user_uid(uid)
             if user_data:
-                # self.ui.block_screen.hide()
                 user_autorization = True
                 self.ui.menu_lbl_profile.setText(f"Профиль: {user_data['name']}")
         else:
@@ -129,6 +242,9 @@ class MainWindow(QMainWindow):
             self.ui.menu_sait_animaunt.setDisabled(True)
             self.ui.menu_sait_malfurik.setDisabled(True)
             self.ui.menu_sait_vk.setDisabled(True)
+            self.ui.stackedWidget.setCurrentIndex(1)
+            self.ui.btn_navi_anime.setEnabled(False)
+            self.ui.btn_navi_dorama.setEnabled(False)
 
         ##################################################################
     
@@ -199,7 +315,7 @@ class MainWindow(QMainWindow):
         
         ####################################### #############################
 
-        ############# МЕНЮ ВЕРНХЕЕ ####################################
+        ############# МЕНЮ  ####################################
         
         self.ui.menu_app.clicked.connect(AuthorizationApp)
         self.ui.menu_vk.clicked.connect(self.autorization_vk)
@@ -226,11 +342,9 @@ class MainWindow(QMainWindow):
 
         self.ui.btn_upload_anime.clicked.connect(self.start_work)
 
-        self.upload_manager = UploadManager()
+        self.upload_manager = UploadManager(self)
         self.upload_manager.signals.progress_changed.connect(self.update_progress)
-        self.upload_manager.signals.upload_signals.connect(self.upload_finished)
-        self.upload_manager.signals.post_signal.connect(self.upload_vk_finish)
-        self.upload_manager.signals.search_signal.connect(self.anime_search_signal)
+        self.upload_manager.signals.finish_upload.connect(self.upload_finished)
 
         self.ui.check_malf_anime.stateChanged.connect(self.toggle_site_anime)
         
@@ -246,11 +360,10 @@ class MainWindow(QMainWindow):
         self.pictute_selecor_dorama.picture_selected.connect(self.update_picture_dorama)
         self.ui.btn_chose_pic_dor.clicked.connect(self.select_picture_dorama)
         
-        self.upload_manager_dorama = UploadManagerDorama(self)
-        self.upload_manager_dorama.signals.progress_changed.connect(self.update_progress_dor)
-        self.upload_manager_dorama.signals.finished_upload_sftp.connect(self.finish_upload_sftp_dor)
-        self.upload_manager_dorama.signals.finished_upload_tg.connect(self.finish_upload_tg_dor)
-        self.upload_manager_dorama.signals.finish.connect(self.finish_dor)
+        # self.upload_manager_dorama = UploadManagerDorama(self)
+        # self.upload_manager_dorama.signals.progress_changed.connect(self.update_progress_dor)
+        # self.upload_manager_dorama.signals.finish_upload.connect(self.upload_finished_dor)
+
         self.ui.btn_upload_dor.clicked.connect(self.start_work_dorama)
         
         self.ui.check_update_site_dor.stateChanged.connect(self.enable_timer_dor)
@@ -271,14 +384,22 @@ class MainWindow(QMainWindow):
         self.ui.btn_navi_dorama.clicked.connect(lambda: self.switch_chose(0, "upload"))
         self.ui.btn_navi_autorization.clicked.connect(lambda: self.switch_chose(1, "setting"))
 
-        indicator = self.createIndicator('red')
-        label = QtWidgets.QLabel("Ani", self.ui.sliderDownInfo)
-        self.ui.horizontalLayout_11.addWidget(indicator)
-        self.ui.horizontalLayout_11.addWidget(label)
-        indicator = self.createIndicator('green')
-        label1 = QtWidgets.QLabel("Dor", self.ui.sliderDownInfo)
-        self.ui.horizontalLayout_12.addWidget(indicator)
-        self.ui.horizontalLayout_12.addWidget(label1)
+        green = QPixmap(resource_path.path("green.png"))
+        red = QPixmap(resource_path.path("red.png"))
+        if malf_check == True:
+            self.ui.pixmap_malfurik.setPixmap(green)
+        else:
+            self.ui.pixmap_malfurik.setPixmap(red)
+        if ani_check == True:
+            self.ui.pixmap_animaunt.setPixmap(green)
+        else:
+            self.ui.pixmap_animaunt.setPixmap(red)
+        if vk_check == True:
+            self.ui.pixmap_vk.setPixmap(green)
+        else:
+            self.ui.pixmap_vk.setPixmap(red)
+        
+
 
     def createIndicator(self, color):
         indicator = QWidget()
@@ -296,6 +417,9 @@ class MainWindow(QMainWindow):
 
         indicator.paintEvent = paintEvent
         return indicator
+
+    def handler_site_checker(self, malf_check, ani_check, vk_check):
+        print(malf_check, ani_check, vk_check)
 
     def handler_version_checker(self, check):
         if check:
@@ -352,7 +476,6 @@ class MainWindow(QMainWindow):
         uid = Config().get_uid_program()
         db = connect_firebase.Connect()
         user_data = db.find_user_uid(uid)
-        print(user_data)
         db.close()
         if user_data:
             if ('malf_pass' not in user_data or not user_data['malf_pass']) or ('malf_login' not in user_data or not user_data['malf_login']):
@@ -471,7 +594,7 @@ class MainWindow(QMainWindow):
     ################ ФУНКЦИИ ДЛЯ АНИМЕ ############################################ 
 
     def start_work(self):
-        # try:
+        try:
             if self.file_path_anime_pic is not None:
                 if self.ui.check_post_site.isChecked():
                     self.ui.link_site.setText(unquote(self.ui.link_site.text()))
@@ -487,23 +610,8 @@ class MainWindow(QMainWindow):
                     else:
                         self.link_malf_anime = self.ui.link_malfurik_anime.text()
                 self.ui.btn_upload_anime.setEnabled(False)        
-                self.ui.btn_pic_anime.setEnabled(False)     
-                # self.work = UploadManager(self.file_path_anime_pic,
-                #                     self.file_path_anime_video,
-                #                     self.ui.check_sftp_anime.isChecked(),
-                #                     self.ui.check_malf_anime.isChecked(),
-                #                     self.ui.check_nonlink_anime.isChecked(),
-                #                     self.ui.check_post_site.isChecked(),
-                #                     self.link_site_animaunt,
-                #                     self.link_malf_anime)  
-                
-                # self.work.signals.search_signal.connect(self.anime_search_signal, Qt.QueuedConnection)
-
-                # self.work.signals.progress_changed.connect(self.update_progress)
-                # self.work.signals.upload_signals.connect(self.upload_finished)
-                # self.work.signals.post_signal.connect(self.upload_vk_finish)
-
-                # self.work.start() 
+                self.ui.btn_pic_anime.setEnabled(False)   
+                select_dub = Dubbers().select_checkboxes(self)
                 self.upload_manager.start_upload(self.file_path_anime_pic,
                                                 self.file_path_anime_video,
                                                 self.ui.check_sftp_anime.isChecked(),
@@ -511,49 +619,39 @@ class MainWindow(QMainWindow):
                                                 self.ui.check_nonlink_anime.isChecked(),
                                                 self.ui.check_post_site.isChecked(),
                                                 self.link_site_animaunt,
-                                                self.link_malf_anime)
+                                                self.link_malf_anime,
+                                                select_dub)
             else:
                 QMessageBox.warning(None, "Ошибка", "Картинка не выбрана!")
-        # except Exception as e:
-        #     self.file_path_anime_pic = None
-        #     self.file_path_anime_video = None
-        #     logging.exception(e)
-        #     QMessageBox.warning(None, "Ошибка", f"Ошибка: {e}")
-     
-    def anime_search_signal(self, text):
-        self.ui.logging_upload.append(text)
-    
-
+        except Exception as e:
+            self.file_path_anime_pic = None
+            self.file_path_anime_video = None
+            logging.exception(e)
+            QMessageBox.warning(None, "Ошибка", f"Ошибка: {e}")
+         
     def update_progress(self, value, mb_upload, mb_total, speed):
         self.ui.progress_anime.setValue(value)
         self.ui.progress_value.setText(f'Загружено: {mb_upload:.1f} МБ из {mb_total:.1f} МБ. Скорость: {speed:.1f} МБ/с')
 
-    def upload_finished(self, result):
-        name_folder = os.path.basename(os.path.dirname(self.file_path_anime_pic))
-        self.ui.logging_upload.append(name_folder + " загружен в " + result)
-
-    def upload_vk_finish(self, end):
-        self.file_path_anime_pic = None 
-        self.file_path_anime_video = None
-        self.ui.btn_upload_anime.setDisabled(True)
-        self.ui.check_malf_anime.setChecked(False)
-        self.ui.check_nonlink_anime.setChecked(False)
-        self.ui.check_post_site.setChecked(False)
-        self.ui.check_sftp_anime.setChecked(False)
-        self.ui.link_site.setText("")
-        self.ui.link_malfurik_anime.setText("")
-        self.ui.lbl_anime_pic.setText("Картинка не выбрана")
-        self.ui.btn_video_anime.setText("Выбрать видео")
-        self.ui.progress_value.setText("Загружено: 0 МБ из 0 МБ. Скорость: 0 МБ/с")
-        self.ui.progress_anime.setValue(0)
-        self.ui.dateEdit.setDate(QDate(self.year,  self.month, self.day))
-        self.ui.btn_pic_anime.setEnabled(True)
+    def upload_finished(self, end, text):
+        self.ui.logging_upload.append(text)
         if end:
-            self.ui.logging_upload.append("Запощено в вк!")
-            self.ui.logging_upload.append("__________________________________\n")
-        else:
-            self.ui.logging_upload.append("Отмена загрузки.")
-            self.ui.logging_upload.append("__________________________________\n")
+            self.file_path_anime_pic = None 
+            self.file_path_anime_video = None
+            self.ui.btn_upload_anime.setDisabled(True)
+            self.ui.check_malf_anime.setChecked(False)
+            self.ui.check_nonlink_anime.setChecked(False)
+            self.ui.check_post_site.setChecked(False)
+            self.ui.check_sftp_anime.setChecked(False)
+            self.ui.link_site.setText("")
+            self.ui.link_malfurik_anime.setText("")
+            self.ui.lbl_anime_pic.setText("Картинка не выбрана")
+            self.ui.btn_video_anime.setText("Выбрать видео")
+            self.ui.progress_value.setText("Загружено: 0 МБ из 0 МБ. Скорость: 0 МБ/с")
+            self.ui.progress_anime.setValue(0)
+            self.ui.dateEdit.setDate(QDate(self.year,  self.month, self.day))
+            self.ui.btn_pic_anime.setEnabled(True)
+            self.ui.logging_upload.append('__________________________________\n')
 
     def select_picture_anime(self):
         try:
@@ -574,7 +672,7 @@ class MainWindow(QMainWindow):
                         self.file_path_anime_video = None
                     else:
                         search_number = str(file_name_without_extension.zfill(2))
-                        search_pattern = os.path.join(self.data[0][2], f"{search_number}*.mp4")
+                        search_pattern = os.path.join(data[0][2], f"{search_number}*.mp4")
                         try:
                             video_file = glob.glob(search_pattern)[0]
                             self.update_label_video_anime(video_file)
@@ -625,27 +723,25 @@ class MainWindow(QMainWindow):
             self.ui.lbl_pic_video_dor.setText(f"{folder_name} серия {file_name_without_extension}")
             self.file_path_dorama_video = file_path
             with DataBase() as db:
-                self.data_dorama = db.search_by_path_video_dor(os.path.dirname(self.file_path_dorama_video))
-            if not self.data_dorama:
-                self.check_data_dorama = False
-            else:
-                self.check_data_dorama = True
-                if self.data_dorama[0][2] == None or self.data_dorama[0][2] == "":
+                data_dorama = db.search_by_path_video_dor(os.path.dirname(self.file_path_dorama_video))
+            if data_dorama:
+                if data_dorama[0][2] == None or data_dorama[0][2] == "":
                     self.file_path_dorama_pic = None
                 else:
                     search_number = re.search(r'\d+', str(file_name_without_extension.zfill(2))).group()
-                    search_pattern = os.path.join(self.data_dorama[0][2], f"{search_number}*.jpg")
+                    search_pattern = os.path.join(data_dorama[0][2], f"{search_number}*.jpg")
                     try:
                         pic_file = glob.glob(search_pattern)[0]
                         self.update_picture_dorama(pic_file)
-                    except:
+                    except Exception as e:
+                        traceback.print_exc()
                         pic_file = None
-                self.ui.check_sftp_dor.setChecked(self.data_dorama[0][4])
-                self.ui.check_tg_dor.setChecked(self.data_dorama[0][6])
-                self.ui.check_vk_dor.setChecked(self.data_dorama[0][5])
-                self.ui.check_update_site_dor.setChecked(self.data_dorama[0][7])
-                self.ui.line_link_malf_dor.setText(self.data_dorama[0][11])
-                self.ui.line_link_animaunt_dor.setText(self.data_dorama[0][12])
+                self.ui.check_sftp_dor.setChecked(data_dorama[0][4])
+                self.ui.check_tg_dor.setChecked(data_dorama[0][6])
+                self.ui.check_vk_dor.setChecked(data_dorama[0][5])
+                self.ui.check_update_site_dor.setChecked(data_dorama[0][7])
+                self.ui.line_link_malf_dor.setText(data_dorama[0][11])
+                self.ui.line_link_animaunt_dor.setText(data_dorama[0][12])
             self.ui.btn_upload_dor.setDisabled(False)
             if Config().get_id_chat():
                 Dubbers().find_send_vk(path=file_path, main_window_ui=self)
@@ -699,36 +795,54 @@ class MainWindow(QMainWindow):
                 if self.timming_list is None:
                     QMessageBox.warning(None, "Ошибка", "Не выбраны тайминги")
                     return
-            self.check_data_dorama = False
-            with DataBase() as db:
-                data = db.search_by_path_video_dor(os.path.dirname(self.file_path_dorama_video))
-                if data:
-                    self.check_data_dorama = True
-            select_dub = Dubbers().select_checkboxes(self.main_ui)
+            select_dub = Dubbers().select_checkboxes(self)
             self.ui.btn_upload_dor.setEnabled(False)
             self.ui.btn_chose_video_dor.setEnabled(False)
-            self.upload_manager_dorama.start_upload(self.file_path_dorama_pic, self.file_path_dorama_video,
+
+            self.upload_manager_dorama = UploadManagerDorama(self, self.file_path_dorama_pic, self.file_path_dorama_video,
                                                     self.ui.check_sftp_dor.isChecked(), self.ui.check_vk_dor.isChecked(),
                                                     self.ui.check_tg_dor.isChecked(), self.ui.check_update_site_dor.isChecked(),
                                                     self.ui.line_link_animaunt_dor.text(), self.ui.line_link_malf_dor.text(),
-                                                    self.check_data_dorama, self.timming_list, self.ui.check_novideo_dor.isChecked(),
+                                                    self.timming_list, self.ui.check_novideo_dor.isChecked(),
                                                     select_dub)
+            
+            # self.upload_manager_dorama.start_upload()
+            self.upload_manager_dorama.signals.progress_changed.connect(self.update_progress_dor)
+            self.upload_manager_dorama.signals.finish_upload.connect(self.upload_finished_dor)
+            self.upload_manager_dorama.signals.ask.connect(self.ask)
+            self.upload_manager_dorama.start()
         except Exception as e:
             QMessageBox.warning(None, "Ошибка", f"{e}")
-            
-    def update_progress_dor(self, value, mb_upload, mb_total, speed):
-        self.ui.progressBar.setValue(value)
-        self.ui.label_2.setText(f'Загружено: {mb_upload:.1f} МБ из {mb_total:.1f} МБ. Скорость: {speed:.1f} МБ/с')
-        
-    def finish_upload_sftp_dor(self, folder, time):
-        self.ui.logging_upload.append(folder + " загружен в " + time)
-        
-    def finish_upload_tg_dor(self, finish):
-        if finish:
-            self.ui.logging_upload.append("Загружено в телеграмм")
+            logging.exception(e)
+
+    def ask(self, data, info, data_worker, update, update_values):
+        if update == False:
+            title = f'VK плейлист - {info[1]}\n'\
+                    f'VK пост - {info[2]}\n'\
+                    f'TG пост - {info[0]}\n'\
+                    f'Папка сервера - {info[3]}'
+            q = QMessageBox.information(self, 'Информация', f"Проверьте данные\n{title}", QMessageBox.Yes | QMessageBox.No)
+            if q == QMessageBox.Yes:
+                self.upload_manager_dorama.signals.askk.emit(data, data_worker, update, update_values)
+            else:
+                self.upload_manager_dorama.exit()
         else:
-            self.ui.logging_upload.append("Ошибка загрузки в телеграмм")
-            
+            if not all(value is None for value in info):
+                print(info)
+                title = f'VK плейлист - {info[1]}\n'\
+                        f'VK пост - {info[2]}\n'\
+                        f'TG пост - {info[0]}\n'\
+                        f'Папка сервера - {info[3]}'
+                q = QMessageBox.information(self, 'Информация', f"Проверьте данные\n{title}", QMessageBox.Yes | QMessageBox.No)
+                if q == QMessageBox.Yes:
+                    self.upload_manager_dorama.signals.askk.emit(data, data_worker, update, update_values)
+                else:
+                    self.upload_manager_dorama.exit()
+            else:
+                self.upload_manager_dorama.signals.askk.emit(data, data_worker, update, update_values)
+
+
+
     def post_malf(self):
         select_item = self.ui.list_timming.currentItem()
         if select_item is not None:
@@ -756,30 +870,43 @@ class MainWindow(QMainWindow):
             self.ui.check_timmer_dor.setChecked(False)
             self.ui.check_timmer_dor.setEnabled(False)
             
-    def finish_dor(self, done, name):
-        self.file_path_dorama_pic = None
-        self.file_path_dorama_video = None
-        self.ui.check_update_site_dor.setChecked(False)
-        self.ui.btn_chose_pic_dor.setText("Выбрать картинку")
-        self.ui.lbl_pic_video_dor.setText("Видео не выбрано")
-        self.ui.progressBar.setValue(0)
-        self.ui.label_2.setText("Загружено: 0 МБ из 0 МБ. Скорость: 0 МБ/с")
-        self.ui.check_sftp_dor.setChecked(False)
-        self.ui.check_tg_dor.setChecked(False)
-        self.ui.check_vk_dor.setChecked(False)
-        self.ui.check_update_site_dor.setChecked(False)
-        self.ui.check_timmer_dor.setChecked(False)
-        self.ui.check_timmer_dor.setEnabled(False)
-        self.ui.btn_chose_video_dor.setEnabled(True)
-        self.ui.line_link_animaunt_dor.setText("")
-        self.ui.line_link_malf_dor.setText("")
-        if done == False:
-            self.ui.logging_upload.append(f"{name} загрузка прервана!")
-            self.ui.logging_upload.append("__________________________________\n")  
+    def update_progress_dor(self, value, mb_upload, mb_total, speed):
+        self.ui.progressBar.setValue(value)
+        self.ui.label_2.setText(f'Загружено: {mb_upload:.1f} МБ из {mb_total:.1f} МБ. Скорость: {speed:.1f} МБ/с')
+   
+    def upload_finished_dor(self, warning, name, upload):
+        if upload == False:
+            myModal = QCustomModals.InformationModal(
+                title="Информация",  # Title of the modal dialog
+                parent=self,  # Parent widget to which the modal belongs
+                position='top-right',  # Position to display the modal dialog
+                description=name+'\n',  # Description text displayed in the modal dialog
+                isClosable=False,  # Whether the modal dialog is closable (True or False)
+                animationDuration=2000  # Duration (in milliseconds) for which the modal dialog remains visible
+            )
+            myModal.show()
         else:
-            self.ui.logging_upload.append(f"{name} загрузка завершена!")
-            self.ui.logging_upload.append("__________________________________\n")  
-
+            self.ui.logging_upload.append(name)
+        if warning:
+            self.ui.logging_upload.append(name)
+            self.file_path_dorama_pic = None
+            self.file_path_dorama_video = None
+            self.ui.check_update_site_dor.setChecked(False)
+            self.ui.btn_chose_pic_dor.setText("Выбрать картинку")
+            self.ui.lbl_pic_video_dor.setText("Видео не выбрано")
+            self.ui.progressBar.setValue(0)
+            self.ui.label_2.setText("Загружено: 0 МБ из 0 МБ. Скорость: 0 МБ/с")
+            self.ui.check_sftp_dor.setChecked(False)
+            self.ui.check_tg_dor.setChecked(False)
+            self.ui.check_vk_dor.setChecked(False)
+            self.ui.check_update_site_dor.setChecked(False)
+            self.ui.check_timmer_dor.setChecked(False)
+            self.ui.check_timmer_dor.setEnabled(False)
+            self.ui.btn_chose_video_dor.setEnabled(True)
+            self.ui.line_link_animaunt_dor.setText("")
+            self.ui.line_link_malf_dor.setText("")
+            self.ui.logging_upload.append("__________________________________\n")
+    
     ##########################################################################
 
     ###########################  СДАЧА ДОРОГ #################################
@@ -803,10 +930,12 @@ if __name__ == "__main__":
     # try:
         app = QApplication(sys.argv)
         # apply_stylesheet(app, theme='dark_cyan.xml')
-        qdarktheme.setup_theme()
+        # qdarktheme.setup_theme()
         logging.basicConfig(filename="app.log", level=logging.DEBUG, filemode="w", format="%(levelname)s (%(asctime)s): %(message)s (Line: %(lineno)d) [%(filename)s]", datefmt="%d.%m.%Y %I:%M:%S")
-        main_window = MainWindow()
-        main_window.show()
+        # main_window = MainWindow()
+        # main_window.show()
+        window = SplashScreen()
+
         sys.exit(app.exec_())
     # except Exception as e:
     #     logging.exception(e)

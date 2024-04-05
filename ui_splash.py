@@ -62,7 +62,7 @@ class Ui_SplashScreen(object):
 "    border-radius: 10px;\n"
 "    background-color: qlineargradient(spread:pad, x1:0, y1:0.511364, x2:1, y2:0.523, stop:0 rgba(254, 121, 199, 255), stop:1 rgba(170, 85, 255, 255));\n"
 "}")
-        self.progressBar.setProperty("value", 24)
+        self.progressBar.setProperty("value", 0)
         self.progressBar.setObjectName("progressBar")
         self.label_loading = QtWidgets.QLabel(self.dropShadowFrame)
         self.label_loading.setGeometry(QtCore.QRect(0, 320, 661, 21))
@@ -91,7 +91,7 @@ class Ui_SplashScreen(object):
     def retranslateUi(self, SplashScreen):
         _translate = QtCore.QCoreApplication.translate
         SplashScreen.setWindowTitle(_translate("SplashScreen", "MainWindow"))
-        self.label_title.setText(_translate("SplashScreen", "<strong>YOUR</strong> APP NAME"))
-        self.label_description.setText(_translate("SplashScreen", "<strong>APP</strong> DESCRIPTION"))
+        self.label_title.setText(_translate("SplashScreen", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">AUPAN</span></p></body></html>"))
+        self.label_description.setText(_translate("SplashScreen", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">делай</span> быстрее</p></body></html>"))
         self.label_loading.setText(_translate("SplashScreen", "loading..."))
-        self.label_credits.setText(_translate("SplashScreen", "<strong>Created</strong>: Wanderson M. Pimenta"))
+        self.label_credits.setText(_translate("SplashScreen", "<strong>Автор</strong>: @death.noragami"))

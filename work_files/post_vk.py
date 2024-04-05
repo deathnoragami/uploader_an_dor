@@ -2,7 +2,7 @@ import vk_api
 import os
 import string
 import re
-
+import traceback
 
 from work_files.messagebox_q import CustomMessageBox
 from vk_api import VkUpload
@@ -55,28 +55,33 @@ class VkPostAnime(QObject):
         ping_timmer = user.get('ping')
         db.close()
         
-        if self.post_id:
-            post = self.vk.wall.getById(posts=f"{self.group_id}_{self.post_id}")
-            post_text = post[0]['text']
-            first_line = post_text.split('\n')[0]
-            match = re.search(r'(\d+)\s*серия', first_line)
-            self.number_seria = self.number_seria.rsplit('.', 1)[0]
-            if match:
-                new_first_line = re.sub(r'(\d+)\s*серия', f'{int(self.number_seria)} серия', first_line)
-                new_text = post_text.replace(first_line, new_first_line)
-                if not self.check_nolink:
-                    try:
-                        pattern = r"(?<=Роли озвучивали: ).*"
-                        new_text = re.sub(pattern, self.select_dub, new_text)
-                        pattern = r"(?<=Тайминг и сведение: ).*"
-                        new_text = re.sub(pattern, str(ping_timmer), new_text)
-                    except Exception as e:
-                        QMessageBox.warning(None, "Ошибка!", "Возможно пост не имеет дабберов или таймера в посту\nПосмотрите внимательно и если их там нет, то поставьте чекбокс на 'Без ссылок'")
-            upload = vk_api.VkUpload(self.vk_session)
-            photo = upload.photo_wall(f'{self.path_image}')[0]
-            post = self.vk.wall.post(owner_id=self.group_id,
-                                    message=new_text,
-                                    attachments=f'photo{photo["owner_id"]}_{photo["id"]}')
-            self.vk.likes.add(owner_id=self.group_id, type='post', item_id=post['post_id'])
+        try:
+            if self.post_id:
+                post = self.vk.wall.getById(posts=f"{self.group_id}_{self.post_id}")
+                post_text = post[0]['text']
+                first_line = post_text.split('\n')[0]
+                match = re.search(r'(\d+)\s*серия', first_line)
+                self.number_seria = self.number_seria.rsplit('.', 1)[0]
+                if match:
+                    new_first_line = re.sub(r'(\d+)\s*серия', f'{int(self.number_seria)} серия', first_line)
+                    new_text = post_text.replace(first_line, new_first_line)
+                    if not self.check_nolink:
+                        try:
+                            pattern = r"(?<=Роли озвучивали: ).*"
+                            new_text = re.sub(pattern, self.select_dub, new_text)
+                            pattern = r"(?<=Тайминг и сведение: ).*"
+                            new_text = re.sub(pattern, str(ping_timmer), new_text)
+                        except Exception as e:
+                            QMessageBox.warning(None, "Ошибка!", "Возможно пост не имеет дабберов или таймера в посту\nПосмотрите внимательно и если их там нет, то поставьте чекбокс на 'Без ссылок'")
+                upload = vk_api.VkUpload(self.vk_session)
+                photo = upload.photo_wall(f'{self.path_image}')[0]
+                post = self.vk.wall.post(owner_id=self.group_id,
+                                        message=new_text,
+                                        attachments=f'photo{photo["owner_id"]}_{photo["id"]}')
+                self.vk.likes.add(owner_id=self.group_id, type='post', item_id=post['post_id'])
+                return True
+        except Exception as e:
+            traceback.print_exc()
+            return False
                     
                              

@@ -11,6 +11,7 @@ import win32api
 import zipfile
 import os
 import psutil
+import subprocess
 
 class Downloader(QObject):
     file_version = pyqtSignal(str)
@@ -74,6 +75,7 @@ class Downloader(QObject):
         except OSError as e:
             # QMessageBox.warning(None, "Ошибка", "Не смог удалить файлы обновления, программа не имеет админ прав.\nУдалите в папке с программой AUPAn.zip.")
             QMessageBox.warning(None, "Ошибка", f"{e.filename} | {e.strerror}")
+                
 
 
 
@@ -114,12 +116,16 @@ class MainWindow(QMainWindow):
         
     def check_version(self, text):
         self.ui.label_log.setText(f"{self.ui.label_log.text()} <br>{text}")
+        subprocess.Popen("AUPAn.exe")
+        self.close()
         
     def unzip_file(self):
         self.ui.label_log.setText(f"{self.ui.label_log.text()} <br>Обновление завершено")
 
     def del_file(self):
         self.ui.label_log.setText(f"{self.ui.label_log.text()} <br>Файлы обновления удалены")
+        subprocess.Popen("AUPAn.exe")
+        self.close()
 
     def path(self, path):
         try:

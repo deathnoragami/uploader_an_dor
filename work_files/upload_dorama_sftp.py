@@ -12,7 +12,6 @@ import os
 
 class SftpSignals(QObject):
     progress_changed = pyqtSignal(int, float, float, float)
-    finished = pyqtSignal(str, str)
 
 class UploadDoramaSFTP(QObject):
     def __init__(self, main_ui = None):
@@ -39,16 +38,17 @@ class UploadDoramaSFTP(QObject):
             for attr in list_dir:
                 folder_sftp = ''.join(char if char not in string.punctuation else ' ' for char in attr.filename).lower().replace("  ", " ")
                 if name_folder in folder_sftp:
-                    q = QMessageBox.question(None, "[SFTP] Что-то нашел", f"[SFTP] Папка на сервере называется\n {attr.filename} ?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
-                    if q == QMessageBox.Yes:
-                        found_folder = attr.filename
-                        sftp.close()
-                        return found_folder
-                    elif q == QMessageBox.No:
-                        continue
-                    else:
-                        sftp.close()
-                        return None
+                    return attr.filename
+                    # q = QMessageBox.question(None, "[SFTP] Что-то нашел", f"[SFTP] Папка на сервере называется\n {attr.filename} ?", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+                    # if q == QMessageBox.Yes:
+                    #     found_folder = attr.filename
+                    #     sftp.close()
+                    #     return found_folder
+                    # elif q == QMessageBox.No:
+                    #     continue
+                    # else:
+                    #     sftp.close()
+                    #     return None
             if not found_folder:
                 QMessageBox.warning(None, "[SFTP] Поиск", "[SFTP] Не смог найти папку. Убедитесь в названии у себя на компьютере или на сервере")
                 sftp.close()
@@ -72,9 +72,10 @@ class UploadDoramaSFTP(QObject):
                 sftp.put(file_path, callback=self.progress)
                 time_upload = datetime.fromtimestamp(sftp.stat(os.path.basename(file_path)).st_mtime).strftime('%d.%m.%Y %H:%M')
                 sftp.close()
-                self.signals.finished.emit(folder_sftp, time_upload)
+                return True, time_upload
         except Exception as e:
             QMessageBox.warning(None, "Ошибка", f"Произошла ошибка при загрузки файла\n{e}")
+            return False
     
     def progress(self, transferred, total):
         if self.start_time is None:

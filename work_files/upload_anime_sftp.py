@@ -13,7 +13,6 @@ import string
 
 class SftpSignals(QObject):
     progress_changed = pyqtSignal(int, float, float, float)
-    finished = pyqtSignal(str, str)
 
 class SFTPManager(QObject):
     def __init__(self):
@@ -41,11 +40,10 @@ class SFTPManager(QObject):
                 sftp.put(file_path, callback=self.progress)
                 time_upload = datetime.fromtimestamp(sftp.stat(os.path.basename(file_path)).st_mtime).strftime('%d.%m.%Y %H:%M')
                 sftp.close()
-                self.signals.finished.emit(dirname, time_upload)
-                return True
+                return True, time_upload
         except Exception as e:
             QMessageBox.warning(None, "Ошибка", f"Ошибка при загрузке: {e}")
-            return False
+            return False, ""
 
             
     def search_folder_sftp(self, name_folder):
@@ -96,13 +94,7 @@ class SFTPManager(QObject):
         mb_total = total / (1024 * 1024)
         percent = transferred / total * 100
         self.signals.progress_changed.emit(int(percent), float(mb_transferred), float(mb_total), float(speed))
-                
-                
-        # time_upload = '20.02.2024'
-        # for i in range(1, 101):
-        #     self.signals.progress_changed.emit(i)
-        #     time.sleep(0.1)
-        #     self.signals.finished.emit(dirname, time_upload)
+
         
 
 

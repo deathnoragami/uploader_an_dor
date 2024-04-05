@@ -13,6 +13,7 @@ class PostDorama:
                 browser = p.chromium.launch(headless=True)
                 context = browser.new_context(storage_state="assets/malfurik_storage.json")
                 page = context.new_page()
+                page.set_default_timeout(120000)
                 page.goto(link)
                 locator_series = page.query_selector(".rwmb-field.rwmb-group-wrapper")
                 locator_seria = locator_series.query_selector_all(".rwmb-clone.rwmb-group-clone")[-1]
@@ -64,6 +65,7 @@ class PostDorama:
                 browser = p.chromium.launch(headless=True)
                 context = browser.new_context(storage_state="assets/animaunt_storage.json")
                 page = context.new_page()
+                page.set_default_timeout(120000)
                 page.goto(link)
                 page.locator("#xf_number_seria").fill(f'{int(name_file)}')
                 page.locator("#xf_date_timer_seria").fill(f"{int(name_file)+1}")
