@@ -47,7 +47,7 @@ import pytz
 import datetime
 import re
 import resource_path
-import logging
+import log_config
 import subprocess
 import time
 from urllib.parse import unquote
@@ -89,6 +89,7 @@ class SplashScreen(QMainWindow):
         self.ui = Ui_SplashScreen()
         self.ui.setupUi(self)
         self.counter = 0
+        self.setWindowIcon(QIcon(resource_path.path("icon.ico")))
 
         self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
@@ -465,6 +466,7 @@ class MainWindow(QMainWindow):
         if check:
             self.ui.btn_pic_anime.setEnabled(True)
             self.ui.check_vk_dor.setEnabled(True)
+            self.ui.btn_search_dubs.setEnabled(True)
     
     def autorization_tg(self):
         check = AuthorizationTG()
@@ -626,7 +628,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.file_path_anime_pic = None
             self.file_path_anime_video = None
-            logging.exception(e)
+            log_config.logger.exception(e)
             QMessageBox.warning(None, "Ошибка", f"Ошибка: {e}")
          
     def update_progress(self, value, mb_upload, mb_total, speed):
@@ -657,7 +659,7 @@ class MainWindow(QMainWindow):
         try:
             self.picture_selector_anime.select_picture()
         except Exception as e:
-            logging.exception(e)
+            log_config.logger.exception(e)
 
     def update_label_pic_anime(self, file_path):
         if file_path:
@@ -684,6 +686,15 @@ class MainWindow(QMainWindow):
                     self.ui.check_post_site.setChecked(data[0][7])
                     self.ui.link_site.setText(data[0][8])
                     self.ui.link_malfurik_anime.setText(data[0][9])
+                else:
+                    self.file_path_anime_video = None
+                    self.update_label_video_anime("")
+                    self.ui.check_sftp_anime.setChecked(0)
+                    self.ui.check_nonlink_anime.setChecked(0)
+                    self.ui.check_malf_anime.setChecked(0)
+                    self.ui.check_post_site.setChecked(0)
+                    self.ui.link_site.setText("")
+                    self.ui.link_malfurik_anime.setText("")
                 self.ui.btn_upload_anime.setDisabled(False)
                 if Config().get_id_chat():
                     Dubbers().find_send_vk(path=file_path, main_window_ui=self)
@@ -740,8 +751,17 @@ class MainWindow(QMainWindow):
                 self.ui.check_tg_dor.setChecked(data_dorama[0][6])
                 self.ui.check_vk_dor.setChecked(data_dorama[0][5])
                 self.ui.check_update_site_dor.setChecked(data_dorama[0][7])
-                self.ui.line_link_malf_dor.setText(data_dorama[0][11])
-                self.ui.line_link_animaunt_dor.setText(data_dorama[0][12])
+                self.ui.line_link_malf_dor.setText(data_dorama[0][12])
+                self.ui.line_link_animaunt_dor.setText(data_dorama[0][13])
+            else:
+                self.file_path_dorama_pic = None
+                self.update_picture_dorama("")
+                self.ui.check_sftp_dor.setChecked(0)
+                self.ui.check_tg_dor.setChecked(0)
+                self.ui.check_vk_dor.setChecked(0)
+                self.ui.check_update_site_dor.setChecked(0)
+                self.ui.line_link_malf_dor.setText("")
+                self.ui.line_link_animaunt_dor.setText("")
             self.ui.btn_upload_dor.setDisabled(False)
             if Config().get_id_chat():
                 Dubbers().find_send_vk(path=file_path, main_window_ui=self)
@@ -809,11 +829,15 @@ class MainWindow(QMainWindow):
             # self.upload_manager_dorama.start_upload()
             self.upload_manager_dorama.signals.progress_changed.connect(self.update_progress_dor)
             self.upload_manager_dorama.signals.finish_upload.connect(self.upload_finished_dor)
+            self.upload_manager_dorama.signals.finish_sftp.connect(self.sftp_time)
             self.upload_manager_dorama.signals.ask.connect(self.ask)
             self.upload_manager_dorama.start()
         except Exception as e:
             QMessageBox.warning(None, "Ошибка", f"{e}")
-            logging.exception(e)
+            log_config.logger.exception(e)
+
+    def sftp_time(self, text):
+        self.ui.logging_upload.append(text)
 
     def ask(self, data, info, data_worker, update, update_values):
         if update == False:
@@ -927,15 +951,14 @@ class MainWindow(QMainWindow):
         self.move(qr.topLeft())
 
 if __name__ == "__main__":
-    # try:
+    try:
         app = QApplication(sys.argv)
         # apply_stylesheet(app, theme='dark_cyan.xml')
         # qdarktheme.setup_theme()
-        logging.basicConfig(filename="app.log", level=logging.DEBUG, filemode="w", format="%(levelname)s (%(asctime)s): %(message)s (Line: %(lineno)d) [%(filename)s]", datefmt="%d.%m.%Y %I:%M:%S")
         # main_window = MainWindow()
         # main_window.show()
         window = SplashScreen()
-
         sys.exit(app.exec_())
-    # except Exception as e:
-    #     logging.exception(e)
+    except Exception as e:
+        log_config.setup_logger().exception(e)
+        

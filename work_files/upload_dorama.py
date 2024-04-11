@@ -13,10 +13,12 @@ import time
 
 class UploadSignals(QObject):
     progress_changed = pyqtSignal(int, float, float, float)
-    finish_upload = pyqtSignal(bool, str)
+    finish_upload = pyqtSignal(bool, str, bool)
     worker_finish_upload = pyqtSignal(bool, str, bool)
     ask = pyqtSignal(list, list, list, bool, dict)
     askk = pyqtSignal(list, list, bool, dict)
+    worker_finish_sftp = pyqtSignal(str)
+    finish_sftp = pyqtSignal(str)
 
 class UploadManagerDorama(QThread):
     def __init__(self, main_window, file_path_image,
@@ -65,10 +67,10 @@ class UploadManagerDorama(QThread):
             if data != []:
                 info_data = []
                 if self.check_tg == True and data[0][6] != self.check_tg:
-                    self.signals.finish_upload.emit(False, f"Ищу пост в ТГ...")
+                    self.signals.finish_upload.emit(False, f"Ищу пост в ТГ...", False)
                     tg_post_id, text_tg = UploadDoramaTg().seach_id_post(self.file_path_video)
                     if not tg_post_id:
-                        self.signals.finish_upload.emit(True, f"{name} не нашел пост в ТГ.")
+                        self.signals.finish_upload.emit(True, f"{name} не нашел пост в ТГ.", False)
                         return
                     info_data.append(text_tg)
                     update_values["check_telegram"] = self.check_tg
@@ -80,18 +82,19 @@ class UploadManagerDorama(QThread):
                     update_values["tg_post_id"] = "NULL"
                 else:
                     info_data.append(None)
-                    tg_post_id = data[0][10]
+                    tg_post_id = data[0][11]
                 if self.check_vk == True and data[0][5] != self.check_vk:
-                    self.signals.finish_upload.emit(False, f"Ищу плейлист и пост в ВК...")
+                    self.signals.finish_upload.emit(False, f"Ищу плейлист и пост в ВК...", False)
                     vk_post_id, vk_playlist_id, text_playlist, text_vk = UploadDoramaVK().search_vk_dorama(self.file_path_video)
                     if vk_playlist_id == False:
-                        self.signals.finish_upload.emit(True, f"{name} ошибка при поиске в ВК.")
+                        self.signals.finish_upload.emit(True, f"{name} ошибка при поиске в ВК.", False)
                         return
                     info_data.append(text_playlist)
                     info_data.append(text_vk)
                     update_values["vk_post_id"] = vk_post_id
                     update_values["vk_playlist_id"] = vk_playlist_id
                     update_values["check_vk"] = self.check_vk
+                    update_values["check_novideo_vk"] = self.check_novideo_vk
                 elif self.check_vk == False and data[0][5] != self.check_vk:
                     vk_post_id = None
                     vk_playlist_id = None
@@ -100,16 +103,17 @@ class UploadManagerDorama(QThread):
                     update_values["vk_post_id"] = "NULL"
                     update_values["vk_playlist_id"] = "NULL"
                     update_values["check_vk"] = self.check_vk
+                    update_values["check_novideo_vk"] = self.check_novideo_vk
                 else: 
                     info_data.append(None)
                     info_data.append(None)
-                    vk_playlist_id = data[0][9]
-                    vk_post_id = data[0][8]
+                    vk_playlist_id = data[0][10]
+                    vk_post_id = data[0][9]
                 if self.check_sftp == True and data[0][4] != self.check_sftp:
-                    self.signals.finish_upload.emit(False, f"Ищу папку на сервере...")
+                    self.signals.finish_upload.emit(False, f"Ищу папку на сервере...", False)
                     folder_sftp = UploadDoramaSFTP().search_folder_sftp(self.file_path_video)
                     if not folder_sftp:
-                        self.signals.finish_upload.emit(True, f"{name} не нашел папку на сервере.")
+                        self.signals.finish_upload.emit(True, f"{name} не нашел папку на сервере.", False)
                         return
                     info_data.append(folder_sftp)
                     update_values["check_sftp"] = self.check_sftp
@@ -129,6 +133,8 @@ class UploadManagerDorama(QThread):
                     update_values["check_site"] = self.check_post_site
                     update_values["link_second_site"] = self.link_site_animaunt
                     update_values["link_site"] = self.link_site_malf
+                if data[0][8] != self.check_novideo_vk:
+                    update_values["check_novideo_vk"] = self.check_novideo_vk
                 # if update_values != {}:
                 #     db.update_dorama(os.path.dirname(self.file_path_video), update_values) 
                 
@@ -141,26 +147,26 @@ class UploadManagerDorama(QThread):
             else:
                 info_data = []
                 if self.check_tg:
-                    self.signals.finish_upload.emit(False, f"Ищу пост в ТГ...")
+                    self.signals.finish_upload.emit(False, f"Ищу пост в ТГ...", False)
                     # QCoreApplication.processEvents()
                     tg_post_id, text_tg = UploadDoramaTg().seach_id_post(self.file_path_video)
                     if not tg_post_id:
-                        self.signals.finish_upload.emit(True, f"{name} не нашел пост в ТГ.")
+                        self.signals.finish_upload.emit(True, f"{name} не нашел пост в ТГ.", False)
                         return
                     else:
-                        self.signals.finish_upload.emit(False, f"Нашел {text_tg}")
+                        self.signals.finish_upload.emit(False, f"Нашел {text_tg}", False)
                     info_data.append(text_tg)
                 else:
                     tg_post_id = None
                     info_data.append(None)
                 if self.check_vk:
-                    self.signals.finish_upload.emit(False, f"Ищу плейлист и пост в ВК...")
+                    self.signals.finish_upload.emit(False, f"Ищу плейлист и пост в ВК...", False)
                     vk_post_id, vk_playlist_id, text_playlist, text_vk = UploadDoramaVK().search_vk_dorama(self.file_path_video)
                     if vk_playlist_id == False:
-                        self.signals.finish_upload.emit(True, f"{name} ошибка при поиске в ВК.")
+                        self.signals.finish_upload.emit(True, f"{name} ошибка при поиске в ВК.", False)
                         return
                     else:
-                        self.signals.finish_upload.emit(False, f"Нашел {text_playlist}\n{text_vk}")
+                        self.signals.finish_upload.emit(False, f"Нашел {text_playlist}\n{text_vk}", False)
                     info_data.append(text_playlist)
                     info_data.append(text_vk)
                 else:
@@ -168,14 +174,14 @@ class UploadManagerDorama(QThread):
                     info_data.append(None)
                     info_data.append(None)
                 if self.check_sftp:
-                    self.signals.finish_upload.emit(False, f"Ищу папку на сервере...")
+                    self.signals.finish_upload.emit(False, f"Ищу папку на сервере...", False)
                     # QCoreApplication.processEvents()
                     folder_sftp = UploadDoramaSFTP().search_folder_sftp(self.file_path_video)
                     if not folder_sftp:
-                        self.signals.finish_upload.emit(True, f"{name} не нашел папку на сервере.")
+                        self.signals.finish_upload.emit(True, f"{name} не нашел папку на сервере.", False)
                         return
                     else:
-                        self.signals.finish_upload.emit(False, f"Нашел {folder_sftp}")
+                        self.signals.finish_upload.emit(False, f"Нашел {folder_sftp}", False)
                     info_data.append(folder_sftp)
                 else:
                     folder_sftp = None
@@ -199,10 +205,12 @@ class UploadManagerDorama(QThread):
                     db.update_dorama(os.path.dirname(data_worker[2]), update_values)
         try:
             self.worker.signals.worker_finish_upload.disconnect(self.signals.finish_upload)
+            self.worker.signals.worker_finish_sftp.disconnect(self.signals.finish_sftp)
         except:
             pass
         self.worker = UploadWorkerDorama(*data_worker)
         self.worker.signals.worker_finish_upload.connect(self.signals.finish_upload)
+        self.worker.signals.worker_finish_sftp.connect(self.signals.finish_sftp)
         self.worker.start()
                   
 class UploadWorkerDorama(QThread):
@@ -237,7 +245,7 @@ class UploadWorkerDorama(QThread):
                 self.signals.worker_finish_upload.emit(False, f"Заливаю на сервер...", False)
                 upload_sftp, sftp_time = self.sftp_manager.upload_sftp(self.file_path_video, self.folder_sftp)
                 if upload_sftp:
-                    self.signals.worker_finish_upload.emit(False, f"{name} залита на сервер в {sftp_time}", True)
+                    self.signals.worker_finish_sftp.emit(f"{name} залита на сервер в {sftp_time}")
                 else:
                     self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки на сервер.", True)
                     return
@@ -269,7 +277,7 @@ class UploadWorkerDorama(QThread):
                 else:
                     self.signals.worker_finish_upload.emit(True, f"Ошибка поста на Малфурик.", True)
                     # QMessageBox.warning(None, "Ошибка", f"Ошибка при посте на малфурик")
-            self.signals.worker_finish_upload.emit(True, f"{name} загрузка завершена.", True)
+            self.signals.worker_finish_upload.emit(True, f"{name} загрузка завершена.", False)
 
         except Exception as e:
             self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки {e}", True)

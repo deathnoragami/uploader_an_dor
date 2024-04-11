@@ -1,4 +1,5 @@
 # pyinstaller --noconfirm --onefile --windowed --icon "C:/Python/uploader_an_dor/work_files/updater/update_icon.ico" --name "update" --add-data "C:/Python/uploader_an_dor/work_files/updater/right_pic.gif;." --add-data "C:/Python/uploader_an_dor/work_files/updater/update_icon.ico;."  "C:/Python/uploader_an_dor/work_files/updater/updater.py"
+# pyinstaller --noconfirm --onefile --windowed --icon "D:/GitHub/Uploader/work_files/updater/update_icon.ico" --name "update" --add-data "D:/GitHub/Uploader/work_files/updater/right_pic.gif;." --add-data "D:/GitHub/Uploader/work_files/updater/update_icon.ico;."  "D:/GitHub/Uploader/work_files/updater/updater.py"
 
 import sys
 from PyQt5.QtGui import QMovie, QIcon
@@ -116,8 +117,9 @@ class MainWindow(QMainWindow):
         
     def check_version(self, text):
         self.ui.label_log.setText(f"{self.ui.label_log.text()} <br>{text}")
-        subprocess.Popen("AUPAn.exe")
-        self.close()
+        if text == "Обновление не нужно":
+            subprocess.Popen("AUPAn.exe")
+            self.close()
         
     def unzip_file(self):
         self.ui.label_log.setText(f"{self.ui.label_log.text()} <br>Обновление завершено")

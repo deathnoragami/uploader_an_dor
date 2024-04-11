@@ -1,7 +1,7 @@
 from playwright.sync_api import sync_playwright
 import re
 from datetime import datetime, timedelta
-
+import traceback
 
 class PostDorama:
     def __init__(self):
@@ -69,14 +69,14 @@ class PostDorama:
                 page.goto(link)
                 page.locator("#xf_number_seria").fill(f'{int(name_file)}')
                 page.locator("#xf_date_timer_seria").fill(f"{int(name_file)+1}")
+                current_data = page.locator("#xf_date_timer").get_attribute("value")
+                reform_current_data = datetime.fromisoformat(current_data)
                 if timer == True:
-                    current_data = page.locator("#xf_date_timer").get_attribute("value")
-                    reform_current_data = datetime.fromisoformat(current_data)
                     new_data = reform_current_data + timedelta(weeks=1)
                     reform_new_data = new_data.strftime("%Y-%m-%dT%H:%M")
                     page.locator("#xf_date_timer").fill(reform_new_data)
                 else:
-                    data_now = datetime.fromisoformat(datetime.now())
+                    data_now = datetime.fromisoformat(datetime.now().isoformat())
                     time_difference = reform_current_data - data_now
                     if time_difference.days < 2:
                         new_data = reform_current_data + timedelta(weeks=2)
@@ -88,4 +88,5 @@ class PostDorama:
                 browser.close()
                 return True
         except Exception as e:
+            traceback.print_exc()
             return e

@@ -3,6 +3,7 @@ import os
 import string
 import re
 import traceback
+import log_config
 
 from work_files.messagebox_q import CustomMessageBox
 from vk_api import VkUpload
@@ -81,6 +82,7 @@ class VkPostAnime(QObject):
                 self.vk.likes.add(owner_id=self.group_id, type='post', item_id=post['post_id'])
                 return True
         except Exception as e:
+            log_config.setup_logger().exception(e)
             traceback.print_exc()
             return False
                     
