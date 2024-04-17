@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QMessageBox
 from playwright.sync_api import sync_playwright
 from connect_firebase import Connect
 import traceback
+import log_config
 
 
 
@@ -114,7 +115,7 @@ class UploadDoramaVK():
                                     context.close()
                                     browser.close()
                         except Exception as e:
-                            pass
+                            log_config.setup_logger().exception(e)
             else:
                 upload = vk_api.VkUpload(self.vk_session)
                 photo = upload.photo_wall(f'{file_path_pic}')[0]
@@ -135,6 +136,7 @@ class UploadDoramaVK():
             self.vk.likes.add(owner_id=self.group_id, type='post', item_id=post['post_id'])
             return True
         except Exception as e:
+            log_config.setup_logger().exception(e)
             traceback.print_exc()
             return False
                 

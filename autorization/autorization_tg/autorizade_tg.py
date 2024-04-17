@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QDialog, QMessageBox
 from .autorizationUI import Ui_authorization_tg
 import os
 from pyrogram import Client, errors
+import log_config
 
 
 class AuthorizationTG():
@@ -39,6 +40,7 @@ class AuthorizationTG():
                 self.auto_ui.line_password.setDisabled(False)
                 return self.send_code_info, self.client, self.number_phone
             except Exception as e:
+                log_config.setup_logger().exception(e)
                 self.client.stop()
         else:
             QMessageBox.warning(None, "Ошибка", "Не введен номер телефона")

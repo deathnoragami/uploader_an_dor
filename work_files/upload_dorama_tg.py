@@ -7,6 +7,7 @@ import time
 import asyncio
 import socket
 import tgcrypto
+import log_config
 
 class TgSignals(QObject):
     progress_changed = pyqtSignal(int, float, float, float)
@@ -64,7 +65,7 @@ class UploadDoramaTg(QObject):
             client.stop()
             return True
         except Exception as e:
-            print(e)
+            log_config.setup_logger().exception(e)
             return False
         
         

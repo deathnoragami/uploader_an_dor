@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright
 from PyQt5.QtWidgets import QMessageBox
 
 import os
+import log_config
 
 class Malfurik_web():
     def __init__(self, checker=False):
@@ -34,7 +35,7 @@ class Malfurik_web():
                             QMessageBox.warning(None, "Ошибка", "Вы не успели войти, повторите попытку.")
                 
             except Exception as e:
-                QMessageBox.warning(None, "Ошибка", f"{e}")
+                log_config.setup_logger().exception(e)
 
     def checker(self):
         try:
@@ -54,6 +55,7 @@ class Malfurik_web():
                     browser.close()
                     return False
         except Exception as e:
+            log_config.setup_logger().exception(e)
             context.close()
             browser.close()
             return False

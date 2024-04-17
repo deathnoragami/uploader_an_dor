@@ -5,6 +5,7 @@ from config import Config
 
 import pysftp
 import os
+import log_config
 
 
 class AutorizationServer():
@@ -74,7 +75,7 @@ class AutorizationServer():
             except pysftp.AuthenticationException:
                 QMessageBox.warning(None, "Ошибка", "Неверный логин или пароль")
             except Exception as e:
-                QMessageBox.warning(None, "Ошибка", f"Ошибка подключения, {str(e)}")
+                log_config.setup_logger().exception(e)
 
 
     def add_animaunt(self):
@@ -100,6 +101,6 @@ class AutorizationServer():
             except pysftp.AuthenticationException:
                 QMessageBox.warning(None, "Ошибка", "Неверный логин или пароль")
             except Exception as e:
-                QMessageBox.warning(None, "Ошибка", f"Ошибка подключения, {str(e)}")
+                log_config.setup_logger().exception(e)
 
 

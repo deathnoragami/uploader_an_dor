@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright
 import re
 from datetime import datetime, timedelta
+import log_config
 
 class PostAnimaunt():
     def __init__(self, link_animaunt, link_malfurik, number_seria, name_video, data_time):
@@ -73,4 +74,5 @@ class PostAnimaunt():
                 browser.close()
                 return True
         except Exception as e:
+            log_config.setup_logger().exception(e)
             return e

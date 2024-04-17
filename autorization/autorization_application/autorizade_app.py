@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import QDialog, QMessageBox
 from .autorizationUI import Ui_authorization_app
 from connect_firebase import Connect
-from ui import Ui_MainWindow
 from config import Config as cfg
 
 import os
+import log_config
 
 class AuthorizationApp():
     def __init__(self):
@@ -42,7 +42,7 @@ class AuthorizationApp():
             if found_user is None:
                 QMessageBox.information(None, "Авторизация!", "Пользователь был не найден или логин и пароль не верный.")
         except Exception as e:
-            print(e)
+            log_config.setup_logger().exception(e)
             
 
         

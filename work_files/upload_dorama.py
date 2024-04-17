@@ -10,6 +10,7 @@ from work_files.post_dorama import PostDorama
 
 import os
 import time
+import log_config
 
 class UploadSignals(QObject):
     progress_changed = pyqtSignal(int, float, float, float)
@@ -56,162 +57,168 @@ class UploadManagerDorama(QThread):
         self.signals.askk.connect(self.start_thread)
 
     def run(self):
-        name = os.path.basename(os.path.dirname(self.file_path_video))
-        if self.file_path_image is not None:
-            file_path_image_folder = os.path.dirname(self.file_path_image)
-        else:
-            file_path_image_folder = None
-        with DataBase() as db:
-            update_values = {}
-            data = db.search_by_path_video_dor(os.path.dirname(self.file_path_video))
-            if data != []:
-                info_data = []
-                if self.check_tg == True and data[0][6] != self.check_tg:
-                    self.signals.finish_upload.emit(False, f"Ищу пост в ТГ...", False)
-                    tg_post_id, text_tg = UploadDoramaTg().seach_id_post(self.file_path_video)
-                    if not tg_post_id:
-                        self.signals.finish_upload.emit(True, f"{name} не нашел пост в ТГ.", False)
-                        return
-                    info_data.append(text_tg)
-                    update_values["check_telegram"] = self.check_tg
-                    update_values["tg_post_id"] = tg_post_id
-                elif self.check_tg == False and data[0][6] != self.check_tg:
-                    info_data.append(None)
-                    tg_post_id = None
-                    update_values["check_telegram"] = self.check_tg
-                    update_values["tg_post_id"] = "NULL"
-                else:
-                    info_data.append(None)
-                    tg_post_id = data[0][11]
-                if self.check_vk == True and data[0][5] != self.check_vk:
-                    self.signals.finish_upload.emit(False, f"Ищу плейлист и пост в ВК...", False)
-                    vk_post_id, vk_playlist_id, text_playlist, text_vk = UploadDoramaVK().search_vk_dorama(self.file_path_video)
-                    if vk_playlist_id == False:
-                        self.signals.finish_upload.emit(True, f"{name} ошибка при поиске в ВК.", False)
-                        return
-                    info_data.append(text_playlist)
-                    info_data.append(text_vk)
-                    update_values["vk_post_id"] = vk_post_id
-                    update_values["vk_playlist_id"] = vk_playlist_id
-                    update_values["check_vk"] = self.check_vk
-                    update_values["check_novideo_vk"] = self.check_novideo_vk
-                elif self.check_vk == False and data[0][5] != self.check_vk:
-                    vk_post_id = None
-                    vk_playlist_id = None
-                    info_data.append(None)
-                    info_data.append(None)
-                    update_values["vk_post_id"] = "NULL"
-                    update_values["vk_playlist_id"] = "NULL"
-                    update_values["check_vk"] = self.check_vk
-                    update_values["check_novideo_vk"] = self.check_novideo_vk
-                else: 
-                    info_data.append(None)
-                    info_data.append(None)
-                    vk_playlist_id = data[0][10]
-                    vk_post_id = data[0][9]
-                if self.check_sftp == True and data[0][4] != self.check_sftp:
-                    self.signals.finish_upload.emit(False, f"Ищу папку на сервере...", False)
-                    folder_sftp = UploadDoramaSFTP().search_folder_sftp(self.file_path_video)
-                    if not folder_sftp:
-                        self.signals.finish_upload.emit(True, f"{name} не нашел папку на сервере.", False)
-                        return
-                    info_data.append(folder_sftp)
-                    update_values["check_sftp"] = self.check_sftp
-                    update_values["folder_sftp"] = folder_sftp
-                elif self.check_sftp == False and data[0][4] != self.check_sftp:
-                    folder_sftp = None
-                    info_data.append(None)
-                    update_values["check_sftp"] = self.check_sftp
-                else:
-                    info_data.append(None)
-                    folder_sftp = data[0][3]
-                if self.check_post_site == True and data[0][7] != self.check_post_site:
-                    update_values["check_site"] = self.check_post_site
-                    update_values["link_second_site"] = self.link_site_animaunt
-                    update_values["link_site"] = self.link_site_malf
-                elif self.check_post_site == False and data[0][7] != self.check_post_site:
-                    update_values["check_site"] = self.check_post_site
-                    update_values["link_second_site"] = self.link_site_animaunt
-                    update_values["link_site"] = self.link_site_malf
-                if data[0][8] != self.check_novideo_vk:
-                    update_values["check_novideo_vk"] = self.check_novideo_vk
-                # if update_values != {}:
-                #     db.update_dorama(os.path.dirname(self.file_path_video), update_values) 
-                
-                data_worker = [self.sftp_manager, self.tg_manager, self.file_path_video, self.file_path_image, 
-                               vk_playlist_id, vk_post_id, tg_post_id, folder_sftp,
-                                self.check_sftp, self.check_tg, self.check_vk, self.check_post_site, 
-                                self.check_novideo_vk, self.link_site_animaunt, self.link_site_malf, 
-                                self.main_ui, self.select_dub, self.timming_list]   
-                self.signals.ask.emit([], info_data, data_worker, True, update_values)
+        try:
+            name = os.path.basename(os.path.dirname(self.file_path_video))
+            if self.file_path_image is not None:
+                file_path_image_folder = os.path.dirname(self.file_path_image)
             else:
-                info_data = []
-                if self.check_tg:
-                    self.signals.finish_upload.emit(False, f"Ищу пост в ТГ...", False)
-                    # QCoreApplication.processEvents()
-                    tg_post_id, text_tg = UploadDoramaTg().seach_id_post(self.file_path_video)
-                    if not tg_post_id:
-                        self.signals.finish_upload.emit(True, f"{name} не нашел пост в ТГ.", False)
-                        return
+                file_path_image_folder = None
+            with DataBase() as db:
+                update_values = {}
+                data = db.search_by_path_video_dor(os.path.dirname(self.file_path_video))
+                if data != []:
+                    info_data = []
+                    if self.check_tg == True and data[0][6] != self.check_tg:
+                        self.signals.finish_upload.emit(False, f"Ищу пост в ТГ...", False)
+                        tg_post_id, text_tg = UploadDoramaTg().seach_id_post(self.file_path_video)
+                        if not tg_post_id:
+                            self.signals.finish_upload.emit(True, f"{name} не нашел пост в ТГ.", False)
+                            return
+                        info_data.append(text_tg)
+                        update_values["check_telegram"] = self.check_tg
+                        update_values["tg_post_id"] = tg_post_id
+                    elif self.check_tg == False and data[0][6] != self.check_tg:
+                        info_data.append(None)
+                        tg_post_id = None
+                        update_values["check_telegram"] = self.check_tg
+                        update_values["tg_post_id"] = "NULL"
                     else:
-                        self.signals.finish_upload.emit(False, f"Нашел {text_tg}", False)
-                    info_data.append(text_tg)
-                else:
-                    tg_post_id = None
-                    info_data.append(None)
-                if self.check_vk:
-                    self.signals.finish_upload.emit(False, f"Ищу плейлист и пост в ВК...", False)
-                    vk_post_id, vk_playlist_id, text_playlist, text_vk = UploadDoramaVK().search_vk_dorama(self.file_path_video)
-                    if vk_playlist_id == False:
-                        self.signals.finish_upload.emit(True, f"{name} ошибка при поиске в ВК.", False)
-                        return
+                        info_data.append(None)
+                        tg_post_id = data[0][11]
+                    if self.check_vk == True and data[0][5] != self.check_vk:
+                        self.signals.finish_upload.emit(False, f"Ищу плейлист и пост в ВК...", False)
+                        vk_post_id, vk_playlist_id, text_playlist, text_vk = UploadDoramaVK().search_vk_dorama(self.file_path_video)
+                        if vk_playlist_id == False:
+                            self.signals.finish_upload.emit(True, f"{name} ошибка при поиске в ВК.", False)
+                            return
+                        info_data.append(text_playlist)
+                        info_data.append(text_vk)
+                        update_values["vk_post_id"] = vk_post_id
+                        update_values["vk_playlist_id"] = vk_playlist_id
+                        update_values["check_vk"] = self.check_vk
+                        update_values["check_novideo_vk"] = self.check_novideo_vk
+                    elif self.check_vk == False and data[0][5] != self.check_vk:
+                        vk_post_id = None
+                        vk_playlist_id = None
+                        info_data.append(None)
+                        info_data.append(None)
+                        update_values["vk_post_id"] = "NULL"
+                        update_values["vk_playlist_id"] = "NULL"
+                        update_values["check_vk"] = self.check_vk
+                        update_values["check_novideo_vk"] = self.check_novideo_vk
+                    else: 
+                        info_data.append(None)
+                        info_data.append(None)
+                        vk_playlist_id = data[0][10]
+                        vk_post_id = data[0][9]
+                    if self.check_sftp == True and data[0][4] != self.check_sftp:
+                        self.signals.finish_upload.emit(False, f"Ищу папку на сервере...", False)
+                        folder_sftp = UploadDoramaSFTP().search_folder_sftp(self.file_path_video)
+                        if not folder_sftp:
+                            self.signals.finish_upload.emit(True, f"{name} не нашел папку на сервере.", False)
+                            return
+                        info_data.append(folder_sftp)
+                        update_values["check_sftp"] = self.check_sftp
+                        update_values["folder_sftp"] = folder_sftp
+                    elif self.check_sftp == False and data[0][4] != self.check_sftp:
+                        folder_sftp = None
+                        info_data.append(None)
+                        update_values["check_sftp"] = self.check_sftp
                     else:
-                        self.signals.finish_upload.emit(False, f"Нашел {text_playlist}\n{text_vk}", False)
-                    info_data.append(text_playlist)
-                    info_data.append(text_vk)
+                        info_data.append(None)
+                        folder_sftp = data[0][3]
+                    if self.check_post_site == True and data[0][7] != self.check_post_site:
+                        update_values["check_site"] = self.check_post_site
+                        update_values["link_second_site"] = self.link_site_animaunt
+                        update_values["link_site"] = self.link_site_malf
+                    elif self.check_post_site == False and data[0][7] != self.check_post_site:
+                        update_values["check_site"] = self.check_post_site
+                        update_values["link_second_site"] = self.link_site_animaunt
+                        update_values["link_site"] = self.link_site_malf
+                    if data[0][8] != self.check_novideo_vk:
+                        update_values["check_novideo_vk"] = self.check_novideo_vk
+                    # if update_values != {}:
+                    #     db.update_dorama(os.path.dirname(self.file_path_video), update_values) 
+                    
+                    data_worker = [self.sftp_manager, self.tg_manager, self.file_path_video, self.file_path_image, 
+                                vk_playlist_id, vk_post_id, tg_post_id, folder_sftp,
+                                    self.check_sftp, self.check_tg, self.check_vk, self.check_post_site, 
+                                    self.check_novideo_vk, self.link_site_animaunt, self.link_site_malf, 
+                                    self.main_ui, self.select_dub, self.timming_list]   
+                    self.signals.ask.emit([], info_data, data_worker, True, update_values)
                 else:
-                    vk_post_id, vk_playlist_id = None, None
-                    info_data.append(None)
-                    info_data.append(None)
-                if self.check_sftp:
-                    self.signals.finish_upload.emit(False, f"Ищу папку на сервере...", False)
-                    # QCoreApplication.processEvents()
-                    folder_sftp = UploadDoramaSFTP().search_folder_sftp(self.file_path_video)
-                    if not folder_sftp:
-                        self.signals.finish_upload.emit(True, f"{name} не нашел папку на сервере.", False)
-                        return
+                    info_data = []
+                    if self.check_tg:
+                        self.signals.finish_upload.emit(False, f"Ищу пост в ТГ...", False)
+                        # QCoreApplication.processEvents()
+                        tg_post_id, text_tg = UploadDoramaTg().seach_id_post(self.file_path_video)
+                        if not tg_post_id:
+                            self.signals.finish_upload.emit(True, f"{name} не нашел пост в ТГ.", False)
+                            return
+                        else:
+                            self.signals.finish_upload.emit(False, f"Нашел {text_tg}", False)
+                        info_data.append(text_tg)
                     else:
-                        self.signals.finish_upload.emit(False, f"Нашел {folder_sftp}", False)
-                    info_data.append(folder_sftp)
-                else:
-                    folder_sftp = None
-                    info_data.append(None)
-                data_entry = [os.path.dirname(self.file_path_video), file_path_image_folder, folder_sftp, self.check_sftp,
-                                        self.check_vk, self.check_tg, self.check_post_site, self.check_novideo_vk, vk_post_id, vk_playlist_id,
-                                        tg_post_id, self.link_site_malf, self.link_site_animaunt]
-                data_worker = [self.sftp_manager, self.tg_manager, self.file_path_video, self.file_path_image, 
-                               vk_playlist_id, vk_post_id, tg_post_id, folder_sftp,
-                                self.check_sftp, self.check_tg, self.check_vk, self.check_post_site, 
-                                self.check_novideo_vk, self.link_site_animaunt, self.link_site_malf, 
-                                self.main_ui, self.select_dub, self.timming_list]
-                self.signals.ask.emit(data_entry, info_data, data_worker, False, {})
+                        tg_post_id = None
+                        info_data.append(None)
+                    if self.check_vk:
+                        self.signals.finish_upload.emit(False, f"Ищу плейлист и пост в ВК...", False)
+                        vk_post_id, vk_playlist_id, text_playlist, text_vk = UploadDoramaVK().search_vk_dorama(self.file_path_video)
+                        if vk_playlist_id == False:
+                            self.signals.finish_upload.emit(True, f"{name} ошибка при поиске в ВК.", False)
+                            return
+                        else:
+                            self.signals.finish_upload.emit(False, f"Нашел {text_playlist}\n{text_vk}", False)
+                        info_data.append(text_playlist)
+                        info_data.append(text_vk)
+                    else:
+                        vk_post_id, vk_playlist_id = None, None
+                        info_data.append(None)
+                        info_data.append(None)
+                    if self.check_sftp:
+                        self.signals.finish_upload.emit(False, f"Ищу папку на сервере...", False)
+                        # QCoreApplication.processEvents()
+                        folder_sftp = UploadDoramaSFTP().search_folder_sftp(self.file_path_video)
+                        if not folder_sftp:
+                            self.signals.finish_upload.emit(True, f"{name} не нашел папку на сервере.", False)
+                            return
+                        else:
+                            self.signals.finish_upload.emit(False, f"Нашел {folder_sftp}", False)
+                        info_data.append(folder_sftp)
+                    else:
+                        folder_sftp = None
+                        info_data.append(None)
+                    data_entry = [os.path.dirname(self.file_path_video), file_path_image_folder, folder_sftp, self.check_sftp,
+                                            self.check_vk, self.check_tg, self.check_post_site, self.check_novideo_vk, vk_post_id, vk_playlist_id,
+                                            tg_post_id, self.link_site_malf, self.link_site_animaunt]
+                    data_worker = [self.sftp_manager, self.tg_manager, self.file_path_video, self.file_path_image, 
+                                vk_playlist_id, vk_post_id, tg_post_id, folder_sftp,
+                                    self.check_sftp, self.check_tg, self.check_vk, self.check_post_site, 
+                                    self.check_novideo_vk, self.link_site_animaunt, self.link_site_malf, 
+                                    self.main_ui, self.select_dub, self.timming_list]
+                    self.signals.ask.emit(data_entry, info_data, data_worker, False, {})
+        except Exception as e:
+            log_config.setup_logger().exception(e)
 
     def start_thread(self, data, data_worker, update, update_values):
-        with DataBase() as db:
-            if update == False:
-                db.add_dorama(*data)
-            else:
-                if update_values != {}:
-                    db.update_dorama(os.path.dirname(data_worker[2]), update_values)
         try:
-            self.worker.signals.worker_finish_upload.disconnect(self.signals.finish_upload)
-            self.worker.signals.worker_finish_sftp.disconnect(self.signals.finish_sftp)
-        except:
-            pass
-        self.worker = UploadWorkerDorama(*data_worker)
-        self.worker.signals.worker_finish_upload.connect(self.signals.finish_upload)
-        self.worker.signals.worker_finish_sftp.connect(self.signals.finish_sftp)
-        self.worker.start()
+            with DataBase() as db:
+                if update == False:
+                    db.add_dorama(*data)
+                else:
+                    if update_values != {}:
+                        db.update_dorama(os.path.dirname(data_worker[2]), update_values)
+            try:
+                self.worker.signals.worker_finish_upload.disconnect(self.signals.finish_upload)
+                self.worker.signals.worker_finish_sftp.disconnect(self.signals.finish_sftp)
+            except:
+                pass
+            self.worker = UploadWorkerDorama(*data_worker)
+            self.worker.signals.worker_finish_upload.connect(self.signals.finish_upload)
+            self.worker.signals.worker_finish_sftp.connect(self.signals.finish_sftp)
+            self.worker.start()
+        except Exception as e:
+            log_config.setup_logger().exception(e)
                   
 class UploadWorkerDorama(QThread):
     signals = UploadSignals()
@@ -280,5 +287,6 @@ class UploadWorkerDorama(QThread):
             self.signals.worker_finish_upload.emit(True, f"{name} загрузка завершена.", False)
 
         except Exception as e:
+            log_config.setup_logger().exception(e)
             self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки {e}", True)
             return

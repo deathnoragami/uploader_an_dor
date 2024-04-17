@@ -18,6 +18,8 @@ class Config():
             self.cfg['USER'] = {}
             self.cfg['USER']['uid_program'] = ''
             self.cfg['USER']['vk_token'] = ''
+            self.cfg['USER']['email_hent'] = ''
+            self.cfg['USER']['api_hent'] = ''
             
             with open('assets/config.ini', 'w') as configfile:
                 self.cfg.write(configfile)
@@ -50,12 +52,27 @@ class Config():
     
     def get_vk_token(self):
         return self.cfg['USER']['vk_token']
+    
+    def get_email_hent(self):
+        return self.cfg['USER']['email_hent']
+
+    def get_api_hent(self):
+        return self.cfg['USER']['api_hent']
 
     def set_id_chat(self, id_chat):
         self.cfg['GLOBAL']['id_chat'] = id_chat
         with open('assets/config.ini', 'w') as configfile:
             self.cfg.write(configfile)
-            
+
+    def set_email_hent(self, email):
+        self.cfg['USER']['email_hent'] = email
+        with open('assets/config.ini', 'w') as configfile:
+            self.cfg.write(configfile)
+
+    def set_api_hent(self, api):
+        self.cfg['USER']['api_hent'] = api
+        with open('assets/config.ini', 'w') as configfile:
+            self.cfg.write(configfile)
     
     def set_defoult_path_pic_anime(self, path):
         self.cfg['GLOBAL']['defoult_path_pic_anime'] = path

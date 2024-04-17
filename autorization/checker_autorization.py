@@ -4,6 +4,7 @@ from autorization.autorization_malfurik.autorization_web_malfurik import Malfuri
 from PyQt5.QtCore import QThread, pyqtSignal
 import os
 
+
 class CheckerThread(QThread):
     # Сигналы для отправки результата выполнения функции в основной поток
     finished = pyqtSignal(bool, bool, bool)
@@ -19,7 +20,7 @@ class CheckerThread(QThread):
                 ani_check = Animaunt_web(True).checker()
             else:
                 ani_check = False
-
+            
             if os.path.exists("./assets/malfurik_storage.json"):
                 malf_check = Malfurik_web(True).checker()
             else:

@@ -9,6 +9,7 @@ from config import Config
 from datetime import datetime
 import socket
 import string
+import log_config
 
 
 class SftpSignals(QObject):
@@ -42,6 +43,7 @@ class SFTPManager(QObject):
                 sftp.close()
                 return True, time_upload
         except Exception as e:
+            log_config.setup_logger().exception(e)
             QMessageBox.warning(None, "Ошибка", f"Ошибка при загрузке: {e}")
             return False, ""
 
@@ -81,7 +83,7 @@ class SFTPManager(QObject):
                         return False
         except Exception as e:
             sftp.close()
-            QMessageBox.warning(None, "Ошибка", f"Ошибка при поиске: {e}")
+            log_config.setup_logger().exception(e)
                     
     def progress(self, transferred, total):
         if self.start_time is None:

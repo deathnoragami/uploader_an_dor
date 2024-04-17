@@ -8,6 +8,7 @@ from datetime import datetime
 from config import Config
 from connect_firebase import Connect
 import os
+import log_config
 
 
 class SftpSignals(QObject):
@@ -74,6 +75,7 @@ class UploadDoramaSFTP(QObject):
                 sftp.close()
                 return True, time_upload
         except Exception as e:
+            log_config.setup_logger().exception(e)
             QMessageBox.warning(None, "Ошибка", f"Произошла ошибка при загрузки файла\n{e}")
             return False
     

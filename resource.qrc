@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icon/u.png</file>
+    <file>icon/h.png</file>
     <file>icon/auto.png</file>
     <file>icon/d.png</file>
     <file>icon/a.png</file>

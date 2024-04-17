@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright
 from PyQt5.QtWidgets import QMessageBox
 
 import os
+import log_config
 
 class Animaunt_web():
     def __init__(self, checker=False):
@@ -25,7 +26,7 @@ class Animaunt_web():
                         QMessageBox.warning(None, "Ошибка", "Вы не успели войти, повторите попытку.")
                     
             except Exception as e:
-                QMessageBox.warning(None, "Ошибка", e)
+                log_config.setup_logger().exception(e)
 
     def checker(self):
         try:
@@ -43,4 +44,5 @@ class Animaunt_web():
                 browser.close()
                 return True                
         except Exception as e:
+            log_config.setup_logger().exception(e)
             return False
