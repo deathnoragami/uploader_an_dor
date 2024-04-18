@@ -253,42 +253,42 @@ class UploadWorkerDorama(QThread):
         try:
             name = os.path.basename(os.path.dirname(self.file_path_video))
             name_file = os.path.splitext(os.path.basename(self.file_path_video))[0].lstrip('0').replace('x', '')
-            if self.check_sftp:
-                self.signals.worker_finish_upload.emit(False, f"Заливаю на сервер...", False)
-                upload_sftp, sftp_time = self.sftp_manager.upload_sftp(self.file_path_video, self.folder_sftp)
-                if upload_sftp:
-                    self.signals.worker_finish_sftp.emit(f"{name} залита на сервер в {sftp_time}")
-                else:
-                    self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки на сервер.", True)
-                    return
-            if self.check_tg:
-                upload_tg = self.tg_manager.upload_tg(self.file_path_video, self.tg_post_id)
-                if upload_tg:
-                    self.signals.worker_finish_upload.emit(False, f"{name} залито в ТГ.", True)
-                else:
-                    self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки в ТГ.", True)
-                    return
-            if self.check_vk:
-                self.signals.worker_finish_upload.emit(False, f"Начинаю загрузку в ВК...", False)
-                upload_vk = UploadDoramaVK().upload_vk_dorama(self.file_path_video, self.file_path_image, self.vk_playlist_id, self.vk_post_id, name_file, self.select_dub, self.check_novideo_vk)
-                if upload_vk:
-                    self.signals.worker_finish_upload.emit(False, f"{name} залито в ВК.", True)
-                else:
-                    self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки в ВК.", True)
-                    return
-            if self.check_post_site:
-                post_malf = PostDorama().post_malfurik(self.link_malf, name_file=os.path.basename(self.file_path_video), timming_list=self.timming_list)
-                if post_malf == True:
-                    self.signals.worker_finish_upload.emit(False, f"Запощен на сайт Малфурик.", True)
-                    post_maunt = PostDorama().post_animaunt(self.main_ui.ui.check_timmer_dor.isChecked(), self.link_animaunt, name_file)
-                    if post_maunt != True:
-                        self.signals.worker_finish_upload.emit(True, f"Ошибка поста на Анимаунт.", True)
-                        # QMessageBox.warning(None, "Ошибка", f"Ошибка при посте на анимаунт")
-                    else:
-                        self.signals.worker_finish_upload.emit(False, f"Запощен на сайт Анимаунт.", True)
-                else:
-                    self.signals.worker_finish_upload.emit(True, f"Ошибка поста на Малфурик.", True)
-                    # QMessageBox.warning(None, "Ошибка", f"Ошибка при посте на малфурик")
+            # if self.check_sftp:
+            #     self.signals.worker_finish_upload.emit(False, f"Заливаю на сервер...", False)
+            #     upload_sftp, sftp_time = self.sftp_manager.upload_sftp(self.file_path_video, self.folder_sftp)
+            #     if upload_sftp:
+            #         self.signals.worker_finish_sftp.emit(f"{name} залита на сервер в {sftp_time}")
+            #     else:
+            #         self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки на сервер.", True)
+            #         return
+            # if self.check_tg:
+            #     upload_tg = self.tg_manager.upload_tg(self.file_path_video, self.tg_post_id)
+            #     if upload_tg:
+            #         self.signals.worker_finish_upload.emit(False, f"{name} залито в ТГ.", True)
+            #     else:
+            #         self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки в ТГ.", True)
+            #         return
+            # if self.check_vk:
+            #     self.signals.worker_finish_upload.emit(False, f"Начинаю загрузку в ВК...", False)
+            #     upload_vk = UploadDoramaVK().upload_vk_dorama(self.file_path_video, self.file_path_image, self.vk_playlist_id, self.vk_post_id, name_file, self.select_dub, self.check_novideo_vk)
+            #     if upload_vk:
+            #         self.signals.worker_finish_upload.emit(False, f"{name} залито в ВК.", True)
+            #     else:
+            #         self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки в ВК.", True)
+            #         return
+            # if self.check_post_site:
+            #     post_malf = PostDorama().post_malfurik(self.link_malf, name_file=os.path.basename(self.file_path_video), timming_list=self.timming_list)
+            #     if post_malf == True:
+            #         self.signals.worker_finish_upload.emit(False, f"Запощен на сайт Малфурик.", True)
+            #         post_maunt = PostDorama().post_animaunt(self.main_ui.ui.check_timmer_dor.isChecked(), self.link_animaunt, name_file)
+            #         if post_maunt != True:
+            #             self.signals.worker_finish_upload.emit(True, f"Ошибка поста на Анимаунт.", True)
+            #             # QMessageBox.warning(None, "Ошибка", f"Ошибка при посте на анимаунт")
+            #         else:
+            #             self.signals.worker_finish_upload.emit(False, f"Запощен на сайт Анимаунт.", True)
+            #     else:
+            #         self.signals.worker_finish_upload.emit(True, f"Ошибка поста на Малфурик.", True)
+            #         # QMessageBox.warning(None, "Ошибка", f"Ошибка при посте на малфурик")
             try:
                 tg.main('logger', self.tg_values[0], name_file, name)
                 tg.main('ad', self.tg_values[1], name_file, name, self.tg_values[0])

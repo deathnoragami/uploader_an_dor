@@ -2,8 +2,6 @@
 # pyinstaller --noconfirm --onedir --windowed --icon "D:/GitHub/Uploader/icon.ico" --name "AUPAn" --version-file "D:/GitHub/Uploader/version.txt" --add-data "D:/GitHub/Uploader/timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json;." --add-data "D:/GitHub/Uploader/.env;." --add-data "D:/GitHub/Uploader/icon.ico;." --add-data "D:/GitHub/Uploader/auto.png;." --add-data "D:/GitHub/Uploader/red.png;." --add-data "D:/GitHub/Uploader/green.png;." "D:/GitHub/Uploader/app.py"
 
 
-# ! D:\GitHub\Uploader\venv\Scripts\python.exe
-
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QIcon, QPainter, QColor, QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem, QDateEdit, QWidget, \

@@ -11,21 +11,21 @@ class CheckerThread(QThread):
 
     def run(self):
         try:
-            # if os.path.exists("./assets/vk_storage.json"):
-            #     vk_check = AutorizationWebVK(checker=True).check_autorezade(link="https://vk.com/", checker=True)
-            # else:
-            #     vk_check = False
+            if os.path.exists("./assets/vk_storage.json"):
+                vk_check = AutorizationWebVK(checker=True).check_autorezade(link="https://vk.com/", checker=True)
+            else:
+                vk_check = False
             
-            # if os.path.exists("./assets/animaunt_storage.json"):
-            #     ani_check = Animaunt_web(True).checker()
-            # else:
-            #     ani_check = False
+            if os.path.exists("./assets/animaunt_storage.json"):
+                ani_check = Animaunt_web(True).checker()
+            else:
+                ani_check = False
             
-            # if os.path.exists("./assets/malfurik_storage.json"):
-            #     malf_check = Malfurik_web(True).checker()
-            # else:
-            #     malf_check = False
-            vk_check, malf_check, ani_check = True, True, True
+            if os.path.exists("./assets/malfurik_storage.json"):
+                malf_check = Malfurik_web(True).checker()
+            else:
+                malf_check = False
+            # vk_check, malf_check, ani_check = True, True, True
             # Отправка результата в основной поток через сигнал
             self.finished.emit(malf_check, ani_check, vk_check)
         except Exception as e:
