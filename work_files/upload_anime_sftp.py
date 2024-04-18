@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
-from connect_firebase import Connect
 from work_files.messagebox_q import CustomMessageBox
 import os
 import pysftp
@@ -22,12 +21,9 @@ class SFTPManager(QObject):
 
     def upload_file(self, dirname, file_path):
         try:
-            db = Connect()
-            uid = Config().get_uid_program()
-            user_data = db.find_user_uid(uid)
-            maunt_login = user_data.get('maunt_login')
-            maunt_pass = user_data.get('maunt_pass')
-            db.close()
+            user_data = Config().get_info_maunt()
+            maunt_login = user_data[0]
+            maunt_pass = user_data[1]
             
             self.start_time = None
             cnopts = pysftp.CnOpts()
@@ -50,12 +46,9 @@ class SFTPManager(QObject):
             
     def search_folder_sftp(self, name_folder):
         try:
-            db = Connect()
-            uid = Config().get_uid_program()
-            user_data = db.find_user_uid(uid)
-            maunt_login = user_data.get('maunt_login')
-            maunt_pass = user_data.get('maunt_pass')
-            db.close()
+            user_data = Config().get_info_maunt()
+            maunt_login = user_data[0]
+            maunt_pass = user_data[1]
             cnopts = pysftp.CnOpts()
             cnopts.hostkeys = None
             

@@ -7,24 +7,19 @@ import re
 import time
 from PyQt5.QtWidgets import QMessageBox
 from playwright.sync_api import sync_playwright
-from connect_firebase import Connect
+from postgre import Connect
 import traceback
 import log_config
 
 
 
 class UploadDoramaVK():
-   
     def __init__(self):
         token = Config().get_vk_token()
         self.vk_session = vk_api.VkApi(token=f'{token}')
         self.vk = self.vk_session.get_api()
         self.group_id = -int(os.getenv("ID_GROUP_DORAMA"))
-        db = Connect()
-        uid = Config().get_uid_program()
-        user = db.find_user_uid(uid)
-        self.ping_timmer = user.get('ping')
-        db.close()
+
 
     def search_vk_dorama(self, file_path):
         playlist_name = os.path.basename(os.path.dirname(file_path))
@@ -73,6 +68,7 @@ class UploadDoramaVK():
         
     def upload_vk_dorama(self, file_path, file_path_pic, playlist_id, vk_post_id, name_file, select_dub, check_novideo_vk):
         try:
+            self.ping_timmer = Connect().find_user_uid(Config().get_uid_program())[2]
             if check_novideo_vk == False:
                 videos = self.vk.video.get(owner_id=self.group_id, album_id=playlist_id)
                 last_video_title = videos['items'][0]['title']

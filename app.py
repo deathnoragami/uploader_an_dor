@@ -60,9 +60,7 @@ import traceback
 
 import qdarktheme
 # from qt_material import apply_stylesheet
-
-
-import connect_firebase
+from postgre import Connect
 
 load_dotenv(dotenv_path=resource_path.path(".env"))
 
@@ -204,7 +202,6 @@ class MainWindow(QMainWindow):
 
         self.setWindowIcon(QIcon(resource_path.path("icon.ico")))
         # self.center_screen()
-        db = connect_firebase.Connect()
 
         ############## ОБНУЛЕНИЕ ПЕРЕМЕННЫХ #############################
 
@@ -233,16 +230,17 @@ class MainWindow(QMainWindow):
         config = Config()
         uid = config.get_uid_program()
         if not uid == '':
-            user_data = db.find_user_uid(uid)
+            user_data = Connect().find_user_uid(uid)
             if user_data:
                 user_autorization = True
                 try:
-                    self.ui.btn_navi_hentai.setEnabled(user_data['hentai'])
+                    self.ui.btn_navi_hentai.setEnabled(user_data[4])
                     self.ui.line_hentai_mail.setText(Config().get_email_hent())
                     self.ui.line_hentai_api.setText(Config().get_api_hent())
                 except:
                     pass
-                self.ui.menu_lbl_profile.setText(f"Профиль: {user_data['name']}")
+                self.name_user = user_data[0]
+                self.ui.menu_lbl_profile.setText(f"Профиль: {self.name_user}")
         else:
             user_data = False
 
@@ -261,14 +259,14 @@ class MainWindow(QMainWindow):
 
         ########## Добавление чекбоксов дабберов #########################s####
 
-        self.dub_data = db.get_dub_data()
+        self.dub_data = Connect().get_dub_data()
         self.ui.scrollAreaWidgetContents.setLayout(QtWidgets.QVBoxLayout())
-        sorted_result = sorted(self.dub_data, key=lambda x: x['id'])
+        # sorted_result = sorted(self.dub_data, key=lambda x: x['id'])
         self.checkbox_vars = []
-        for item in sorted_result:
-            checkbox = QtWidgets.QCheckBox(item['id'])
-            ping_value = item.get('ping', '')
-            self.checkbox_vars.append((checkbox, ping_value, item['id']))
+        for item in self.dub_data:
+            checkbox = QtWidgets.QCheckBox(item[0])  # Используем второй элемент кортежа как название чекбокса
+            ping_value = item[2] # Проверяем наличие значения 'ping' и присваиваем, если есть
+            self.checkbox_vars.append((checkbox, ping_value, item[0]))  # Добавляем кортеж в список checkbox_vars
             self.ui.scrollAreaWidgetContents.layout().addWidget(checkbox)
 
         #####################################################################
@@ -285,16 +283,12 @@ class MainWindow(QMainWindow):
         if os.path.exists("assets/my_session_tg.session"):
             self.ui.check_tg_dor.setEnabled(True)
         if user_data:
-            if ('malf_pass' not in user_data or not user_data['malf_pass']) or (
-                    'malf_login' not in user_data or not user_data['malf_login']):
-                pass
-            else:
-                self.ui.check_sftp_dor.setEnabled(True)
-            if ('maunt_login' not in user_data or not user_data['maunt_login']) or (
-                    'maunt_pass' not in user_data or not user_data['maunt_pass']):
-                pass
-            else:
+            maunt = Config().get_info_maunt()
+            if maunt[0] != '' and maunt[1] != '':
                 self.ui.check_sftp_anime.setEnabled(True)
+            malf = Config().get_info_malf()
+            if malf[0] != '' and malf[1] != '':
+                self.ui.check_sftp_dor.setEnabled(True)
                 # self.ui.btn_video_anime.setEnabled(True)
         if os.path.exists("assets/animaunt_storage.json"):
             self.ui.check_post_site.setEnabled(True)
@@ -304,7 +298,6 @@ class MainWindow(QMainWindow):
         #     self.ui.btn_chose_pic_dor.setEnabled(True)
         #####################################################################
 
-        db.close()
         ################## ТАЙМИНГ ##################################  
 
         if os.path.exists("assets/timming.json"):
@@ -559,22 +552,10 @@ class MainWindow(QMainWindow):
 
     def autorization_sftp(self):
         AutorizationServer()
-        uid = Config().get_uid_program()
-        db = connect_firebase.Connect()
-        user_data = db.find_user_uid(uid)
-        db.close()
-        if user_data:
-            if ('malf_pass' not in user_data or not user_data['malf_pass']) or (
-                    'malf_login' not in user_data or not user_data['malf_login']):
-                pass
-            else:
-                self.ui.check_sftp_dor.setEnabled(True)
-            if ('maunt_login' not in user_data or not user_data['maunt_login']) or (
-                    'maunt_pass' not in user_data or not user_data['maunt_pass']):
-                pass
-            else:
-                self.ui.check_sftp_anime.setEnabled(True)
-                self.ui.btn_video_anime.setEnabled(True)
+        if all(item != '' for item in Config().get_info_malf()):
+            self.ui.check_sftp_dor.setEnabled(True)
+        if all(item != '' for item in Config().get_info_maunt()):
+            self.ui.check_sftp_anime.setEnabled(True)
 
     def autorization_animaunt_web(self):
         Animaunt_web()
@@ -631,16 +612,18 @@ class MainWindow(QMainWindow):
             item = QListWidgetItem(item_text)
             item.setData(Qt.UserRole, data)
             self.ui.list_timming.insertItem(0, item)
+            self.get_timming(item)
 
     def get_timming(self, item):
         item_data = item.data(Qt.UserRole)
-        times, name_ad = timming.format_timming(item_data)
+        self.times, self.name_ad = timming.format_timming(item_data)
         select_item = self.ui.list_timming.currentItem()
         if select_item is not None:
             item_data = select_item.data(Qt.UserRole)
             self.timming_list = timming.get_list(item_data)
-        self.ui.textedit_timming_ad.setText(times)
-        self.ui.textedit_name_ad.setText(name_ad)
+        self.ui.textedit_timming_ad.setText(self.times)
+        self.ui.textedit_name_ad.setText(self.name_ad)
+        self.timming_list = timming.get_list(item_data)
 
     def delete_select_timming(self):
         selected_item = self.ui.list_timming.currentItem()
@@ -851,13 +834,6 @@ class MainWindow(QMainWindow):
                         self.get_timming(item)
                         self.timming_list = timming.get_list(item_data)
                         break
-            if self.timming_list is None:
-                select_item = self.ui.list_timming.currentItem()
-                if select_item is not None:
-                    item_data = select_item.data(Qt.UserRole)
-                    self.timming_list = timming.get_list(item_data)
-                    if self.timming_list is None:
-                        QMessageBox.warning(None, "Ошибка", "Не нашел тайминга")
             if os.path.exists("assets/vk_storage.json"):
                 self.ui.btn_chose_pic_dor.setEnabled(True)
         else:
@@ -916,6 +892,10 @@ class MainWindow(QMainWindow):
         self.ui.logging_upload.append(text)
 
     def ask(self, data, info, data_worker, update, update_values):
+        if self.timming_list != None:
+            list_tg = [self.name_user, self.name_ad]
+        else: 
+            list_tg = [self.name_user, "Не выбирал рекламу"]
         if update == False:
             title = f'VK плейлист - {info[1]}\n' \
                     f'VK пост - {info[2]}\n' \
@@ -924,12 +904,12 @@ class MainWindow(QMainWindow):
             q = QMessageBox.information(self, 'Информация', f"Проверьте данные\n{title}",
                                         QMessageBox.Yes | QMessageBox.No)
             if q == QMessageBox.Yes:
-                self.upload_manager_dorama.signals.askk.emit(data, data_worker, update, update_values)
+                self.upload_manager_dorama.signals.askk.emit(data, data_worker, update, update_values,
+                                                             list_tg)
             else:
                 self.upload_manager_dorama.exit()
         else:
             if not all(value is None for value in info):
-                print(info)
                 title = f'VK плейлист - {info[1]}\n' \
                         f'VK пост - {info[2]}\n' \
                         f'TG пост - {info[0]}\n' \
@@ -937,11 +917,13 @@ class MainWindow(QMainWindow):
                 q = QMessageBox.information(self, 'Информация', f"Проверьте данные\n{title}",
                                             QMessageBox.Yes | QMessageBox.No)
                 if q == QMessageBox.Yes:
-                    self.upload_manager_dorama.signals.askk.emit(data, data_worker, update, update_values)
+                    self.upload_manager_dorama.signals.askk.emit(data, data_worker, update, update_values,
+                                                                 list_tg)
                 else:
                     self.upload_manager_dorama.exit()
             else:
-                self.upload_manager_dorama.signals.askk.emit(data, data_worker, update, update_values)
+                self.upload_manager_dorama.signals.askk.emit(data, data_worker, update, update_values,
+                                                             list_tg)
 
     def post_malf(self):
         select_item = self.ui.list_timming.currentItem()
@@ -989,6 +971,7 @@ class MainWindow(QMainWindow):
         else:
             self.ui.logging_upload.append(name)
         if warning:
+            self.timming_list = None
             self.ui.logging_upload.append(name)
             self.file_path_dorama_pic = None
             self.file_path_dorama_video = None
@@ -1047,7 +1030,6 @@ class MainWindow(QMainWindow):
             cursor.movePosition(cursor.End)
             cursor.select(cursor.BlockUnderCursor)
             cursor.removeSelectedText()
-            print('ydalil')
         self.ui.link_upload.append(link)
 
     def del_file_hent(self):

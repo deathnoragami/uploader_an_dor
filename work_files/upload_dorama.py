@@ -8,16 +8,20 @@ from work_files.upload_dorama_vk import UploadDoramaVK
 from work_files.upload_dorama_sftp import UploadDoramaSFTP
 from work_files.post_dorama import PostDorama
 
+from custom_widget.win_notify import notify
+
 import os
 import time
 import log_config
+
+import custom_widget.logger_tg as tg
 
 class UploadSignals(QObject):
     progress_changed = pyqtSignal(int, float, float, float)
     finish_upload = pyqtSignal(bool, str, bool)
     worker_finish_upload = pyqtSignal(bool, str, bool)
     ask = pyqtSignal(list, list, list, bool, dict)
-    askk = pyqtSignal(list, list, bool, dict)
+    askk = pyqtSignal(list, list, bool, dict, list)
     worker_finish_sftp = pyqtSignal(str)
     finish_sftp = pyqtSignal(str)
 
@@ -200,7 +204,7 @@ class UploadManagerDorama(QThread):
         except Exception as e:
             log_config.setup_logger().exception(e)
 
-    def start_thread(self, data, data_worker, update, update_values):
+    def start_thread(self, data, data_worker, update, update_values, tg_values):
         try:
             with DataBase() as db:
                 if update == False:
@@ -213,7 +217,7 @@ class UploadManagerDorama(QThread):
                 self.worker.signals.worker_finish_sftp.disconnect(self.signals.finish_sftp)
             except:
                 pass
-            self.worker = UploadWorkerDorama(*data_worker)
+            self.worker = UploadWorkerDorama(*data_worker, tg_values)
             self.worker.signals.worker_finish_upload.connect(self.signals.finish_upload)
             self.worker.signals.worker_finish_sftp.connect(self.signals.finish_sftp)
             self.worker.start()
@@ -223,7 +227,7 @@ class UploadManagerDorama(QThread):
 class UploadWorkerDorama(QThread):
     signals = UploadSignals()
     def __init__(self, sftp_manager, tg_manager, file_path_video, file_path_image, vk_playlist_id, vk_post_id, tg_post_id, folder_sftp,
-                        check_sftp, check_tg, check_vk, check_post_site, check_novideo_vk, link_site_animaunt, link_site_malf, main_ui, select_dub, timming_list):
+                        check_sftp, check_tg, check_vk, check_post_site, check_novideo_vk, link_site_animaunt, link_site_malf, main_ui, select_dub, timming_list, tg_values):
         super().__init__()
         self.sftp_manager = sftp_manager
         self.tg_manager = tg_manager
@@ -243,6 +247,7 @@ class UploadWorkerDorama(QThread):
         self.main_ui = main_ui
         self.select_dub = select_dub
         self.timming_list = timming_list
+        self.tg_values = tg_values
 
     def run(self):
         try:
@@ -284,9 +289,16 @@ class UploadWorkerDorama(QThread):
                 else:
                     self.signals.worker_finish_upload.emit(True, f"Ошибка поста на Малфурик.", True)
                     # QMessageBox.warning(None, "Ошибка", f"Ошибка при посте на малфурик")
+            try:
+                tg.main('logger', self.tg_values[0], name_file, name)
+                tg.main('ad', self.tg_values[1], name_file, name, self.tg_values[0])
+            except Exception as e:
+                log_config.setup_logger().exception(e)
             self.signals.worker_finish_upload.emit(True, f"{name} загрузка завершена.", False)
+            notify(title="Загрузчик", msg=f"{name} {name_file} успешно загружен.")
 
         except Exception as e:
             log_config.setup_logger().exception(e)
+            notify(title="Загрузчик", msg=f"{name} {name_file} ошибка загрузки {e}")
             self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки {e}", True)
             return

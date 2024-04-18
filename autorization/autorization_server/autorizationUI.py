@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\autorization\autorization_server\autoUI.ui'
+# Form implementation generated from reading ui file 'autorization\autorization_server\autoUI.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -22,12 +22,14 @@ class Ui_autorization_server(object):
         self.animaunt_login.setObjectName("animaunt_login")
         self.pass_animaunt = QtWidgets.QLineEdit(autorization_server)
         self.pass_animaunt.setGeometry(QtCore.QRect(150, 30, 141, 31))
+        self.pass_animaunt.setEchoMode(QtWidgets.QLineEdit.Password)
         self.pass_animaunt.setObjectName("pass_animaunt")
         self.login_malfurik = QtWidgets.QLineEdit(autorization_server)
         self.login_malfurik.setGeometry(QtCore.QRect(10, 90, 131, 31))
         self.login_malfurik.setObjectName("login_malfurik")
         self.pass_malfurik = QtWidgets.QLineEdit(autorization_server)
         self.pass_malfurik.setGeometry(QtCore.QRect(150, 90, 141, 31))
+        self.pass_malfurik.setEchoMode(QtWidgets.QLineEdit.Password)
         self.pass_malfurik.setObjectName("pass_malfurik")
         self.btn_enter_animaunt = QtWidgets.QPushButton(autorization_server)
         self.btn_enter_animaunt.setGeometry(QtCore.QRect(310, 30, 121, 31))
@@ -49,13 +51,3 @@ class Ui_autorization_server(object):
         self.pass_malfurik.setPlaceholderText(_translate("autorization_server", "Пароль малфурик"))
         self.btn_enter_animaunt.setText(_translate("autorization_server", "Войти"))
         self.btn_enter_malfurik.setText(_translate("autorization_server", "Войти"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    autorization_server = QtWidgets.QWidget()
-    ui = Ui_autorization_server()
-    ui.setupUi(autorization_server)
-    autorization_server.show()
-    sys.exit(app.exec_())

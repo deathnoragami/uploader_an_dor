@@ -41,25 +41,24 @@ class Dubbers:
                                    text)
                 for link in links:
                     for item in main_window_ui.dub_data:
-                        if item.get('link') == sender_id:
-                            title = item.get('id')
+                        if item[1] == sender_id:
+                            title = item[0]
                             found_message.append(
                                 f"{title} {message_datatime.strftime('%d.%m.%Y %H:%M')}")
                             break
                 if 'attachments' in message and len(message['attachments']) > 0:
                     for item in main_window_ui.dub_data:
-                        if isinstance(item, dict):
-                            key = item.get('id')
-                            ping_value = item.get('link')
-                        else:
-                            ping_value = key
-                        if sender_id == ping_value:
+                        # if isinstance(item, dict):
+                        key = item[0]
+                        ping_value = item[1]
+                        if int(sender_id) == int(ping_value):
                             title = key
                             if f"{title} {message_datatime.strftime('%d.%m.%Y %H:%M')}" not in found_message:
                                 found_message.append(f"{title} {message_datatime.strftime('%d.%m.%Y %H:%M')}")
                             for checkbox, ping, name in main_window_ui.checkbox_vars:
                                 if name == key:
                                     checkbox.setChecked(True)
+                                    break
         if btn:
             number = main_window_ui.ui.line_search_dub_number_serial.text()
             name = main_window_ui.ui.line_search_dub_name_serial.text()

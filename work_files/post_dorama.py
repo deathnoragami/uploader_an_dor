@@ -10,7 +10,7 @@ class PostDorama:
     def post_malfurik(self, link, timming_list = None, name_file = None):
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=False)
+                browser = p.chromium.launch(headless=True)
                 context = browser.new_context(storage_state="assets/malfurik_storage.json")
                 page = context.new_page()
                 page.set_default_timeout(120000)

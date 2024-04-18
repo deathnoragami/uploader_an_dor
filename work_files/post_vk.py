@@ -49,12 +49,8 @@ class VkPostAnime(QObject):
     
            
     def post_vk(self):
-        from connect_firebase import Connect
-        db = Connect()
-        uid = Config().get_uid_program()
-        user = db.find_user_uid(uid)
-        ping_timmer = user.get('ping')
-        db.close()
+        from postgre import Connect
+        ping_timmer = Connect().find_user_uid(Config().get_uid_program())[2]
         
         try:
             if self.post_id:

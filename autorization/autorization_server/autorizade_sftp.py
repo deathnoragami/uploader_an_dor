@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QDialog, QMessageBox
 from .autorizationUI import Ui_autorization_server
-from connect_firebase import Connect
 from config import Config
 
 import pysftp
@@ -17,37 +16,23 @@ class AutorizationServer():
 
         self.auto_ui.btn_enter_malfurik.clicked.connect(self.add_malfurik)
         self.auto_ui.btn_enter_animaunt.clicked.connect(self.add_animaunt)
-        
-        uid = Config().get_uid_program()
-        db = Connect()
-        user_data = db.find_user_uid(uid)
-        db.close()
-        if user_data:
-            # if all(key in user_data and user_data[key] for key in ['malf_pass', 'malf_login', 'maunt_login', 'maunt_pass']):
-            #         self.auto_ui.animaunt_login.setDisabled(True)
-            #         self.auto_ui.pass_animaunt.setDisabled(True)
-            #         self.auto_ui.login_malfurik.setDisabled(True)
-            #         self.auto_ui.pass_malfurik.setDisabled(True)
-            #         self.auto_ui.btn_enter_animaunt.setDisabled(True)
-            #         self.auto_ui.btn_enter_animaunt.setText('Авторизован')
-            #         self.auto_ui.btn_enter_malfurik.setDisabled(True)
-            #         self.auto_ui.btn_enter_malfurik.setText('Авторизован')
-            # else:
-            if ('malf_pass' not in user_data or not user_data['malf_pass']) or ('malf_login' not in user_data or not user_data['malf_login']):
-                pass
-            else:
-                self.auto_ui.login_malfurik.setDisabled(True)
-                self.auto_ui.pass_malfurik.setDisabled(True)
-                self.auto_ui.btn_enter_malfurik.setDisabled(True)
-                self.auto_ui.btn_enter_malfurik.setText('Авторизован')
-            if ('maunt_login' not in user_data or not user_data['maunt_login']) or ('maunt_pass' not in user_data or not user_data['maunt_pass']):
-                pass
-            else:
-                self.auto_ui.animaunt_login.setDisabled(True)
-                self.auto_ui.pass_animaunt.setDisabled(True)
-                self.auto_ui.btn_enter_animaunt.setDisabled(True)
-                self.auto_ui.btn_enter_animaunt.setText('Авторизован')
 
+        malf = Config().get_info_malf()
+        if malf[0] != '' and malf[1] != '':
+            self.auto_ui.login_malfurik.setText(malf[0])
+            self.auto_ui.pass_malfurik.setText(malf[1])
+            self.auto_ui.login_malfurik.setDisabled(True)
+            self.auto_ui.pass_malfurik.setDisabled(True)
+            self.auto_ui.btn_enter_malfurik.setDisabled(True)
+            self.auto_ui.btn_enter_malfurik.setText('Авторизован')
+        maunt = Config().get_info_maunt()
+        if maunt[0] != '' and maunt[1] != '':
+            self.auto_ui.animaunt_login.setText(maunt[0])
+            self.auto_ui.pass_animaunt.setText(maunt[1])
+            self.auto_ui.animaunt_login.setDisabled(True)
+            self.auto_ui.pass_animaunt.setDisabled(True)
+            self.auto_ui.btn_enter_animaunt.setDisabled(True)
+            self.auto_ui.btn_enter_animaunt.setText('Авторизован')
 
         widget.exec_()
         
@@ -68,10 +53,7 @@ class AutorizationServer():
                     self.auto_ui.btn_enter_malfurik.setText('Авторизован')
                     self.auto_ui.login_malfurik.setDisabled(True)
                     self.auto_ui.pass_malfurik.setDisabled(True)
-                    uid = Config().get_uid_program()
-                    self.db = Connect()
-                    self.db.update_malf_data(uid, login_malf, pass_malf)
-                    self.db.close()
+                    Config().set_info_malf(login_malf, pass_malf)
             except pysftp.AuthenticationException:
                 QMessageBox.warning(None, "Ошибка", "Неверный логин или пароль")
             except Exception as e:
@@ -94,10 +76,7 @@ class AutorizationServer():
                     self.auto_ui.btn_enter_animaunt.setText('Авторизован')
                     self.auto_ui.animaunt_login.setDisabled(True)
                     self.auto_ui.pass_animaunt.setDisabled(True)
-                    uid = Config().get_uid_program()
-                    self.db = Connect()
-                    self.db.update_maunt_data(uid, login_maunt, pass_maunt)
-                    self.db.close()
+                    Config().set_info_maunt(login_maunt, pass_maunt)
             except pysftp.AuthenticationException:
                 QMessageBox.warning(None, "Ошибка", "Неверный логин или пароль")
             except Exception as e:

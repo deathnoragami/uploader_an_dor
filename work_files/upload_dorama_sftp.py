@@ -6,7 +6,6 @@ import socket
 import string
 from datetime import datetime
 from config import Config
-from connect_firebase import Connect
 import os
 import log_config
 
@@ -22,12 +21,9 @@ class UploadDoramaSFTP(QObject):
         self.main_ui = main_ui
         
     def search_folder_sftp(self, file_path):
-        db = Connect()
-        uid = Config().get_uid_program()
-        user_data = db.find_user_uid(uid)
-        malf_login = user_data.get('malf_login')
-        malf_pass = user_data.get('malf_pass')
-        db.close()
+        user_data = Config().get_info_malf()
+        malf_login = user_data[0]
+        malf_pass = user_data[1]
         cnopts = pysftp.CnOpts()
         cnopts.hostkeys = None
         with pysftp.Connection(host=os.getenv("MALFURIK_IP_SERVER"), username=malf_login, password=malf_pass, port=22, cnopts=cnopts) as sftp:
@@ -57,12 +53,9 @@ class UploadDoramaSFTP(QObject):
             
     def upload_sftp(self, file_path, folder_sftp):
         try:
-            db = Connect()
-            uid = Config().get_uid_program()
-            user_data = db.find_user_uid(uid)
-            malf_login = user_data.get('malf_login')
-            malf_pass = user_data.get('malf_pass')
-            db.close()
+            user_data = Config().get_info_malf()
+            malf_login = user_data[0]
+            malf_pass = user_data[1]
             cnopts = pysftp.CnOpts()
             cnopts.hostkeys = None
             with pysftp.Connection(host=os.getenv("MALFURIK_IP_SERVER"), username=malf_login, password=malf_pass, port=22, cnopts=cnopts) as sftp:

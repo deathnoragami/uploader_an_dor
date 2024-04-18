@@ -50,6 +50,9 @@
      <height>31</height>
     </rect>
    </property>
+   <property name="echoMode">
+    <enum>QLineEdit::Password</enum>
+   </property>
    <property name="placeholderText">
     <string>Пароль Анимаунт</string>
    </property>
@@ -75,6 +78,9 @@
      <width>141</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="echoMode">
+    <enum>QLineEdit::Password</enum>
    </property>
    <property name="placeholderText">
     <string>Пароль малфурик</string>
