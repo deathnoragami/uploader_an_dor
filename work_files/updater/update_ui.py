@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'work_files/updater/updater.ui'
+# Form implementation generated from reading ui file '.\work_files\updater\updater.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -14,15 +14,123 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(528, 232)
-        MainWindow.setMinimumSize(QtCore.QSize(528, 232))
-        MainWindow.setMaximumSize(QtCore.QSize(528, 232))
+        MainWindow.resize(821, 370)
+        MainWindow.setMinimumSize(QtCore.QSize(821, 370))
+        MainWindow.setMaximumSize(QtCore.QSize(821, 370))
+        MainWindow.setStyleSheet("background-color: rgb(235, 240, 244);")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.label_log = QtWidgets.QLabel(self.centralwidget)
-        self.label_log.setGeometry(QtCore.QRect(10, 10, 291, 181))
-        self.label_log.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
-        self.label_log.setObjectName("label_log")
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(20, 10, 71, 71))
+        self.label.setObjectName("label")
+        self.label_2 = QtWidgets.QLabel(self.centralwidget)
+        self.label_2.setGeometry(QtCore.QRect(100, 10, 201, 41))
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        self.label_3.setGeometry(QtCore.QRect(100, 50, 111, 16))
+        self.label_3.setObjectName("label_3")
+        self.frame = QtWidgets.QFrame(self.centralwidget)
+        self.frame.setGeometry(QtCore.QRect(20, 100, 781, 211))
+        self.frame.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+"border: none;\n"
+"border-radius: 20px;")
+        self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame.setObjectName("frame")
+        self.label_8 = QtWidgets.QLabel(self.frame)
+        self.label_8.setGeometry(QtCore.QRect(0, 80, 151, 20))
+        self.label_8.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.label_8.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_8.setObjectName("label_8")
+        self.label_7 = QtWidgets.QLabel(self.frame)
+        self.label_7.setGeometry(QtCore.QRect(50, 20, 91, 16))
+        self.label_7.setObjectName("label_7")
+        self.current_version = QtWidgets.QLabel(self.frame)
+        self.current_version.setGeometry(QtCore.QRect(170, 80, 201, 21))
+        self.current_version.setAlignment(QtCore.Qt.AlignCenter)
+        self.current_version.setObjectName("current_version")
+        self.label_6 = QtWidgets.QLabel(self.frame)
+        self.label_6.setGeometry(QtCore.QRect(240, 20, 81, 16))
+        self.label_6.setObjectName("label_6")
+        self.label_5 = QtWidgets.QLabel(self.frame)
+        self.label_5.setGeometry(QtCore.QRect(440, 20, 81, 16))
+        self.label_5.setObjectName("label_5")
+        self.update_version = QtWidgets.QLabel(self.frame)
+        self.update_version.setGeometry(QtCore.QRect(380, 80, 191, 16))
+        self.update_version.setAlignment(QtCore.Qt.AlignCenter)
+        self.update_version.setObjectName("update_version")
+        self.label_4 = QtWidgets.QLabel(self.frame)
+        self.label_4.setGeometry(QtCore.QRect(660, 20, 61, 16))
+        self.label_4.setObjectName("label_4")
+        self.label_9 = QtWidgets.QLabel(self.frame)
+        self.label_9.setGeometry(QtCore.QRect(616, 60, 141, 20))
+        self.label_9.setText("")
+        self.label_9.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_9.setObjectName("label_9")
+        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton.setGeometry(QtCore.QRect(540, 332, 121, 31))
+        self.pushButton.setStyleSheet("QPushButton {\n"
+"    background-color: rgb(2, 90, 249);\n"
+"    border:none;\n"
+"    border-radius: 10px;\n"
+"    color: white;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: rgba(2, 90, 249, 180);\n"
+"    border:1px solid blue;\n"
+"}\n"
+"")
+        self.pushButton.setObjectName("pushButton")
+        self.pushButton_2 = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_2.setGeometry(QtCore.QRect(680, 332, 121, 31))
+        self.pushButton_2.setStyleSheet("QPushButton {\n"
+"    background-color: rgb(2, 90, 249);\n"
+"    border:none;\n"
+"    border-radius: 10px;\n"
+"    color: white;\n"
+"}\n"
+"QPushButton:hover {\n"
+"    background-color: rgba(1, 57, 154, 180);\n"
+"    border:1px solid blue;\n"
+"}")
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.line = QtWidgets.QFrame(self.centralwidget)
+        self.line.setGeometry(QtCore.QRect(20, 150, 781, 2))
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.progress_bar = QtWidgets.QProgressBar(self.centralwidget)
+        self.progress_bar.setGeometry(QtCore.QRect(630, 180, 151, 21))
+        self.progress_bar.setStyleSheet("QProgressBar\n"
+"{\n"
+"border: solid grey;\n"
+"border-radius: 15px;\n"
+"color: black;\n"
+"text-align: center;\n"
+"}\n"
+"QProgressBar::chunk \n"
+"{\n"
+"background-color: #05B8CC;\n"
+"border-radius :15px;\n"
+"}     ")
+        self.progress_bar.setProperty("value", 0)
+        self.progress_bar.setObjectName("progress_bar")
+        self.line_2 = QtWidgets.QFrame(self.centralwidget)
+        self.line_2.setGeometry(QtCore.QRect(610, 110, 2, 30))
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.line_2.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_2.setObjectName("line_2")
+        self.line_3 = QtWidgets.QFrame(self.centralwidget)
+        self.line_3.setGeometry(QtCore.QRect(390, 110, 2, 30))
+        self.line_3.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.line_3.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_3.setObjectName("line_3")
+        self.line_4 = QtWidgets.QFrame(self.centralwidget)
+        self.line_4.setGeometry(QtCore.QRect(190, 110, 2, 30))
+        self.line_4.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.line_4.setMidLineWidth(0)
+        self.line_4.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_4.setObjectName("line_4")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -31,4 +139,20 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "UpdaterAUPAn"))
-        self.label_log.setText(_translate("MainWindow", "Жду обновления"))
+        self.label.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/icon/update.png\"/></p></body></html>"))
+        self.label_2.setText(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:12pt; font-weight:600;\">Доступна новая версия</span></p></body></html>"))
+        self.label_3.setText(_translate("MainWindow", "Обновить сейчас?"))
+        self.label_8.setText(_translate("MainWindow", "AUPAn"))
+        self.label_7.setText(_translate("MainWindow", "Название"))
+        self.current_version.setText(_translate("MainWindow", "0.0.0.0"))
+        self.label_6.setText(_translate("MainWindow", "Ваша версия"))
+        self.label_5.setText(_translate("MainWindow", "Новая версия"))
+        self.update_version.setText(_translate("MainWindow", "0.0.0.0"))
+        self.label_4.setText(_translate("MainWindow", "Прогресс"))
+        self.pushButton.setText(_translate("MainWindow", "Обновить"))
+        self.pushButton_2.setText(_translate("MainWindow", "Отмена"))
+import resource_rc
