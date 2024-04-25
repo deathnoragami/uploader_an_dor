@@ -1,6 +1,7 @@
 # pyinstaller --noconfirm --onefile --windowed --icon "C:/Python/uploader_an_dor/work_files/updater/update_icon.ico" --name "update" --add-data "C:/Python/uploader_an_dor/work_files/updater/right_pic.gif;." --add-data "C:/Python/uploader_an_dor/work_files/updater/update_icon.ico;."  "C:/Python/uploader_an_dor/work_files/updater/updater.py"
 # pyinstaller --noconfirm --onefile --windowed --icon "D:/GitHub/Uploader/work_files/updater/update_icon.ico" --name "update" --add-data "D:/GitHub/Uploader/work_files/updater/update_icon.ico;."  "D:/GitHub/Uploader/work_files/updater/updater.py"
 import shutil
+import subprocess
 import sys
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
@@ -12,6 +13,7 @@ import os
 import psutil
 import pysftp
 import const
+import socket
 
 
 class Downloader(QThread):
@@ -28,6 +30,9 @@ class Downloader(QThread):
         cnopts.hostkeys = None
         with pysftp.Connection(host=const.HOST, username=const.USER, password=const.PASSWORD, port=22,
                                cnopts=cnopts) as ftp:
+            sock = ftp._transport.sock
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 200 * 1024 * 1024)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 200 * 1024 * 1024)
             ftp.chdir('AUPAn')
             ftp.get("AUPAn.zip", "AUPAn.zip", self.call)
             ftp.close()
@@ -83,10 +88,7 @@ class MainWindow(QMainWindow):
         self.ui.update_version.setText(version)
         self.ui.current_version.setText(current_ver)
         self.ui.pushButton.clicked.connect(self.update)
-        self.ui.pushButton_2.clicked.connect(self.close_app)
-
-    def close_app(self):
-        self.close()
+        self.ui.pushButton_2.clicked.connect(self.close)
 
     def update(self):
         self.ui.label_9.setText("Загружаю...")
@@ -96,9 +98,18 @@ class MainWindow(QMainWindow):
         self.worker.install_file.connect(self.install_file)
         self.worker.complete.connect(self.complete)
         self.worker.start()
+        self.ui.pushButton.setEnabled(False)
 
     def complete(self):
         self.ui.label_9.setText("Обновлено")
+        self.ui.pushButton.setEnabled(True)
+        self.ui.pushButton.setText("Открыть программу")
+        self.ui.pushButton.clicked.disconnect()
+        self.ui.pushButton.clicked.connect(self.open_programm)
+
+    def open_programm(self):
+        subprocess.Popen("AUPAn.exe")
+        self.close()
 
     def install_file(self):
         self.ui.label_9.setText("Устанавливаю...")

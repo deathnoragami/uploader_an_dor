@@ -1,9 +1,19 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icon.ico</file>
+    <file>icon/close.png</file>
+    <file>icon/minimize.png</file>
+    <file>icon/down-arrow.png</file>
     <file>icon/u.png</file>
     <file>icon/h.png</file>
     <file>icon/auto.png</file>
     <file>icon/d.png</file>
     <file>icon/a.png</file>
+  </qresource>
+  <qresource prefix="ckeckbox">
+    <file>icon/checkbox_checked.ico</file>
+    <file>icon/checkbox_checked_hover_pressed.ico</file>
+    <file>icon/checkbox_unchecked.ico</file>
+    <file>icon/checkbox_unchecked_hover_pressed.ico</file>
   </qresource>
 </RCC>

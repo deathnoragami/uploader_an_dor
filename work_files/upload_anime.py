@@ -7,7 +7,8 @@ import os
 import log_config
 from work_files.post_animaunt import PostAnimaunt
 from work_files.post_vk import VkPostAnime
-from work_files.dubbers import Dubbers
+import custom_widget.logger_tg as tg
+
 
 class UploadSignals(QObject):
     progress_changed = pyqtSignal(int, float, float, float)
@@ -26,14 +27,15 @@ class UploadManager(QThread):
         self.sftp_manager.signals.progress_changed.connect(self.signals.progress_changed)
 
     def start_upload(self, file_path_image,
-                    file_path_video,
-                    check_sftp,
-                    check_post_malf,
-                    check_nolink,
-                    check_post_site,
-                    link_site_animaunt,
-                    link_site_malf,
-                    select_dub):
+                     file_path_video,
+                     check_sftp,
+                     check_post_malf,
+                     check_nolink,
+                     check_post_site,
+                     link_site_animaunt,
+                     link_site_malf,
+                     select_dub,
+                     name_user):
         """Класс для загрузки аниме
         Args:
             file_path_image (str): Полный пусть до файла картинки
@@ -65,7 +67,8 @@ class UploadManager(QThread):
                     else:
                         dirname_sftp = data[0][3]
                     post_id = data[0][10]
-                    db.update_anime(folder_file_path_image, folder_file_path_video, dirname_sftp, check_sftp, check_post_malf, 
+                    db.update_anime(folder_file_path_image, folder_file_path_video, dirname_sftp, check_sftp,
+                                    check_post_malf,
                                     check_nolink, check_post_site, link_site_animaunt, link_site_malf)
                 else:
                     self.signals.finish_upload.emit(False, "Ищу нужный пост...")
@@ -82,9 +85,9 @@ class UploadManager(QThread):
                     else:
                         dirname_sftp = None
 
-                    db.add_anime(folder_file_path_image, folder_file_path_video, dirname_sftp, 
-                        check_sftp, check_post_malf, check_nolink, check_post_site,
-                        link_site_animaunt, post_id, link_site_malf)
+                    db.add_anime(folder_file_path_image, folder_file_path_video, dirname_sftp,
+                                 check_sftp, check_post_malf, check_nolink, check_post_site,
+                                 link_site_animaunt, post_id, link_site_malf)
 
             try:
                 self.worker.signals.worker_finish_upload.disconnect(self.signals.finish_upload)
@@ -92,27 +95,30 @@ class UploadManager(QThread):
                 pass
 
             self.worker = UploadWorker(self.sftp_manager, self.main_ui, select_dub, file_path_image,
-                                file_path_video, check_sftp,
-                                check_post_malf, check_nolink, check_post_site, link_site_animaunt, link_site_malf, post_id, dirname_sftp)
+                                       file_path_video, check_sftp,
+                                       check_post_malf, check_nolink, check_post_site, link_site_animaunt,
+                                       link_site_malf, post_id, dirname_sftp, name_user)
             self.worker.signals.worker_finish_upload.connect(self.signals.finish_upload)
             self.worker.start()
         except Exception as e:
             log_config.setup_logger().exception(e)
-   
+
     def search_post_vk(self, name):
         post_id = VkPostAnime(name=name).search_post()
         return post_id
-    
+
     def search_folder_sftp(self, name):
         dirname_sftp = SFTPManager().search_folder_sftp(name)
         return dirname_sftp
-          
+
+
 class UploadWorker(QThread):
     signals = UploadSignals()
 
     def __init__(self, sftp_manager, main_ui, select_dub, file_path_image,
-                    file_path_video, check_sftp,
-                    check_post_malf, check_nolink, check_post_site, link_site_animaunt, link_site_malf, post_id, dirname_sftp):
+                 file_path_video, check_sftp,
+                 check_post_malf, check_nolink, check_post_site, link_site_animaunt, link_site_malf, post_id,
+                 dirname_sftp, name_user):
         super().__init__()
         self.sftp_manager = sftp_manager
         self.file_path_image = file_path_image
@@ -128,6 +134,7 @@ class UploadWorker(QThread):
         self.select_dub = select_dub
         self.post_id = post_id
         self.dirname_sftp = dirname_sftp
+        self.name_user = name_user
 
     def run(self):
         try:
@@ -136,7 +143,7 @@ class UploadWorker(QThread):
             if self.file_path_video is not None:
                 name_video = os.path.basename(self.file_path_video)
             else:
-                name_video = None       
+                name_video = None
             if self.file_path_video is not None and self.check_sftp and self.dirname_sftp is not None:
                 upload_sftp, time = self.sftp_manager.upload_file(self.dirname_sftp, self.file_path_video)
                 if upload_sftp:
@@ -148,20 +155,26 @@ class UploadWorker(QThread):
                 # TODO: Дописать когда добавлю на малф
             if self.check_post_site:
                 data_time = self.main_ui.ui.dateEdit.date().toString("yyyy-MM-dd")
-                post = PostAnimaunt(self.link_site_animaunt, self.link_site_malf, name_file, name_video, data_time).post()
+                post = PostAnimaunt(self.link_site_animaunt, self.link_site_malf, name_file, name_video,
+                                    data_time).post()
                 if post == True:
                     self.signals.worker_finish_upload.emit(False, f"{nama_dir} запощен на сайт.")
                 else:
                     QMessageBox.warning(None, "Ошибка", "Ошибка в публикации на сайте!")
                     self.signals.worker_finish_upload.emit(True, f"{nama_dir} ошибка при посте на сайт.")
                     return
-            post_vk = VkPostAnime(check_nolink=self.check_nolink, path_image=self.file_path_image, post_id=self.post_id, number=name_file, select_dub=self.select_dub).post_vk()
+            post_vk = VkPostAnime(check_nolink=self.check_nolink, path_image=self.file_path_image, post_id=self.post_id,
+                                  number=name_file, select_dub=self.select_dub).post_vk()
             if post_vk:
+                if self.dirname_sftp:
+                    name = self.dirname_sftp.split("|")[0].strip()
+                else:
+                    name = nama_dir
                 self.signals.worker_finish_upload.emit(False, f"{nama_dir} сделан пост в ВК.")
+                tg.main('logger', self.name_user, name, name_file)
                 self.signals.worker_finish_upload.emit(True, f"{nama_dir} загрузка завершена.")
             else:
                 self.signals.worker_finish_upload.emit(True, f"{nama_dir} ошибка при посте в ВК.")
         except Exception as e:
             log_config.setup_logger().exception(e)
             self.signals.worker_finish_upload.emit(True, f"{nama_dir} ошибка при посте в ВК.")
-

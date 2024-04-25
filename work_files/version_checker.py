@@ -1,5 +1,7 @@
 from PyQt5.QtCore import QThread, pyqtSignal
-import requests
+import os
+import pysftp
+
 
 class VersionChecker(QThread):
     check_version = pyqtSignal(bool)
@@ -9,12 +11,15 @@ class VersionChecker(QThread):
         self.version = version
 
     def run(self):
-        url = f"https://api.github.com/repos/deathnoragami/uploader_an_dor/releases/latest"
-        response = requests.get(url)
-        if response.status_code == 200:
-            release_info = response.json()
-            tag_name = release_info["tag_name"]
-            if self.version < tag_name:
+        cnopts = pysftp.CnOpts()
+        cnopts.hostkeys = None
+        # Создаем экземпляр главного окна только если условие не выполнено
+        with pysftp.Connection(host=os.getenv("FTP_HOST"), username=os.getenv("FTP_USER"),
+                               password=os.getenv("FTP_PASS"), port=22,
+                               cnopts=cnopts) as ftp:
+            ftp.chdir('AUPAn')
+            version_ftp = ftp.listdir()[0]
+            if self.version < version_ftp:
                 self.check_version.emit(True)
-            elif self.version == tag_name:
+            else:
                 self.check_version.emit(False)

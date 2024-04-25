@@ -12,7 +12,6 @@ import traceback
 import log_config
 
 
-
 class UploadDoramaVK():
     def __init__(self):
         token = Config().get_vk_token()
@@ -20,17 +19,19 @@ class UploadDoramaVK():
         self.vk = self.vk_session.get_api()
         self.group_id = -int(os.getenv("ID_GROUP_DORAMA"))
 
-
     def search_vk_dorama(self, file_path):
         playlist_name = os.path.basename(os.path.dirname(file_path))
-        playlist_name = ''.join(char if char not in string.punctuation else ' ' for char in playlist_name).lower().replace("  ", " ")
+        playlist_name = ''.join(
+            char if char not in string.punctuation else ' ' for char in playlist_name).lower().replace("  ", " ")
         playlist_id = None
         for i in range(10):
             if playlist_id:
                 break
-            playlists = self.vk.video.getAlbums(owner_id=self.group_id, count=70, offset=i*71)
+            playlists = self.vk.video.getAlbums(owner_id=self.group_id, count=70, offset=i * 71)
             for playlist in playlists['items']:
-                playlist_vk = ''.join(char if char not in string.punctuation else ' ' for char in playlist['title']).lower().replace("  ", " ")
+                playlist_vk = ''.join(
+                    char if char not in string.punctuation else ' ' for char in playlist['title']).lower().replace("  ",
+                                                                                                                   " ")
                 if playlist_name in playlist_vk:
                     playlist_id = playlist['id']
                     break
@@ -47,26 +48,30 @@ class UploadDoramaVK():
             return False, False
         post_id = None
         for i in range(10):
-            posts = self.vk.wall.get(owner_id=self.group_id, count=70, offset=i*71)
+            posts = self.vk.wall.get(owner_id=self.group_id, count=70, offset=i * 71)
             if not len(posts['items']):
                 return False, False
             for post in posts['items']:
                 post_text = post['text'].split('\n')[0]
-                clean_post_text = ''.join(char if char not in string.punctuation else ' ' for char in post_text).lower().replace("  ", " ")
+                clean_post_text = ''.join(
+                    char if char not in string.punctuation else ' ' for char in post_text).lower().replace("  ", " ")
                 if playlist_name in clean_post_text:
                     return post['id'], playlist_id, playlist['title'], post_text
-                    q = QMessageBox.question(parent, "[VK] Что-то нашел", f"[VK] Этот ли прошлый пост?\n{post_text}", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+                    q = QMessageBox.question(parent, "[VK] Что-то нашел", f"[VK] Этот ли прошлый пост?\n{post_text}",
+                                             QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
                     if q == QMessageBox.Yes:
-                        return 
+                        return
                     elif q == QMessageBox.No:
                         continue
                     else:
                         return False, False
         if not post_id:
-            QMessageBox.warning(None, "[VK] Ошибка", "[VK] Не найден нужный пост, смените название папки для более точного названия, либо пост был сделан более 2-3 месяцев назад.")
+            QMessageBox.warning(None, "[VK] Ошибка",
+                                "[VK] Не найден нужный пост, смените название папки для более точного названия, либо пост был сделан более 2-3 месяцев назад.")
             return False, False
-        
-    def upload_vk_dorama(self, file_path, file_path_pic, playlist_id, vk_post_id, name_file, select_dub, check_novideo_vk):
+
+    def upload_vk_dorama(self, file_path, file_path_pic, playlist_id, vk_post_id, name_file, select_dub,
+                         check_novideo_vk):
         try:
             self.ping_timmer = Connect().find_user_uid(Config().get_uid_program())[2]
             if check_novideo_vk == False:
@@ -77,7 +82,7 @@ class UploadDoramaVK():
                     new_title = last_video_title.replace(match.group(1), name_file)
                 else:
                     print("Не смог изменить цифру в названии видео.")
-                    return None #TODO не нашел цифру
+                    return None  # TODO не нашел цифру
                 upload = VkUpload(self.vk_session)
                 video = upload.video(file_path, group_id=abs(self.group_id), name=new_title, album_id=playlist_id)
                 video_id = video['video_id']
@@ -105,9 +110,8 @@ class UploadDoramaVK():
                                         page.locator(".ThumbChooser__uploadStub").click()
                                     file_chooser = fc_info.value
                                     file_chooser.set_files(f"{file_path_pic}")
-                                    time.sleep(2)
+                                    page.wait_for_selector('.ThumbChooser__itemUploaderImage')
                                     page.get_by_role("button", name="Сохранить").click()
-                                    time.sleep(2)
                                     context.close()
                                     browser.close()
                         except Exception as e:
@@ -135,7 +139,3 @@ class UploadDoramaVK():
             log_config.setup_logger().exception(e)
             traceback.print_exc()
             return False
-                
-        
-        
-        

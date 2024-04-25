@@ -9,8 +9,10 @@ import socket
 import tgcrypto
 import log_config
 
+
 class TgSignals(QObject):
     progress_changed = pyqtSignal(int, float, float, float)
+
 
 class UploadDoramaTg(QObject):
     def __init__(self):
@@ -20,7 +22,7 @@ class UploadDoramaTg(QObject):
         self.api_hash = os.getenv("API_HASH")
         self.chat_id = int(os.getenv("ID_TG_DORAMA"))
         self.start_time = None
-    
+
     def seach_id_post(self, file_path):
         asyncio.set_event_loop(asyncio.new_event_loop())
         client = Client("assets/my_session_tg", self.api_id, self.api_hash)
@@ -32,19 +34,10 @@ class UploadDoramaTg(QObject):
                 first_line = message.caption.split("\n")[0]
                 client.stop()
                 return message.id, first_line
-                # q = QMessageBox.question(None, "[TG] Что-то нашел", f"[TG] Этот пост?\n{first_line}", QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
-                # if q == QMessageBox.Yes:
-                #     client.stop()
-                #     return message.id
-                # elif q == QMessageBox.No:
-                #     continue
-                # else:
-                #     client.stop()
-                #     return None
         QMessageBox.information(None, "[TG] Информация", "[TG] Не нашел постов")
         client.stop()
         return None
-        
+
     def upload_tg(self, file_path, msg_id):
         try:
             asyncio.set_event_loop(asyncio.new_event_loop())
@@ -59,16 +52,16 @@ class UploadDoramaTg(QObject):
                 text_lines[0] = new_first_line
                 new_text = "\n".join(text_lines)
             sock = socket.socket()
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 200 * 1024 * 1024)
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 200 * 1024 * 1024)
-            client.send_video(chat_id=self.chat_id, video=file_path, width=1920, height=1080, caption=new_text, progress=self.progress)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 250 * 1024 * 1024)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 250 * 1024 * 1024)
+            client.send_video(chat_id=self.chat_id, video=file_path, width=1920, height=1080, caption=new_text,
+                              progress=self.progress)
             client.stop()
             return True
         except Exception as e:
             log_config.setup_logger().exception(e)
             return False
-        
-        
+
     def progress(self, current, total):
         if self.start_time is None:
             self.start_time = time.time()

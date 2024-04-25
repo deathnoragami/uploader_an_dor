@@ -18,6 +18,7 @@ class Malfurik_web():
                         context = browser.new_context()
                         page = context.new_page()
                         link = os.getenv('MALFURIK_LINK')
+                    page.set_default_timeout(120000)
                     page.goto(link)
                     wpadminbar_element = page.query_selector('#wpadminbar')
                     if wpadminbar_element:
@@ -25,7 +26,8 @@ class Malfurik_web():
                         context.close()
                         browser.close()
                     else:
-                        page.goto(os.getenv('MALFURIK_LINK'))
+                        link = os.getenv('MALFURIK_LINK')
+                        page.goto(link)
                         try:
                             page.wait_for_selector("#dashboard-widgets-wrap", timeout=20000)
                             context.storage_state(path='assets/malfurik_storage.json')
@@ -43,6 +45,7 @@ class Malfurik_web():
                 browser = playwright.chromium.launch(headless=True)
                 context = browser.new_context(storage_state="assets/malfurik_storage.json")
                 page = context.new_page()
+                page.set_default_timeout(120000)
                 link = "https://anime.malfurik.online/"
                 page.goto(link)
                 wpadminbar_element = page.query_selector('#wpadminbar')
