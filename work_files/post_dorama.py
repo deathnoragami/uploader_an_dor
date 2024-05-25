@@ -2,6 +2,7 @@ from playwright.sync_api import sync_playwright
 import re
 from datetime import datetime, timedelta
 import log_config
+from handle.parse_maunt import ParseMaunt
 
 class PostDorama:
     def __init__(self):
@@ -54,6 +55,9 @@ class PostDorama:
             return e
         
     def post_animaunt(self, timer, link, name_file):
+        ParseMaunt(link).autorization_maunt()
+        
+        
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)

@@ -4,9 +4,8 @@ from datetime import datetime, timedelta
 import log_config
 
 class PostAnimaunt():
-    def __init__(self, link_animaunt, link_malfurik, number_seria, name_video, data_time):
+    def __init__(self, link_animaunt, number_seria, name_video, data_time):
         self.link_animaunt = link_animaunt
-        self.link_malfurik = link_malfurik
         self.number_seria = number_seria
         self.name_video = name_video
         self.pattern = re.compile(r'\d+')

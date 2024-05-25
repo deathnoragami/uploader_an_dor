@@ -24,13 +24,17 @@ class Config():
             self.cfg['USER']['pass_maunt'] = ''
             self.cfg['USER']['user_malf'] = ''
             self.cfg['USER']['pass_malf'] = ''
+            self.cfg["USER"]['a_site_login'] = ''
+            self.cfg["USER"]['a_site_pass'] = ''
+            self.cfg["USER"]['m_site_login'] = ''
+            self.cfg["USER"]['m_site_pass'] = ''
             with open('assets/config.ini', 'w') as configfile:
                 self.cfg.write(configfile)
         else:
             config = configparser.ConfigParser()
             config.read('assets/config.ini')
             for section in ['USER']:
-                for option in ['uid_program', 'vk_token', 'email_hent', 'api_hent', 'user_maunt', 'pass_maunt', 'user_malf', 'pass_malf']:
+                for option in ['uid_program', 'vk_token', 'email_hent', 'api_hent', 'user_maunt', 'pass_maunt', 'user_malf', 'pass_malf', 'a_site_login', 'a_site_pass', 'm_site_login', 'm_site_pass']:
                     if option not in config[section]:
                         config[section][option] = ''
             with open('assets/config.ini', 'w') as configfile:
@@ -69,6 +73,12 @@ class Config():
 
     def get_info_malf(self):
         return [self.cfg['USER']['user_malf'], self.cfg['USER']['pass_malf']]
+    
+    def get_a_info_site(self):
+        return [self.cfg['USER']['a_site_login'], self.cfg['USER']['a_site_pass']]
+    
+    def get_m_info_site(self):
+        return [self.cfg['USER']['m_site_login'], self.cfg['USER']['m_site_pass']]
 
     def set_id_chat(self, id_chat):
         self.cfg['GLOBAL']['id_chat'] = id_chat
@@ -126,3 +136,16 @@ class Config():
         self.cfg['USER']['pass_malf'] = pass_malf
         with open('assets/config.ini', 'w') as configfile:
             self.cfg.write(configfile)
+            
+    def set_a_info_site(self, login, pasw):
+        self.cfg['USER']['a_site_login'] = login
+        self.cfg['USER']['a_site_pass'] = pasw
+        with open('assets/config.ini', 'w') as configfile:
+            self.cfg.write(configfile)
+            
+    def set_m_info_site(self, login, pasw):
+        self.cfg['USER']['m_site_login'] = login
+        self.cfg['USER']['m_site_pass'] = pasw
+        with open('assets/config.ini', 'w') as configfile:
+            self.cfg.write(configfile)
+        

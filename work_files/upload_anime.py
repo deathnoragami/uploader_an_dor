@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMessageBox
 
+from handle.parse_maunt import ParseMaunt
 from work_files.database_title import DataBase
 from work_files.upload_anime_sftp import SFTPManager
 import os
@@ -151,12 +152,14 @@ class UploadWorker(QThread):
                 else:
                     self.signals.worker_finish_upload.emit(True, f"{nama_dir} ошибка загрузки на сервер")
             if self.check_post_malf:
-                post = PostAnimaunt(self.link_site_animaunt, self.link_site_malf, name_file)
+                pass
                 # TODO: Дописать когда добавлю на малф
             if self.check_post_site:
                 data_time = self.main_ui.ui.dateEdit.date().toString("yyyy-MM-dd")
-                post = PostAnimaunt(self.link_site_animaunt, self.link_site_malf, name_file, name_video,
-                                    data_time).post()
+                # post = PostAnimaunt(self.link_site_animaunt, name_file, name_video,
+                #                     data_time).post()
+                post = ParseMaunt().update_seria_maunt(self.link_site_animaunt, int(name_file.split('.')[0]), 
+                                                       data_time, name_video)
                 if post == True:
                     self.signals.worker_finish_upload.emit(False, f"{nama_dir} запощен на сайт.")
                 else:
@@ -178,3 +181,4 @@ class UploadWorker(QThread):
         except Exception as e:
             log_config.setup_logger().exception(e)
             self.signals.worker_finish_upload.emit(True, f"{nama_dir} ошибка при посте в ВК.")
+            

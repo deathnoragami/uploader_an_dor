@@ -39,6 +39,18 @@ icon/
 *.ui
 test/
 work_files/updater/const.py
+work_files/updater/_internal
+.idea
+.vscode
+bin/
+version.txt
+ui.py
+testing.py
+*.js
+*.html
+*.qrc
+logger_tg.session
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

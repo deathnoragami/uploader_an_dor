@@ -5,6 +5,8 @@ from work_files.upload_dorama_tg import UploadDoramaTg
 from work_files.upload_dorama_vk import UploadDoramaVK
 from work_files.upload_dorama_sftp import UploadDoramaSFTP
 from work_files.post_dorama import PostDorama
+from handle.parse_malf import ParseMalf
+from handle.parse_maunt import ParseMaunt
 
 import os
 import time
@@ -278,7 +280,7 @@ class UploadWorkerDorama(QThread):
                     self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки в ТГ.", True)
                     return
             if self.check_vk:
-                self.signals.worker_finish_upload.emit(False, f"Начинаю загрузку в ВК...", False)
+                self.signals.worker_finish_upload.emit(False, f"Начинаю загрузку в ВК...", True)
                 upload_vk = UploadDoramaVK().upload_vk_dorama(self.file_path_video,
                                                               self.file_path_image,
                                                               self.vk_playlist_id,
@@ -292,14 +294,18 @@ class UploadWorkerDorama(QThread):
                     self.signals.worker_finish_upload.emit(True, f"{name} ошибка загрузки в ВК.", True)
                     return
             if self.check_post_site:
-                post_malf = PostDorama().post_malfurik(self.link_malf,
-                                                       name_file=os.path.basename(self.file_path_video),
-                                                       timming_list=self.timming_list)
+                post_malf = ParseMalf().update_seria_malf(self.link_malf,
+                                                timming_list=self.timming_list,
+                                                name_file=os.path.basename(self.file_path_video))
+                # post_malf = PostDorama().post_malfurik(self.link_malf,
+                #                                        name_file=os.path.basename(self.file_path_video),
+                #                                        timming_list=self.timming_list)
                 if post_malf == True:
                     self.signals.worker_finish_upload.emit(False, f"Запощен на сайт Малфурик.", True)
-                    post_maunt = PostDorama().post_animaunt(self.main_ui.ui.check_timmer_dor.isChecked(),
-                                                            self.link_animaunt,
-                                                            name_file)
+                    post_maunt = ParseMaunt().update_seria_maunt(self.link_animaunt, int(name_file), dorama=True, timer=self.main_ui.ui.check_timmer_dor.isChecked())
+                    # post_maunt = PostDorama().post_animaunt(self.main_ui.ui.check_timmer_dor.isChecked(),
+                    #                                         self.link_animaunt,
+                    #                                         name_file)
                     if post_maunt != True:
                         self.signals.worker_finish_upload.emit(True, f"Ошибка поста на Анимаунт.", True)
                         # QMessageBox.warning(None, "Ошибка", f"Ошибка при посте на анимаунт")
@@ -315,7 +321,6 @@ class UploadWorkerDorama(QThread):
                     name = self.folder_sftp[index_start + 1: index_end].strip()
                     Connect().add_name_ad(name, name_file, self.tg_values[1])
                 tg.main('logger', self.tg_values[0], name_file, name)
-                # tg.main('ad', self.tg_values[1], name_file, name, self.tg_values[0])
             except Exception as e:
                 log_config.setup_logger().exception(e)
             self.signals.worker_finish_upload.emit(True, f"{name} загрузка завершена.", False)

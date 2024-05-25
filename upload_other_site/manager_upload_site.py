@@ -3,12 +3,16 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
 from upload_other_site.db_handler import DatabaseHandler
 from upload_other_site.anime_up_other import AnimeUpOther
 from upload_other_site.dorama_up_other import DoramaUpOther
+from handle.parse_maunt import ParseMaunt
+from handle.parse_malf import ParseMalf
 
+import time
 import re
 import os
 import log_config
 import requests
-
+from playwright.sync_api import sync_playwright
+import threading
 from bs4 import BeautifulSoup
 
 
@@ -66,60 +70,22 @@ class Dialog(QDialog):
         self.accept()
 
 
-class ThreadUpload(QThread):
+
+class Signals(QObject):
     find_link = pyqtSignal(str, str)
     _365_link = pyqtSignal(str, str)
-
-    def setdata(self, data):
-        self.data = data
-
-    def run(self):
-        for item in self.data:
-            name, episode = item[0], item[1]
-            data_title = DatabaseHandler().get_data_by_name(name)
-            res, code_file = AnimeUpOther().animaunt_checker(data_title[2], episode)
-            if res == True:
-                code_player = code_file[0]
-                file_name = code_file[1]
-                if data_title[3] != '':
-                    res_find, link_find = AnimeUpOther().findanime(data_title[3], episode,
-                                                                   code_player)
-                    if res_find == True:
-                        self.find_link.emit("find", link_find)
-                    else:
-                        self.find_link.emit("find", "Ошибка, не нашел на сайте серию.")
-                else:
-                    self.find_link.emit("find", "Нет на сайте")
-                if data_title[4] != '' and data_title[5] != '':
-                    files = os.listdir(data_title[5])
-                    if file_name in files:
-                        file_path = os.path.join(data_title[5], file_name)
-                        res_365_, link_365_ = AnimeUpOther().anime365(data_title[4],
-                                                                      episode, file_path)
-                        if res_365_ == True:
-                            self._365_link.emit("365", link_365_)
-                        else:
-                            self._365_link.emit("365", "Ошибка, не нашел на сайте серию.")
-                    else:
-                        self._365_link.emit("365", "Ошибка, не нашел файл в папке.")
-                else:
-                    self._365_link.emit("365", "Нет на сайте")
-            else:
-                self.find_link.emit("find", "Ошибка, не смог достать на маунте данные о серии.")
-                self._365_link.emit("365", str(code_file))
-
 
 class UploadManagerOtherSite(QObject):
-    find_link = pyqtSignal(str, str)
-    _365_link = pyqtSignal(str, str)
 
-    def __init__(self):
+    def __init__(self, all_title):
         super().__init__()
+        self.signals = Signals()
         self.worker = None
+        self.all_title = all_title
 
-    def start_upload(self, all_title):
+    def run(self):
         try:
-            titles_list = all_title.split('\n')
+            titles_list = self.all_title.split('\n')
             data_list = [[title.rsplit(' ', 1)[0], title.rsplit(' ', 1)[1]] for title in titles_list if ' ' in title]
             for title in titles_list:
                 words = title.split()
@@ -132,25 +98,92 @@ class UploadManagerOtherSite(QObject):
                         result = dialog.exec_()
                         if result == QDialog.Rejected:
                             return
-            self.worker = ThreadUpload()
-            self.worker.setdata(data_list)
-            self.worker.find_link.connect(self.find_link)
-            self.worker._365_link.connect(self._365_link)
+            self.worker = ThreadUpload(data_list)
+            # self.worker.setdata(data_list)
+            self.worker.find_link.connect(self.signals.find_link)
+            self.worker._365_link.connect(self.signals._365_link)
             self.worker.start()
-            # threading.Thread(target=ThreadUpload, args=(data_list, self.ui)).start()
+            # self.worker.start()
+            # thread = threading.Thread(target=ThreadUpload(data_list).run)
+            # thread.start()
         except Exception as e:
             log_config.setup_logger().exception(e)
 
     def handle_dialog_close(self, dialog, name):
         name = dialog.lineedit1.text()
         animaunt_link = dialog.lineedit2.text()
-        match = re.search(r'/(\d+)-', animaunt_link)
-        animaunt_link = os.getenv("CHECK_ANIMAUNT_LINK") + "&action=editnews&id=" + match.group(1)
         find_link = dialog.lineedit4.text()
         _365_link = dialog.lineedit5.text()
         path = dialog.lineedit3.text()
         DatabaseHandler().insert_data(name, animaunt_link, find_link, _365_link, path)
         dialog.deleteLater()
+
+class ThreadUpload(QThread):
+    find_link = pyqtSignal(str, str)
+    _365_link = pyqtSignal(str, str)
+    def __init__(self, data):
+        super().__init__()
+        self.data = data
+        # self.data = data
+        # self.anime_upload = AnimeUpOther()
+        # self.anime_upload.find_anime.connect(self.find_link)
+        # self.anime_upload._365_anime.connect(self._365_link)
+
+    def setdata(self, data):
+        self.data = data
+
+    def run(self):
+        
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            for item in self.data:
+                name, episode = item[0], item[1]
+                data_title = DatabaseHandler().get_data_by_name(name)
+                find_seria = False
+                code_file = ParseMaunt().get_list_series(data_title[2])
+                for i in code_file:
+                    if i[0] != '':
+                        if i[1] == f'{episode} серия':
+                            code_player = i[0]
+                            file_name = i[0].split('/')[-1]
+                            find_seria = True
+                            break
+                if find_seria:
+                    if data_title[3] != '':
+                        res_find, link_find = AnimeUpOther().findanime(data_title[3], code_player, episode)
+                        if res_find == True:
+                            self.find_link.emit("find", link_find)
+                            pass
+                        else:
+                            self.find_link.emit("find",f"{link_find}")
+                            pass
+                    else:
+                        self.find_link.emit("find", "Нет на сайте")
+                        pass
+                    if data_title[4] != '' and data_title[5] != '':
+                        files = os.listdir(data_title[5])
+                        if file_name in files:
+                            file_path = os.path.join(data_title[5], file_name)
+                            
+                            res_365_, link_365_ = AnimeUpOther().anime365(data_title[4],
+                                                                        episode, file_path, browser)
+                            if res_365_ == True:
+                                self._365_link.emit("365", link_365_)
+                                pass
+                            else:
+                                self._365_link.emit("365", f"Ошибка, не нашел на сайте серию.{link_365_}")
+                                pass
+                        else:
+                            self._365_link.emit("365", "Ошибка, не нашел файл в папке.")
+                            pass
+                    else:
+                        self._365_link.emit("365", "Нет на сайте")
+                        pass
+                else:
+                    self.find_link.emit("find", "Ошибка, не смог достать на маунте данные о серии.")
+                    pass
+                    self._365_link.emit("365", str(code_file))
+                    pass
 
 
 class DialogDorama(QDialog):
@@ -201,11 +234,14 @@ class ThreadUploadDorama(QThread):
         for item in self.data:
             name, episode = item[0], item[1]
             data_title = DatabaseHandler().get_data_by_name_dorama(name)
-            link_video = DoramaUpOther().malfurik_checker(data_title[2], episode)
-            if link_video:
-                doramatv_link = DoramaUpOther().doramatv_uploader(data_title[3], episode, link_video)
-                if doramatv_link:
-                    self.doramatv.emit(doramatv_link)
+            links_video = ParseMalf().get_list_series(data_title[2])
+            for link_video in links_video:
+                if link_video[0] == f'{episode} серия':
+                    req, doramatv_link = AnimeUpOther().findanime(data_title[3], link_video[1], episode, True)
+                    # doramatv_link = DoramaUpOther().doramatv_uploader(data_title[3], episode, link_video)
+                    if req:
+                        self.doramatv.emit(doramatv_link)
+                        break
 
 
 class UploadManagerOtherDorama(QObject):
@@ -239,15 +275,6 @@ class UploadManagerOtherDorama(QObject):
     def handle_dialog_dorama_close(self, dialog, name):
         name = dialog.lineedit1.text()
         malfurik_link = dialog.lineedit2.text()
-        response = requests.get(malfurik_link)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            link_tag = soup.find('link', rel='shortlink')
-            if link_tag:
-                href = link_tag.get('href')
-                match = re.search(r'\?p=(\d+)', href)
-                number = match.group(1)
-        malfurik_link = f"https://anime.malfurik.online/wp-admin/post.php?post={number}&action=edit"
         doramatv_link = dialog.lineedit4.text()
         DatabaseHandler().insert_data_dorama(name, malfurik_link, doramatv_link)
         dialog.deleteLater()

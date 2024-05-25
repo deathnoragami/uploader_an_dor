@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\untitled1.ui'
+# Form implementation generated from reading ui file 'untitled1.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -72,13 +72,13 @@ class Ui_MainWindow(object):
 "    height:15px;\n"
 "}\n"
 "QCheckBox::indicator:unchecked{\n"
-"    image: url(:/ckeckbox/icon/checkbox_unchecked.ico);\n"
+"    image: url(:/ckeckbox/icon/checkbox_unchecked1.ico);\n"
 "}\n"
 "QCheckBox::indicator:unchecked:hover, QCheckBox::indicator:unchecked:pressed {\n"
 "    image: url(:/ckeckbox/icon/checkbox_unchecked_hover_pressed.ico);\n"
 "}\n"
 "QCheckBox::indicator:checked{\n"
-"    image: url(:/ckeckbox/icon/checkbox_checked.ico);\n"
+"    image: url(:/ckeckbox/icon/checkbox_checked1.ico);\n"
 "}\n"
 "QCheckBox::indicator:checked:hover, QCheckBox::indicator:checked:pressed {\n"
 "image: url(:/ckeckbox/icon/checkbox_checked_hover_pressed.ico);\n"
@@ -116,6 +116,7 @@ class Ui_MainWindow(object):
 "        background: rgb(38, 42, 51);\n"
 "        width: 12px;\n"
 "        margin: 0px 0px 0px 0px;\n"
+"        border-radius:5px;\n"
 "    }\n"
 "QScrollBar::handle:vertical {\n"
 "        background: rgb(49, 54, 65);\n"
@@ -137,6 +138,34 @@ class Ui_MainWindow(object):
 "        subcontrol-origin: margin;\n"
 "    }\n"
 "    QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\n"
+"        background: none;\n"
+"    }\n"
+"QScrollBar:horizontal {\n"
+"        background: rgb(38, 42, 51);\n"
+"        width: 12px;\n"
+"        margin: 0px 0px 0px 0px;\n"
+"        border-radius:5px;\n"
+"    }\n"
+"QScrollBar::handle:horizontal {\n"
+"        background: rgb(49, 54, 65);\n"
+"        min-height: 20px;\n"
+"    }\n"
+"QScrollBar::handle:horizontal:hover {\n"
+"        background: rgb(52, 181, 249);\n"
+"    }\n"
+"    QScrollBar::add-line:horizontal {\n"
+"        background: rgb(38, 42, 51);\n"
+"        height: 0px;\n"
+"        subcontrol-position: bottom;\n"
+"        subcontrol-origin: margin;\n"
+"    }\n"
+"    QScrollBar::sub-line:horizontal {\n"
+"        background: rgb(38, 42, 51);\n"
+"        height: 0px;\n"
+"        subcontrol-position: top;\n"
+"        subcontrol-origin: margin;\n"
+"    }\n"
+"    QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {\n"
 "        background: none;\n"
 "    }\n"
 "\n"
@@ -211,19 +240,19 @@ class Ui_MainWindow(object):
         self.horizontalLayout_22.setSpacing(5)
         self.horizontalLayout_22.setObjectName("horizontalLayout_22")
         self.minimize_btn = QtWidgets.QPushButton(self.title_frame)
+        self.minimize_btn.setMinimumSize(QtCore.QSize(24, 24))
+        self.minimize_btn.setStyleSheet("QPushButton{background-image: url(:/icon/icon/minimize.png);}\n"
+"QPushButton:hover{background-image: url(:/icon/icon/minimize_hover.png);}")
         self.minimize_btn.setText("")
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icon/icon/minimize.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.minimize_btn.setIcon(icon)
         self.minimize_btn.setIconSize(QtCore.QSize(24, 24))
         self.minimize_btn.setObjectName("minimize_btn")
         self.horizontalLayout_22.addWidget(self.minimize_btn)
         self.close_btn = QtWidgets.QPushButton(self.title_frame)
+        self.close_btn.setMinimumSize(QtCore.QSize(24, 24))
         self.close_btn.setAutoFillBackground(False)
+        self.close_btn.setStyleSheet("QPushButton{background-image: url(:/icon/icon/close.png);}\n"
+"QPushButton:hover{background-image: url(:/icon/icon/close_hover.png);}")
         self.close_btn.setText("")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icon/icon/close.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.close_btn.setIcon(icon1)
         self.close_btn.setIconSize(QtCore.QSize(24, 24))
         self.close_btn.setObjectName("close_btn")
         self.horizontalLayout_22.addWidget(self.close_btn)
@@ -329,6 +358,10 @@ class Ui_MainWindow(object):
         self.btn_navi_upload_other.setStyleSheet("background-image: url(:/icon/icon/u.png);")
         self.btn_navi_upload_other.setObjectName("btn_navi_upload_other")
         self.verticalLayout_8.addWidget(self.btn_navi_upload_other)
+        self.btn_navi_hurdsub = QtWidgets.QPushButton(self.sliderNavigate)
+        self.btn_navi_hurdsub.setMinimumSize(QtCore.QSize(200, 30))
+        self.btn_navi_hurdsub.setObjectName("btn_navi_hurdsub")
+        self.verticalLayout_8.addWidget(self.btn_navi_hurdsub)
         self.verticalLayout.addWidget(self.sliderNavigate)
         self.sliderDownInfo = QtWidgets.QFrame(self.leftMenuSlider)
         self.sliderDownInfo.setMaximumSize(QtCore.QSize(200, 150))
@@ -339,41 +372,14 @@ class Ui_MainWindow(object):
         self.verticalLayout_23.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_23.setSpacing(0)
         self.verticalLayout_23.setObjectName("verticalLayout_23")
-        self.horizontalLayout_13 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_13.setObjectName("horizontalLayout_13")
-        self.pixmap_animaunt = QtWidgets.QLabel(self.sliderDownInfo)
-        self.pixmap_animaunt.setMinimumSize(QtCore.QSize(25, 25))
-        self.pixmap_animaunt.setMaximumSize(QtCore.QSize(25, 25))
-        self.pixmap_animaunt.setText("")
-        self.pixmap_animaunt.setObjectName("pixmap_animaunt")
-        self.horizontalLayout_13.addWidget(self.pixmap_animaunt)
-        self.label_7 = QtWidgets.QLabel(self.sliderDownInfo)
-        self.label_7.setObjectName("label_7")
-        self.horizontalLayout_13.addWidget(self.label_7)
-        self.verticalLayout_23.addLayout(self.horizontalLayout_13)
-        self.horizontalLayout_12 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_12.setObjectName("horizontalLayout_12")
-        self.pixmap_malfurik = QtWidgets.QLabel(self.sliderDownInfo)
-        self.pixmap_malfurik.setMinimumSize(QtCore.QSize(25, 25))
-        self.pixmap_malfurik.setMaximumSize(QtCore.QSize(25, 25))
-        self.pixmap_malfurik.setText("")
-        self.pixmap_malfurik.setObjectName("pixmap_malfurik")
-        self.horizontalLayout_12.addWidget(self.pixmap_malfurik)
-        self.label_9 = QtWidgets.QLabel(self.sliderDownInfo)
-        self.label_9.setObjectName("label_9")
-        self.horizontalLayout_12.addWidget(self.label_9)
-        self.verticalLayout_23.addLayout(self.horizontalLayout_12)
         self.horizontalLayout_11 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_11.setContentsMargins(5, -1, -1, -1)
         self.horizontalLayout_11.setObjectName("horizontalLayout_11")
-        self.pixmap_vk = QtWidgets.QLabel(self.sliderDownInfo)
-        self.pixmap_vk.setMinimumSize(QtCore.QSize(25, 25))
-        self.pixmap_vk.setMaximumSize(QtCore.QSize(25, 25))
-        self.pixmap_vk.setText("")
-        self.pixmap_vk.setObjectName("pixmap_vk")
-        self.horizontalLayout_11.addWidget(self.pixmap_vk)
-        self.label_11 = QtWidgets.QLabel(self.sliderDownInfo)
-        self.label_11.setObjectName("label_11")
-        self.horizontalLayout_11.addWidget(self.label_11)
+        self.checker_vk = QtWidgets.QLabel(self.sliderDownInfo)
+        self.checker_vk.setAutoFillBackground(False)
+        self.checker_vk.setWordWrap(False)
+        self.checker_vk.setObjectName("checker_vk")
+        self.horizontalLayout_11.addWidget(self.checker_vk, 0, QtCore.Qt.AlignBottom)
         self.verticalLayout_23.addLayout(self.horizontalLayout_11)
         self.verticalLayout.addWidget(self.sliderDownInfo)
         self.gridLayout_17.addWidget(self.leftMenuSlider, 1, 0, 1, 1)
@@ -875,7 +881,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 200, 379))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 188, 16))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout_7.addWidget(self.scrollArea)
@@ -1028,22 +1034,14 @@ class Ui_MainWindow(object):
         self.frame_36.setObjectName("frame_36")
         self.verticalLayout_16 = QtWidgets.QVBoxLayout(self.frame_36)
         self.verticalLayout_16.setObjectName("verticalLayout_16")
-        self.menu_sait_animaunt = QtWidgets.QPushButton(self.frame_36)
-        self.menu_sait_animaunt.setMinimumSize(QtCore.QSize(0, 30))
-        self.menu_sait_animaunt.setObjectName("menu_sait_animaunt")
-        self.verticalLayout_16.addWidget(self.menu_sait_animaunt)
-        self.menu_sait_malfurik = QtWidgets.QPushButton(self.frame_36)
-        self.menu_sait_malfurik.setMinimumSize(QtCore.QSize(0, 30))
-        self.menu_sait_malfurik.setObjectName("menu_sait_malfurik")
-        self.verticalLayout_16.addWidget(self.menu_sait_malfurik)
+        self.menu_login_sites = QtWidgets.QPushButton(self.frame_36)
+        self.menu_login_sites.setMinimumSize(QtCore.QSize(0, 30))
+        self.menu_login_sites.setObjectName("menu_login_sites")
+        self.verticalLayout_16.addWidget(self.menu_login_sites)
         self.menu_sait_vk = QtWidgets.QPushButton(self.frame_36)
         self.menu_sait_vk.setMinimumSize(QtCore.QSize(0, 30))
         self.menu_sait_vk.setObjectName("menu_sait_vk")
         self.verticalLayout_16.addWidget(self.menu_sait_vk)
-        self.menu_sait_find = QtWidgets.QPushButton(self.frame_36)
-        self.menu_sait_find.setMinimumSize(QtCore.QSize(0, 30))
-        self.menu_sait_find.setObjectName("menu_sait_find")
-        self.verticalLayout_16.addWidget(self.menu_sait_find)
         self.menu_sait_365 = QtWidgets.QPushButton(self.frame_36)
         self.menu_sait_365.setMinimumSize(QtCore.QSize(0, 30))
         self.menu_sait_365.setObjectName("menu_sait_365")
@@ -1052,6 +1050,36 @@ class Ui_MainWindow(object):
         self.gridLayout_11.addWidget(self.frame_34, 1, 1, 1, 1)
         self.horizontalLayout_9.addWidget(self.frame_28)
         self.stackedWidget.addWidget(self.page_2)
+        self.page_9 = QtWidgets.QWidget()
+        self.page_9.setObjectName("page_9")
+        self.frame_39 = QtWidgets.QFrame(self.page_9)
+        self.frame_39.setGeometry(QtCore.QRect(0, 0, 1141, 401))
+        self.frame_39.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame_39.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame_39.setObjectName("frame_39")
+        self.btn_chose_video_file = QtWidgets.QPushButton(self.frame_39)
+        self.btn_chose_video_file.setGeometry(QtCore.QRect(390, 250, 131, 23))
+        self.btn_chose_video_file.setAcceptDrops(True)
+        self.btn_chose_video_file.setObjectName("btn_chose_video_file")
+        self.checkBox = QtWidgets.QCheckBox(self.frame_39)
+        self.checkBox.setGeometry(QtCore.QRect(390, 300, 171, 17))
+        self.checkBox.setObjectName("checkBox")
+        self.checkBox_2 = QtWidgets.QCheckBox(self.frame_39)
+        self.checkBox_2.setGeometry(QtCore.QRect(600, 300, 151, 17))
+        self.checkBox_2.setObjectName("checkBox_2")
+        self.btn_start_hardsub = QtWidgets.QPushButton(self.frame_39)
+        self.btn_start_hardsub.setGeometry(QtCore.QRect(600, 250, 131, 23))
+        self.btn_start_hardsub.setObjectName("btn_start_hardsub")
+        self.progress_ffmpeg = QtWidgets.QProgressBar(self.frame_39)
+        self.progress_ffmpeg.setGeometry(QtCore.QRect(390, 332, 341, 21))
+        self.progress_ffmpeg.setStyleSheet("color: rgb(0, 255, 255);")
+        self.progress_ffmpeg.setProperty("value", 0)
+        self.progress_ffmpeg.setAlignment(QtCore.Qt.AlignCenter)
+        self.progress_ffmpeg.setObjectName("progress_ffmpeg")
+        self.text_log_ffmpeg = QtWidgets.QTextEdit(self.frame_39)
+        self.text_log_ffmpeg.setGeometry(QtCore.QRect(390, 10, 341, 221))
+        self.text_log_ffmpeg.setObjectName("text_log_ffmpeg")
+        self.stackedWidget.addWidget(self.page_9)
         self.page_5 = QtWidgets.QWidget()
         self.page_5.setAcceptDrops(True)
         self.page_5.setStyleSheet("background-color: rgb(49, 54, 65);")
@@ -1136,6 +1164,10 @@ class Ui_MainWindow(object):
         self.link_upload = QtWidgets.QTextEdit(self.page_5)
         self.link_upload.setGeometry(QtCore.QRect(710, 20, 300, 301))
         self.link_upload.setMaximumSize(QtCore.QSize(300, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setPointSize(9)
+        self.link_upload.setFont(font)
         self.link_upload.setAcceptDrops(False)
         self.link_upload.setStyleSheet("background-color: rgb(38, 42, 51);")
         self.link_upload.setReadOnly(True)
@@ -1420,6 +1452,7 @@ class Ui_MainWindow(object):
         self.gridLayout_16.setSpacing(0)
         self.gridLayout_16.setObjectName("gridLayout_16")
         self.combobox_find_ad = QtWidgets.QComboBox(self.frame_30)
+        self.combobox_find_ad.setEnabled(True)
         self.combobox_find_ad.setMinimumSize(QtCore.QSize(0, 25))
         self.combobox_find_ad.setMaximumSize(QtCore.QSize(225, 16777215))
         self.combobox_find_ad.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -1463,7 +1496,7 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menuBar)
 
         self.retranslateUi(MainWindow)
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(2)
         self.stackedWidget_2.setCurrentIndex(1)
         self.stackedWidget_3.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -1478,9 +1511,8 @@ class Ui_MainWindow(object):
         self.btn_navi_autorization.setText(_translate("MainWindow", "Авторизация"))
         self.btn_navi_hentai.setText(_translate("MainWindow", "ИК"))
         self.btn_navi_upload_other.setText(_translate("MainWindow", "Заливка"))
-        self.label_7.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Анимаунт</span></p></body></html>"))
-        self.label_9.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Малфурик</span></p></body></html>"))
-        self.label_11.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:600;\">Вконтакте</span></p></body></html>"))
+        self.btn_navi_hurdsub.setText(_translate("MainWindow", "PushButton"))
+        self.checker_vk.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:9pt; font-weight:600;\">ВКонтакте</span></p></body></html>"))
         self.chose_lbl_page.setText(_translate("MainWindow", "Аниме"))
         self.lbl_pic_video_dor.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:14pt;\">Видео не выбрано</span></p></body></html>"))
         self.line_link_animaunt_dor.setPlaceholderText(_translate("MainWindow", "Ссылка на анимаунт"))
@@ -1537,11 +1569,14 @@ class Ui_MainWindow(object):
         self.menu_fix_tim.setText(_translate("MainWindow", "Fix тайминг"))
         self.label_6.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">Помощь</span></p></body></html>"))
         self.label_5.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">Автоматизация сайтов</span></p></body></html>"))
-        self.menu_sait_animaunt.setText(_translate("MainWindow", "Animaunt"))
-        self.menu_sait_malfurik.setText(_translate("MainWindow", "Malfurik"))
+        self.menu_login_sites.setToolTip(_translate("MainWindow", "Авторизация на малфурике и анимаунте"))
+        self.menu_login_sites.setText(_translate("MainWindow", "Сайты"))
         self.menu_sait_vk.setText(_translate("MainWindow", "Вконтакте"))
-        self.menu_sait_find.setText(_translate("MainWindow", "FindAnime"))
         self.menu_sait_365.setText(_translate("MainWindow", "Anime365"))
+        self.btn_chose_video_file.setText(_translate("MainWindow", "Выбрать видео"))
+        self.checkBox.setText(_translate("MainWindow", "CheckBox"))
+        self.checkBox_2.setText(_translate("MainWindow", "CheckBox"))
+        self.btn_start_hardsub.setText(_translate("MainWindow", "Загрузить"))
         self.line_hentai_mail.setPlaceholderText(_translate("MainWindow", "e-mail"))
         self.line_hentai_api.setPlaceholderText(_translate("MainWindow", "API"))
         self.upload_hentai.setText(_translate("MainWindow", "Загрузить"))

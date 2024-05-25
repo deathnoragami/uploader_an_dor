@@ -1,11 +1,11 @@
-# pyinstaller --noconfirm --onedir --windowed --icon "D:\GitHub\Uploader/icon.ico" --name "AUPAn" --version-file "C:/Python/uploader_an_dor/version.txt" --add-data "C:/Python/uploader_an_dor/timming-e844f-firebase-adminsdk-s0m6j-53a96d672b.json;." --add-data "C:/Python/uploader_an_dor/.env;." --add-data "C:/Python/uploader_an_dor/icon.ico;." --add-data "C:/Python/uploader_an_dor/auto.png;."  "C:/Python/uploader_an_dor/app.py"
-# pyinstaller --noconfirm --onedir --windowed --icon "D:/GitHub/Uploader/icon.ico" --name "AUPAn" --version-file "D:/GitHub/Uploader/version.txt" --optimize "0" --add-data "D:/GitHub/Uploader/icon.ico;." --add-data "D:/GitHub/Uploader/.env;." --add-data "D:/GitHub/Uploader/logger_tg.session;." --add-data "D:/GitHub/Uploader/red.png;." --add-data "D:/GitHub/Uploader/green.png;." --add-data "D:/GitHub/Uploader/auto.png;."  "D:/GitHub/Uploader/app.py"
+# pyinstaller --noconfirm --onedir --windowed --icon "C:/Python/Uploader/icon.ico" --name "AUPAn" --version-file "C:/Python/Uploader/version.txt" --add-data "C:/Python/Uploader/.env;." --add-data "C:/Python/Uploader/icon.ico;." --add-data "C:/Python/Uploader/logger_tg.session;." --add-data "C:/Python/Uploader/version.txt;." --add-data "C:/Python/Uploader/auto.png;."  "C:/Python/Uploader/app.py"
+# pyinstaller --noconfirm --onedir --windowed --icon "D:/GitHub/Uploader/icon.ico" --name "AUPAn" --version-file "D:/GitHub/Uploader/version.txt" --add-data "D:/GitHub/Uploader/icon.ico;." --add-data "D:/GitHub/Uploader/.env;." --add-data "D:/GitHub/Uploader/logger_tg.session;."  --add-data "D:/GitHub/Uploader/auto.png;." --add-binary ".venv/Lib/site-packages/fake_useragent/data;fake_useragent/data"  "D:/GitHub/Uploader/app.py"
 
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QIcon, QPainter, QColor, QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QListWidgetItem, QDateEdit, QWidget, \
-    QGraphicsDropShadowEffect
+    QGraphicsDropShadowEffect, QDialog
 from PyQt5.QtCore import Qt, QPropertyAnimation, QEasingCurve, QDate, pyqtSignal, QThread, QPoint
 from ui import Ui_MainWindow
 from ui_splash import Ui_SplashScreen
@@ -22,6 +22,7 @@ from autorization.autorization_vk_site.autorization_web_vk import AutorizationWe
 from autorization.checker_autorization import CheckerThread
 from autorization.autorization_findanime.autorization_find import AnimeFind_Web
 from autorization.autorization_smotret_anime.autorization_365_smotret import _365_Web
+from autorization.autorization_sites.autorization_sites import AutorizationSites
 
 from work_files.select_pic_anime import PictureSelectorAnime
 from work_files.select_video_anime import VideoSelectorAnime
@@ -35,6 +36,11 @@ from work_files.dubbers import Dubbers
 from work_files.download_fix_timming import FixTimming
 from work_files.version_checker import VersionChecker
 from work_files.hentai_uploader import HentaiUploader
+
+from handle.parse_malf import ParseMalf
+from handle.parse_maunt import ParseMaunt
+
+from hurdsub_worker.hurdsub import WorkerHardSub
 
 from upload_other_site.manager_upload_site import UploadManagerOtherSite, UploadManagerOtherDorama
 
@@ -55,6 +61,8 @@ import time
 from urllib.parse import unquote
 from dotenv import load_dotenv
 import traceback
+import requests
+from bs4 import BeautifulSoup
 
 import qdarktheme
 from qt_material import apply_stylesheet
@@ -63,116 +71,17 @@ from postgre import Connect
 load_dotenv(dotenv_path=resource_path.path(".env"))
 
 
-class MasterThread(QThread):
-    version_app = pyqtSignal(bool)
-    auto_app = pyqtSignal(bool, bool, bool)
-
-    def __init__(self, version, parent=None):
-        super().__init__(parent)
-        self.version = version
-
-    def run(self):
-        version_thread = VersionChecker(self.version)
-        version_thread.check_version.connect(self.version_app)
-        version_thread.start()
-        version_thread.wait()
-
-        site_thread = CheckerThread()
-        site_thread.finished.connect(self.auto_app)
-        site_thread.start()
-        site_thread.wait()
-
-
-class SplashScreen(QMainWindow):
-    def __init__(self):
-        QMainWindow.__init__(self)
-        self.ui = Ui_SplashScreen()
-        self.ui.setupUi(self)
-        self.counter = 0
-        self.setWindowIcon(QIcon(resource_path.path("icon.ico")))
-
-        self.setWindowFlag(QtCore.Qt.FramelessWindowHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-
-        self.progress_animation = QPropertyAnimation(self.ui.progressBar, b"value")
-        self.progress_animation.setDuration(1000)
-        self.progress_animation.setEasingCurve(QEasingCurve.Linear)
-
-        self.shadow = QGraphicsDropShadowEffect(self)
-        self.shadow.setBlurRadius(20)
-        self.shadow.setXOffset(0)
-        self.shadow.setYOffset(0)
-        self.shadow.setColor(QColor(0, 0, 0, 60))
-        self.ui.dropShadowFrame.setGraphicsEffect(self.shadow)
-
-        try:
-            info = win32api.GetFileVersionInfo("AUPAn.exe", '\\')
-            major = info['FileVersionMS'] >> 16
-            minor = info['FileVersionMS'] & 0xFFFF
-            patch = info['FileVersionLS'] >> 16
-            build = info['FileVersionLS'] & 0xFFFF
-            self.version = f"{major}.{minor}.{patch}.{build}"
-            self.setWindowTitle(f"AUPAn {self.version}")
-        except win32api.error as e:
-            self.version = '0.0.0.0'
-            self.setWindowTitle(f"AUPAn")
-        self.ui.label_description.setText("<strong>ПРОВЕРКА</strong> ВЕРСИИ")
-        self.master_thread = MasterThread(self.version)
-        self.master_thread.version_app.connect(self.handler_version_checker)
-        self.master_thread.auto_app.connect(self.handler_site_checker)
-        self.master_thread.start()
-        self.show()
-
-    def progress(self, count):
-        current_value = self.ui.progressBar.value()
-        self.progress_animation.setStartValue(current_value)
-        self.progress_animation.setEndValue(count)
-        self.progress_animation.start()
-        if count == 60:
-            self.progress_animation.finished.connect(self.end_open)
-
-    def end_open(self):
-        self.ui.label_description.setText("<strong>ШОКОЛАДКИ</strong> ДЕЛАЕМ")
-        current_value = self.ui.progressBar.value()
-        while current_value < 100:
-            current_value += 1
-            self.ui.progressBar.setValue(current_value)
-            QtCore.QCoreApplication.processEvents()  # Обновляем пользовательский интерфейс
-            time.sleep(0.03)  # Делаем небольшую паузу, чтобы не перегружать процессор
-        main_window = MainWindow(self.version, self.malf_check, self.ani_check, self.vk_check)
-        main_window.show()
-        self.close()
-
-    def handler_site_checker(self, malf_check, ani_check, vk_check):
-        self.progress(60)
-        self.malf_check = malf_check
-        self.ani_check = ani_check
-        self.vk_check = vk_check
-
-    def handler_version_checker(self, check):
-        if check:
-            if os.path.exists("update.exe"):
-                subprocess.Popen(["update.exe"])
-                self.progress(20)
-                self.ui.label_description.setText("<strong>ПРОВЕРКА</strong> АВТОРИЗАЦИЙ")
-            else:
-                self.progress(20)
-                self.ui.label_description.setText("<strong>ПРОВЕРКА</strong> АВТОРИЗАЦИЙ")
-        else:
-            self.progress(20)
-            self.ui.label_description.setText("<strong>ПРОВЕРКА</strong> АВТОРИЗАЦИЙ")
-
 
 class MainWindow(QMainWindow):
     other = pyqtSignal(bool)
 
-    def __init__(self, version, malf_check, ani_check, vk_check):
+    def __init__(self):
         super(MainWindow, self).__init__()
         # apply_stylesheet(app, theme="dark_cyan.xml")
         # qdarktheme.setup_theme(theme="auto")
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setWindowTitle(f"AUPAn {version}")
+        
         self.resize(1200, 625)
         self.ui.dateEdit.setButtonSymbols(QDateEdit.NoButtons)
 
@@ -185,26 +94,24 @@ class MainWindow(QMainWindow):
 
         self.old_pos = self.pos()
         self.mouse_pressed = False
-        # self.ui.frameTim.setMaximumHeight(0)
-        # try:
-        #     info = win32api.GetFileVersionInfo("AUPAn.exe", '\\')
-        #     major = info['FileVersionMS'] >> 16
-        #     minor = info['FileVersionMS'] & 0xFFFF
-        #     patch = info['FileVersionLS'] >> 16
-        #     build = info['FileVersionLS'] & 0xFFFF
-        #     version = f"{major}.{minor}.{patch}.{build}"
+        try:
+            info = win32api.GetFileVersionInfo("AUPAn.exe", '\\')
+            major = info['FileVersionMS'] >> 16
+            minor = info['FileVersionMS'] & 0xFFFF
+            patch = info['FileVersionLS'] >> 16
+            build = info['FileVersionLS'] & 0xFFFF
+            version = f"{major}.{minor}.{patch}.{build}"
+            self.setWindowTitle(f"AUPAn {version}")
+        except win32api.error as e:
+            version = '0.0.0.0'
+            self.setWindowTitle(f"AUPAn")
 
-        # except win32api.error as e:
-        #     version = '0.0.0.0'
-        #     self.setWindowTitle(f"AUPAn")
+        version_thread = VersionChecker(version=version)
+        version_thread.start()
 
-        # version_thread = VersionChecker(version=version)
-        # version_thread.check_version.connect(self.handler_version_checker)
-        # version_thread.start()
-
-        # site_thread = CheckerThread()
-        # site_thread.finished.connect(self.handler_site_checker)
-        # site_thread.start()
+        site_thread = CheckerThread()
+        site_thread.finished.connect(self.pix_map_login)
+        site_thread.start()
 
         self.setWindowIcon(QIcon(resource_path.path("icon.ico")))
         # self.center_screen()
@@ -255,8 +162,7 @@ class MainWindow(QMainWindow):
             self.ui.menu_vk.setDisabled(True)
             self.ui.menu_tg.setDisabled(True)
             self.ui.menu_server.setDisabled(True)
-            self.ui.menu_sait_animaunt.setDisabled(True)
-            self.ui.menu_sait_malfurik.setDisabled(True)
+            self.ui.menu_login_sites.setDisabled(True)
             self.ui.menu_sait_vk.setDisabled(True)
             self.ui.stackedWidget.setCurrentIndex(1)
             self.ui.btn_navi_anime.setEnabled(False)
@@ -298,19 +204,25 @@ class MainWindow(QMainWindow):
             if malf[0] != '' and malf[1] != '':
                 self.ui.check_sftp_dor.setEnabled(True)
                 # self.ui.btn_video_anime.setEnabled(True)
-        if os.path.exists("assets/animaunt_storage.json"):
-            self.ui.check_post_site.setEnabled(True)
-            if os.path.exists("assets/malfurik_storage.json"):
-                self.ui.check_update_site_dor.setEnabled(True)
-                if os.path.exists("assets/findanime_storage.json"):
-                    self.ui.btn_dorama_other_upload.setEnabled(True)
-            if os.path.exists("assets/findanime_storage.json"):
-                self.ui.btn_anime_other_upload.setEnabled(True)
+        # if os.path.exists("assets/animaunt_storage.json"):
+        #     self.ui.check_post_site.setEnabled(True)
+        #     if os.path.exists("assets/malfurik_storage.json"):
+        #         self.ui.check_update_site_dor.setEnabled(True)
+        #         if os.path.exists("assets/findanime_storage.json"):
+        #             self.ui.btn_dorama_other_upload.setEnabled(True)
+        #     if os.path.exists("assets/findanime_storage.json"):
+        
 
         # if os.path.exists("assets/vk_storage.json"):
         #     self.ui.btn_chose_pic_dor.setEnabled(True)
         #####################################################################
-
+        if Config().get_a_info_site()[0] != '' and Config().get_a_info_site()[1] != '':
+            self.ui.check_post_site.setEnabled(True)
+            if os.path.exists("assets/anime365_storage.json"):
+                self.ui.btn_anime_other_upload.setEnabled(True)
+        if Config().get_m_info_site()[0] != '' and Config().get_m_info_site()[1] != '':
+            self.ui.check_update_site_dor.setEnabled(True)
+            self.ui.btn_dorama_other_upload.setEnabled(True)
         ################## ТАЙМИНГ ##################################  
 
         if os.path.exists("assets/timming.json"):
@@ -342,10 +254,8 @@ class MainWindow(QMainWindow):
         self.ui.menu_tg.clicked.connect(self.autorization_tg)
         self.ui.menu_server.clicked.connect(self.autorization_sftp)
 
-        self.ui.menu_sait_animaunt.clicked.connect(self.autorization_animaunt_web)
-        self.ui.menu_sait_malfurik.clicked.connect(self.autorization_malfurik_web)
+        self.ui.menu_login_sites.clicked.connect(self.autorization_all_sites)
         self.ui.menu_sait_vk.clicked.connect(self.autorization_vk_web)
-        self.ui.menu_sait_find.clicked.connect(self.autorization_find_web)
         self.ui.menu_sait_365.clicked.connect(self.autorization_365_web)
 
         self.ui.menu_fix_tim.clicked.connect(self.fix_timming)
@@ -416,21 +326,6 @@ class MainWindow(QMainWindow):
         self.ui.upload_hentai_del.clicked.connect(self.del_file_hent)
         self.ui.upload_hentai_del_all.clicked.connect(self.del_all_file_hent)
 
-        self.green = QPixmap(resource_path.path("green.png"))
-        self.red = QPixmap(resource_path.path("red.png"))
-        if malf_check == True:
-            self.ui.pixmap_malfurik.setPixmap(self.green)
-        else:
-            self.ui.pixmap_malfurik.setPixmap(self.red)
-        if ani_check == True:
-            self.ui.pixmap_animaunt.setPixmap(self.green)
-        else:
-            self.ui.pixmap_animaunt.setPixmap(self.red)
-        if vk_check == True:
-            self.ui.pixmap_vk.setPixmap(self.green)
-        else:
-            self.ui.pixmap_vk.setPixmap(self.red)
-
         self.setAcceptDrops(True)
         self.ui.upload_hentai.clicked.connect(self.hentai)
 
@@ -438,15 +333,17 @@ class MainWindow(QMainWindow):
         self.ui.btn_dorama_other_upload.clicked.connect(self.upload_other_dorama)
         self.ui.text_name_serial.mouseDoubleClickEvent = self.custom_paste
         self.ui.text_link_malfurik.mouseDoubleClickEvent = self.custom_paste_dorama
-        self.manager_other = UploadManagerOtherSite()
-        self.manager_other.find_link.connect(self.find_link)
-        self.manager_other._365_link.connect(self.find_link)
+
         self.manager_other_dorama = UploadManagerOtherDorama()
         self.manager_other_dorama.doramatv.connect(self.doramatv_link)
 
         serial_names = [row[0] for row in Connect().get_all_serials()]
         self.ui.combobox_find_ad.addItems(serial_names)
         self.ui.combobox_find_ad.activated.connect(self.combo)
+        
+
+        self.ui.btn_start_hardsub.clicked.connect(self.start_hardsub)
+
 
     # ПЕРЕДВИЖЕНИЕ ПРОГРАММЫ ПО СТАТУС БАРУ
     def mousePressEvent(self, event):
@@ -483,26 +380,40 @@ class MainWindow(QMainWindow):
             if "|" in name_sftp:
                 name_sftp = name_sftp.split("|")[0].strip()
         text = Connect().search_ad_without_number(name_sftp)
-        if int(text[1]) == int(number) - 1:
-            list_search_ad = [item.strip() for item in text[2].split('\n') if item.strip() and "Начитка" not in item]
-            text_ad = self.ui.textedit_name_ad.toPlainText()
-            list_current_ad = [item.strip() for item in text_ad.split('\n') if item.strip() and "Начитка" not in item]
-            overlap_ad = []
-            for item1, item2 in zip(list_search_ad, list_current_ad):
-                if item1 == item2:
-                    overlap_ad.append(item1)
-            if overlap_ad:
-                return [text[0], text[1], overlap_ad]
+        if text:
+            if int(text[1]) == int(number) - 1:
+                list_search_ad = [item.strip() for item in text[2].split('\n') if
+                                  item.strip() and "Начитка" not in item]
+                text_ad = self.ui.textedit_name_ad.toPlainText()
+                list_current_ad = [item.strip() for item in text_ad.split('\n') if
+                                   item.strip() and "Начитка" not in item]
+                overlap_ad = []
+                for item1, item2 in zip(list_search_ad, list_current_ad):
+                    if item1 == item2:
+                        overlap_ad.append(item1)
+                if overlap_ad:
+                    return [text[0], text[1], overlap_ad]
+                else:
+                    return None
             else:
+                myModal = QCustomModals.WarningModal(
+                    title="Реклама",
+                    parent=self,
+                    position='top-left',
+                    description=f"Нет прошлой серии\nРеклама {text[0]} {text[1]}\n\n{text[2]}",
+                    isClosable=True,
+                    animationDuration=10000
+                )
+                myModal.show()
                 return None
         else:
-            myModal = QCustomModals.WarningModal(
+            myModal = QCustomModals.ErrorModal(
                 title="Реклама",
                 parent=self,
                 position='top-left',
-                description=f"Нет прошлой серии\nРеклама {text[0]} {text[1]}\n\n{text[2]}",
+                description=f"В Базе пока нет этого релиза. Ты первопроходец =)",
                 isClosable=True,
-                animationDuration=10000
+                animationDuration=5000
             )
             myModal.show()
             return None
@@ -544,7 +455,10 @@ class MainWindow(QMainWindow):
         self.ui.text_link_365.clear()
         all_title = self.ui.text_name_serial.toPlainText()
         try:
-            self.manager_other.start_upload(all_title)
+            self.manager_other = UploadManagerOtherSite(all_title)
+            self.manager_other.signals.find_link.connect(self.find_link)
+            self.manager_other.signals._365_link.connect(self.find_link)
+            self.manager_other.run()
         except Exception as e:
             log_config.setup_logger().exception(e)
 
@@ -593,22 +507,6 @@ class MainWindow(QMainWindow):
         else:
             event.ignore()
 
-    def createIndicator(self, color):
-        indicator = QWidget()
-        indicator.setFixedSize(20, 20)
-
-        # Переопределяем метод paintEvent для рисования кружка
-        def paintEvent(event):
-            painter = QPainter(indicator)
-            painter.setRenderHint(QPainter.Antialiasing)
-            painter.setBrush(QColor(color))
-            diameter = min(indicator.width(), indicator.height())
-            center_x = (indicator.width() - diameter) // 2
-            center_y = (indicator.height() - diameter) // 2
-            painter.drawEllipse(center_x, center_y, diameter, diameter)
-
-        indicator.paintEvent = paintEvent
-        return indicator
 
     def switch_chose(self, index, page):
         if page == "upload":
@@ -624,15 +522,9 @@ class MainWindow(QMainWindow):
         elif page == "hentai":
             self.ui.chose_lbl_page.setText("Заливка хентая")
             self.ui.stackedWidget.setCurrentIndex(index)
-        elif page == "upload_other":
-            self.ui.chose_lbl_page.setText("Заливка")
-            self.ui.stackedWidget.setCurrentIndex(index)
-        elif page == "upload_other_dorama":
-            self.ui.chose_lbl_page.setText("Заливка дорам")
-            self.ui.stackedWidget_3.setCurrentIndex(1)
 
     def switch_upload_other(self, page=None):
-        self.ui.stackedWidget.setCurrentIndex(3)
+        self.ui.stackedWidget.setCurrentIndex(4)
         if page == "anime":
             self.ui.chose_lbl_page.setText("Заливка аниме")
             self.ui.stackedWidget_3.setCurrentIndex(0)
@@ -659,6 +551,12 @@ class MainWindow(QMainWindow):
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
+    def pix_map_login(self, auth):
+        if auth == True:
+            self.ui.checker_vk.setStyleSheet("color: green;")
+        else:
+            self.ui.checker_vk.setStyleSheet("color: red;")
+
     ####################### ФУНКЦИИ ДЛЯ НАСТРОЕК ###########################
 
     def autorization_vk(self):
@@ -684,38 +582,24 @@ class MainWindow(QMainWindow):
         if all(item != '' for item in Config().get_info_maunt()):
             self.ui.check_sftp_anime.setEnabled(True)
 
-    def autorization_animaunt_web(self):
-        Animaunt_web()
-        if os.path.exists("assets/animaunt_storage.json"):
+    def autorization_all_sites(self):
+        AutorizationSites()
+        if Config().get_a_info_site()[0] != '' and Config().get_a_info_site()[1] != '':
             self.ui.check_post_site.setEnabled(True)
-            self.ui.pixmap_animaunt.setPixmap(self.green)
-            if os.path.exists("assets/malfurik_storage.json"):
-                self.ui.check_update_site_dor.setEnabled(True)
-
-    def autorization_malfurik_web(self):
-        Malfurik_web()
-        if os.path.exists("assets/malfurik_storage.json") and os.path.exists("assets/animaunt_storage.json"):
-            self.ui.pixmap_malfurik.setPixmap(self.green)
+            if os.path.exists("assets/anime365_storage.json"):
+                self.ui.btn_anime_other_upload.setEnabled(True)
+        if Config().get_m_info_site()[0] != '' and Config().get_m_info_site()[1] != '':
             self.ui.check_update_site_dor.setEnabled(True)
-        if os.path.exists("assets/malfurik_storage.json") and os.path.exists("assets/findanime_storage.json"):
             self.ui.btn_dorama_other_upload.setEnabled(True)
+        ################## ТАЙМИНГ ############################
+        # ParseMaunt().update_seria_maunt(r'https://animaunt.org/%E7%A7%81%E3%81%AF%E7%8B%AC%E8%BA%AB%E3%81%A7%E3%81%99.php?mod=editnews&action=editnews&id=13966', 
+        #                                 '31', dorama=True, timer=True)
+
 
     def autorization_vk_web(self):
         AutorizationWebVK()
         if os.path.exists("assets/vk_storage.json"):
             self.ui.pixmap_vk.setPixmap(self.green)
-
-    def autorization_find_web(self):
-        res = AnimeFind_Web().autorization()
-        if res:
-            QMessageBox.information(self, "Авторизация", "Авторизация успешна")
-        else:
-            QMessageBox.warning(self, "Авторизация", "Ошибка при авторизации.")
-        if os.path.exists("assets/animaunt_storage.json") and os.path.exists(
-                "assets/anime365_storage.json") and os.path.exists("assets/findanime_storage.json"):
-            self.ui.btn_anime_other_upload.setEnabled(True)
-        if os.path.exists("assets/malfurik_storage.json") and os.path.exists("assets/findanime_storage.json"):
-            self.ui.btn_dorama_other_upload.setEnabled(True)
 
     def autorization_365_web(self):
         res = _365_Web().autorization()
@@ -767,6 +651,8 @@ class MainWindow(QMainWindow):
             self.ui.list_timming.insertItem(0, item)
             item.setSelected(True)
             self.get_timming(item)
+            item_data = item.data(Qt.UserRole)
+            self.timming_list = timming.get_list(item_data)
 
     def get_timming(self, item):
         item_data = item.data(Qt.UserRole)
@@ -803,12 +689,16 @@ class MainWindow(QMainWindow):
             if self.file_path_anime_pic is not None:
                 if self.ui.check_post_site.isChecked():
                     self.ui.link_site.setText(unquote(self.ui.link_site.text()))
-                    if not self.ui.link_site.text().startswith(
-                            os.getenv('CHECK_ANIMAUNT_LINK')) or self.ui.link_site.text() == '':
-                        QMessageBox.warning(None, "Ошибка", "Ссылка на анимаунт указана не верно")
-                        return
-                    else:
+                    if self.ui.link_site.text() == '':
+                        QMessageBox.warning(None, "Ошибка", "Ссылка на сайт не указана")
+                    elif self.ui.link_site.text().startswith(os.getenv('CHECK_ANIMAUNT_LINK')):
                         self.link_site_animaunt = self.ui.link_site.text()
+                    elif self.ui.link_site.text().startswith('https://animaunt.org/'):
+                        match = re.search(r'(\d+)-', self.ui.link_site.text()).group(1)
+                        self.link_site_animaunt = os.getenv('CHECK_ANIMAUNT_LINK') + '&action=editnews&id=' + match
+                    else:
+                        QMessageBox.warning(None, "Ошибка", "Ссылка на сайт указана не верно")
+                        return
                 if self.ui.check_malf_anime.isChecked():
                     if not self.ui.link_malfurik_anime.text().startswith(
                             os.getenv('CHECK_MALFURIK_LINK')) or self.ui.link_malfurik_anime.text() == '':
@@ -830,7 +720,7 @@ class MainWindow(QMainWindow):
                                                  select_dub,
                                                  self.name_user)
             else:
-                QMessageBox.warning(None, "Ошибка", "Картинка не выбрана!")
+                QMessageBox.warning(self, "Ошибка", "Картинка не выбрана!")
         except Exception as e:
             self.upload_finished(True, "Ошибка")
             log_config.logger.exception(e)
@@ -1018,17 +908,36 @@ class MainWindow(QMainWindow):
     def start_work_dorama(self):
         try:
             if self.ui.check_update_site_dor.isChecked():
-                self.ui.line_link_animaunt_dor.setText(
-                    unquote(self.ui.line_link_animaunt_dor.text()))  # Перекодируем текст если вдруг
-                if not self.ui.line_link_malf_dor.text().startswith(
-                        os.getenv('CHECK_MALFURIK_LINK')) or self.ui.line_link_malf_dor.text() == '' or \
-                        not self.ui.line_link_animaunt_dor.text().startswith(
-                            os.getenv('CHECK_ANIMAUNT_LINK')) or self.ui.line_link_animaunt_dor.text() == '':
-                    QMessageBox.warning(None, "Ошибка", "Неверная ссылка на малфурик или анимаунт")
-                    return
-                if self.timming_list is None:
-                    QMessageBox.warning(None, "Ошибка", "Не выбраны тайминги")
-                    return
+                self.ui.line_link_animaunt_dor.setText(unquote(self.ui.line_link_animaunt_dor.text()))  # Перекодируем текст если вдруг
+                if self.ui.line_link_animaunt_dor.text() == '':
+                    QMessageBox.warning(self, "Ошибка", "Ссылка на анимаунт не указана")
+                elif self.ui.line_link_animaunt_dor.text().startswith(os.getenv('CHECK_ANIMAUNT_LINK')):
+                    self.link_site_animaunt = self.ui.line_link_animaunt_dor.text()
+                elif self.ui.line_link_animaunt_dor.text().startswith('https://animaunt.org/'):
+                    match = re.search(r'(\d+)-', self.ui.line_link_animaunt_dor.text()).group(1)
+                    self.link_site_animaunt = os.getenv('CHECK_ANIMAUNT_LINK') + '&action=editnews&id=' + match
+                else:
+                    QMessageBox.warning(self, "Ошибка", "Ссылка на анимаунт указана не верно")
+                
+                if self.ui.line_link_malf_dor.text() == '':
+                    QMessageBox.warning(self, "Ошибка", "Ссылка на малфурик не указана")
+                elif self.ui.line_link_malf_dor.text().startswith(os.getenv('CHECK_MALFURIK_LINK')):
+                    self.link_site_malfurik = self.ui.line_link_malf_dor.text()
+                elif self.ui.line_link_malf_dor.text().startswith('https://anime.malfurik.online'):
+                    response = requests.get(self.ui.line_link_malf_dor.text())
+                    if response.status_code == 200:
+                        soup = BeautifulSoup(response.text, 'html.parser')
+                        link_tag = soup.find('link', rel='shortlink')
+                        if link_tag:
+                            href = link_tag.get('href')
+                            match = re.search(r'\?p=(\d+)', href)
+                            number = match.group(1)
+                            self.link_site_malfurik = f"https://anime.malfurik.online/wp-admin/post.php?post={number}&action=edit"
+                else:
+                    QMessageBox.warning(self, "Ошибка", "Ссылка на малфурик указана не верно")
+            else:
+                self.link_site_malfurik = None
+                self.link_site_animaunt = None
             select_dub = Dubbers().select_checkboxes(self)
             self.ui.btn_upload_dor.setEnabled(False)
             self.ui.btn_chose_video_dor.setEnabled(False)
@@ -1045,18 +954,17 @@ class MainWindow(QMainWindow):
                                                 f"Вы точно хотите продолжить загрузку?",
                                                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
                         if q == QMessageBox.No:
-                            text = f"Загрузка {overlap_ad[0]} {overlap_ad[1]} прервана."
+                            text = f"Загрузка {self.data_dorama[0][3]} {name_file} прервана."
                             self.upload_finished_dor(True, text, True)
                             return
-
             self.upload_manager_dorama = UploadManagerDorama(self, self.file_path_dorama_pic,
                                                              self.file_path_dorama_video,
                                                              self.ui.check_sftp_dor.isChecked(),
                                                              self.ui.check_vk_dor.isChecked(),
                                                              self.ui.check_tg_dor.isChecked(),
                                                              self.ui.check_update_site_dor.isChecked(),
-                                                             self.ui.line_link_animaunt_dor.text(),
-                                                             self.ui.line_link_malf_dor.text(),
+                                                             self.link_site_animaunt,
+                                                             self.link_site_malfurik,
                                                              self.timming_list, self.ui.check_novideo_dor.isChecked(),
                                                              select_dub)
             self.upload_manager_dorama.signals.progress_changed.connect(self.update_progress_dor)
@@ -1107,13 +1015,17 @@ class MainWindow(QMainWindow):
 
     def post_malf(self):
         select_item = self.ui.list_timming.currentItem()
-        if select_item is not None:
+        if self.timming_list is not None:
             if self.ui.line_add_timming_malf.text().startswith(
                     os.getenv('CHECK_MALFURIK_LINK')) or self.ui.line_add_timming_malf.text() != '':
                 item_data = select_item.data(Qt.UserRole)
                 timming_list = timming.get_list(item_data)
                 if timming_list is not None:
-                    post = PostDorama().post_malfurik(self.ui.line_add_timming_malf.text(), self.timming_list)
+                    # self.only_post = ParseMalf()
+                    # self.only_post.update_seria_malf(self.ui.line_add_timming_malf.text(), self.timming_list)
+                    # self.only_post.start()
+                    post = ParseMalf().update_seria_malf(self.ui.line_add_timming_malf.text(), self.timming_list)
+                    # post = PostDorama().post_malfurik(self.ui.line_add_timming_malf.text(), self.timming_list)
                     if post == True:
                         self.ui.logging_upload.append("На сайт было запощено")
                         self.ui.logging_upload.append("________________________________\n")
@@ -1169,6 +1081,15 @@ class MainWindow(QMainWindow):
             self.ui.line_link_animaunt_dor.setText("")
             self.ui.line_link_malf_dor.setText("")
             self.ui.logging_upload.append("________________________________\n")
+
+    ##########################################################################
+
+    ###########################  ХАРД САБ  #################################
+
+    def start_hardsub(self):
+        path = r'D:/Work/Аниме/Лунное путешествие приведёт к новому миру 2/19/19.mkv'
+        self.hardsub_worker = WorkerHardSub(self, path)
+        self.hardsub_worker.start()
 
     ##########################################################################
 
@@ -1233,9 +1154,11 @@ if __name__ == "__main__":
         app = QApplication(sys.argv)
         # apply_stylesheet(app, theme='dark_cyan.xml')
         # qdarktheme.setup_theme()
-        # main_window = MainWindow()
+        main_window = MainWindow()
+        main_window.show()
+
+        # main_window = MainWindow('0.0.0.0', True, True, True)
         # main_window.show()
-        window = SplashScreen()
         sys.exit(app.exec_())
     except Exception as e:
         log_config.setup_logger().exception(e)

@@ -94,6 +94,7 @@ class UploadDoramaVK():
                             with sync_playwright() as playwright:
                                 browser = playwright.chromium.launch(headless=True)
                                 context = browser.new_context(storage_state="assets/vk_storage.json")
+                                context.set_default_timeout(120000)
                                 page = context.new_page()
                                 page.goto("https://vk.com/")
                                 if page.url.format() == "https://vk.com/":
@@ -111,7 +112,9 @@ class UploadDoramaVK():
                                     file_chooser = fc_info.value
                                     file_chooser.set_files(f"{file_path_pic}")
                                     page.wait_for_selector('.ThumbChooser__itemUploaderImage')
+                                    page.wait_for_timeout(2000)
                                     page.get_by_role("button", name="Сохранить").click()
+                                    page.wait_for_timeout(2000)
                                     context.close()
                                     browser.close()
                         except Exception as e:

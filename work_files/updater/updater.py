@@ -26,6 +26,10 @@ class Downloader(QThread):
         super().__init__(parent)
 
     def run(self):
+        for proc in psutil.process_iter():
+            if proc.name() == "AUPAn.exe":
+                proc.kill()
+                break
         cnopts = pysftp.CnOpts()
         cnopts.hostkeys = None
         with pysftp.Connection(host=const.HOST, username=const.USER, password=const.PASSWORD, port=22,
@@ -48,10 +52,6 @@ class Downloader(QThread):
 
     def del_file(self):
         try:
-            for proc in psutil.process_iter():
-                if proc.name() == "AUPAn.exe":
-                    proc.kill()
-                    break
             try:
                 shutil.rmtree("_internal")
             except:

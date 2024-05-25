@@ -39,13 +39,12 @@ class Connect():
 
     def add_name_ad(self, name, episode, ads):
         self.cursor.execute("INSERT INTO serial (name, episode, ads) VALUES (%s, %s, %s)", (name, episode, ads))
-        print(ads)
         self.connection.commit()
         self.cursor.close()
         self.connection.close()
         return True
 
-    def search_ad(self, name=str, episode=int) -> tuple:
+    def search_ad(self, name:str, episode:int) -> tuple:
         episode = str(episode - 1)
         self.cursor.execute("SELECT ads FROM serial WHERE name = %s AND episode = %s", (name, episode))
         user_data = self.cursor.fetchone()
@@ -53,7 +52,7 @@ class Connect():
         self.connection.close()
         return user_data
 
-    def search_ad_without_number(self, name=str) -> tuple:
+    def search_ad_without_number(self, name:str) -> tuple:
         self.cursor.execute(
             "SELECT name, episode, ads FROM serial WHERE name = %s ORDER BY episode DESC LIMIT 1", (name,))
         user_data = self.cursor.fetchone()

@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 import os
+import subprocess
 import pysftp
 
 
@@ -20,6 +21,9 @@ class VersionChecker(QThread):
             ftp.chdir('AUPAn')
             version_ftp = ftp.listdir()[0]
             if self.version < version_ftp:
-                self.check_version.emit(True)
-            else:
-                self.check_version.emit(False)
+                if os.path.exists("update.exe"):
+                    subprocess.Popen(["update.exe"])
+
+
+                
+

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'c:\Python\Uploader\autorization\autorization_tg\autoUI.ui'
+# Form implementation generated from reading ui file 'c:\Python\Uploader\autorization\autorization_sites\UI_saites.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.10
 #
@@ -11,11 +11,13 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_authorization_tg(object):
-    def setupUi(self, authorization_tg):
-        authorization_tg.setObjectName("authorization_tg")
-        authorization_tg.resize(360, 186)
-        authorization_tg.setStyleSheet("QWidget{\n"
+class Ui_Form(object):
+    def setupUi(self, Form):
+        Form.setObjectName("Form")
+        Form.resize(329, 222)
+        Form.setMinimumSize(QtCore.QSize(329, 222))
+        Form.setMaximumSize(QtCore.QSize(329, 222))
+        Form.setStyleSheet("QWidget{\n"
 "    background-color:rgb(49, 54, 65) ;\n"
 "}\n"
 "QToolTip {\n"
@@ -145,34 +147,44 @@ class Ui_authorization_tg(object):
 "rgb(0, 116, 211) голубой\n"
 "rgb(42, 150, 255) светлоголубой\n"
 "rgb(52, 181, 249) еще  светлее голубой")
-        self.line_number_phone = QtWidgets.QLineEdit(authorization_tg)
-        self.line_number_phone.setGeometry(QtCore.QRect(20, 30, 161, 31))
-        self.line_number_phone.setObjectName("line_number_phone")
-        self.line_code = QtWidgets.QLineEdit(authorization_tg)
-        self.line_code.setEnabled(False)
-        self.line_code.setGeometry(QtCore.QRect(20, 80, 161, 31))
-        self.line_code.setObjectName("line_code")
-        self.line_password = QtWidgets.QLineEdit(authorization_tg)
-        self.line_password.setEnabled(False)
-        self.line_password.setGeometry(QtCore.QRect(20, 130, 161, 31))
-        self.line_password.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.line_password.setObjectName("line_password")
-        self.btn_autorization = QtWidgets.QPushButton(authorization_tg)
-        self.btn_autorization.setEnabled(False)
-        self.btn_autorization.setGeometry(QtCore.QRect(210, 132, 131, 31))
-        self.btn_autorization.setObjectName("btn_autorization")
-        self.btn_give_code = QtWidgets.QPushButton(authorization_tg)
-        self.btn_give_code.setGeometry(QtCore.QRect(210, 30, 131, 31))
-        self.btn_give_code.setObjectName("btn_give_code")
+        self.label = QtWidgets.QLabel(Form)
+        self.label.setGeometry(QtCore.QRect(-10, 10, 251, 31))
+        self.label.setObjectName("label")
+        self.label_2 = QtWidgets.QLabel(Form)
+        self.label_2.setGeometry(QtCore.QRect(-10, 110, 251, 31))
+        self.label_2.setObjectName("label_2")
+        self.lineEdit = QtWidgets.QLineEdit(Form)
+        self.lineEdit.setGeometry(QtCore.QRect(20, 40, 191, 31))
+        self.lineEdit.setMinimumSize(QtCore.QSize(0, 0))
+        self.lineEdit.setMaximumSize(QtCore.QSize(999999, 999999))
+        self.lineEdit.setObjectName("lineEdit")
+        self.lineEdit_2 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_2.setGeometry(QtCore.QRect(20, 80, 191, 31))
+        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.lineEdit_3 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_3.setGeometry(QtCore.QRect(20, 180, 191, 31))
+        self.lineEdit_3.setObjectName("lineEdit_3")
+        self.lineEdit_4 = QtWidgets.QLineEdit(Form)
+        self.lineEdit_4.setGeometry(QtCore.QRect(20, 140, 191, 31))
+        self.lineEdit_4.setObjectName("lineEdit_4")
+        self.btn_auto_animaunt = QtWidgets.QPushButton(Form)
+        self.btn_auto_animaunt.setGeometry(QtCore.QRect(230, 52, 91, 31))
+        self.btn_auto_animaunt.setObjectName("btn_auto_animaunt")
+        self.btn_auto_malf = QtWidgets.QPushButton(Form)
+        self.btn_auto_malf.setGeometry(QtCore.QRect(230, 160, 91, 31))
+        self.btn_auto_malf.setObjectName("btn_auto_malf")
 
-        self.retranslateUi(authorization_tg)
-        QtCore.QMetaObject.connectSlotsByName(authorization_tg)
+        self.retranslateUi(Form)
+        QtCore.QMetaObject.connectSlotsByName(Form)
 
-    def retranslateUi(self, authorization_tg):
+    def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        authorization_tg.setWindowTitle(_translate("authorization_tg", "Авторизация в телеграмме"))
-        self.line_number_phone.setPlaceholderText(_translate("authorization_tg", "Номер телефона (89**)"))
-        self.line_code.setPlaceholderText(_translate("authorization_tg", "Код из телеграмма"))
-        self.line_password.setPlaceholderText(_translate("authorization_tg", "Пароль (если есть)"))
-        self.btn_autorization.setText(_translate("authorization_tg", "Войти"))
-        self.btn_give_code.setText(_translate("authorization_tg", "Получить код"))
+        Form.setWindowTitle(_translate("Form", "Авторизация"))
+        self.label.setText(_translate("Form", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">AniMaunt</span></p></body></html>"))
+        self.label_2.setText(_translate("Form", "<html><head/><body><p align=\"center\"><span style=\" font-size:16pt; font-weight:600;\">Malfurik</span></p></body></html>"))
+        self.lineEdit.setPlaceholderText(_translate("Form", "Логин"))
+        self.lineEdit_2.setPlaceholderText(_translate("Form", "Пароль"))
+        self.lineEdit_3.setPlaceholderText(_translate("Form", "Пароль"))
+        self.lineEdit_4.setPlaceholderText(_translate("Form", "Логин"))
+        self.btn_auto_animaunt.setText(_translate("Form", "Войти"))
+        self.btn_auto_malf.setText(_translate("Form", "Войти"))
